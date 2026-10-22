@@ -1,0 +1,2 @@
+# Firmware text images are hashed byte-for-byte by ARM build scripts.
+*.hex text eol=lf

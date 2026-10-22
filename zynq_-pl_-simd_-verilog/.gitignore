@@ -1,0 +1,47 @@
+# ---- iverilog 仿真产物 ----
+build/
+*.vvp
+*.vcd
+*.out
+
+# ---- Vivado / ISE 工程与日志 ----
+# 通配：裸 PL 工程在 vivado/，Zynq 工程在 vivado_zynq/，都别进版本库。
+vivado*/
+vivado*.log
+vivado*.backup.log
+# 非 GUI 批量跑 Vivado 时重定向出来的日志，名字是 build_<任务>.log /
+# build_<任务>_<pid>.backup.log，vivado*.log 那两条匹配不上。
+build_*.log
+.Xil/
+*.jou
+*.str
+*.xpr
+*.bit
+*.dcp
+*.rpt
+
+# ---- 波形与仿真临时文件 ----
+*.wlf
+*.fsdb
+transcript
+
+# ---- Python 生成脚本的缓存 ----
+__pycache__/
+
+# ---- 编辑器 / 系统 ----
+.vscode/
+*.swp
+Thumbs.db
+desktop.ini
+
+# ---- Claude Code 本地个人配置（项目共享的 settings.json 仍纳入版本库）----
+.claude/settings.local.json
+
+# ---- JVM/Vivado 崩溃转储（不是工程内容）----
+hs_err_pid*.log
+hs_err_pid*.dmp
+replay_pid*.log
+
+# ---- 误建的空文件，不属于工程 ----
+/1
+/2

@@ -1,0 +1,255 @@
+<title>微雪转接板 Pin 映射实测记录表</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&family=Noto+Sans+SC:wght@400;500;700&display=swap">
+<style>
+  :root {
+    --paper: #F5F7F8; --surface: #FFFFFF;
+    --ink: #151B21; --ink-2: #49545E; --ink-3: #78848E;
+    --rule: #DDE2E6; --rule-2: #BFC8CE;
+    --accent: #9A5424; --accent-bg: #F1E5DA;
+    --stop: #A32020; --stop-bg: #FBEAEA;
+    --ok: #2C6A4E; --ok-bg: #E3EFE7;
+    --sans: "IBM Plex Sans", "Noto Sans SC", "Microsoft YaHei", "微软雅黑", "PingFang SC", system-ui, sans-serif;
+    --mono: "IBM Plex Mono", "Cascadia Mono", Consolas, "Microsoft YaHei", "微软雅黑", ui-monospace, Menlo, monospace;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --paper: #11151A; --surface: #191F26; --ink: #E7EBEE; --ink-2: #A9B4BD;
+      --ink-3: #7B8792; --rule: #29313A; --rule-2: #3B454F; --accent: #D28C52;
+      --accent-bg: #2E241B; --stop: #E88A8A; --stop-bg: #331C1C;
+      --ok: #71C098; --ok-bg: #1A2C24;
+    }
+  }
+  :root[data-theme="dark"] {
+    --paper: #11151A; --surface: #191F26; --ink: #E7EBEE; --ink-2: #A9B4BD;
+    --ink-3: #7B8792; --rule: #29313A; --rule-2: #3B454F; --accent: #D28C52;
+    --accent-bg: #2E241B; --stop: #E88A8A; --stop-bg: #331C1C;
+    --ok: #71C098; --ok-bg: #1A2C24;
+  }
+
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; padding-block: 0 4rem; padding-inline: 20px;
+    background: var(--paper); color: var(--ink);
+    font-family: var(--sans); font-size: 15px; line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+  }
+  .wrap { max-width: 1000px; margin: 0 auto; }
+
+  header { padding-block: 2.4rem 1.2rem; border-bottom: 2px solid var(--ink); }
+  .eyebrow { font-family: var(--mono); font-size: .68rem; letter-spacing: .14em;
+             text-transform: uppercase; color: var(--accent); margin: 0 0 .6rem; }
+  h1 { font-size: clamp(1.5rem, 4vw, 2rem); font-weight: 600; letter-spacing: -.02em;
+       line-height: 1.2; margin: 0 0 .6rem; text-wrap: balance; }
+  .standfirst { max-width: 68ch; color: var(--ink-2); margin: 0; }
+
+  section { padding-block: 1.8rem 0; }
+  h2 { font-size: 1.08rem; font-weight: 600; margin: 0 0 .5rem;
+       display: flex; align-items: baseline; gap: .6rem; text-wrap: balance; }
+  h2 .num { font-family: var(--mono); font-size: .74rem; color: var(--accent); font-weight: 500; }
+  p { max-width: 72ch; margin: 0 0 .6rem; }
+  ul { max-width: 72ch; padding-left: 1.15rem; margin: .4rem 0 .6rem; }
+  li { margin-bottom: .25rem; }
+  .lede { color: var(--ink-2); }
+
+  .stop { background: var(--stop-bg); border-left: 3px solid var(--stop);
+          padding: .8rem 1rem; margin: .8rem 0; max-width: 76ch; }
+  .stop strong { color: var(--stop); }
+  .note { background: var(--accent-bg); border-left: 3px solid var(--accent);
+          padding: .8rem 1rem; margin: .8rem 0; max-width: 76ch; }
+
+  table { border-collapse: collapse; width: 100%; font-size: .84rem;
+          font-variant-numeric: tabular-nums; }
+  th, td { text-align: left; padding: .34rem .6rem .34rem 0;
+           border-bottom: 1px solid var(--rule); vertical-align: top; }
+  thead th { border-bottom: 1px solid var(--rule-2); font-weight: 600; font-size: .76rem; }
+  .mono { font-family: var(--mono); font-size: .88em; }
+  .mid { text-align: center; }
+
+  /* 记录表：行要高，留手写空间；两半并排 */
+  .form { display: grid; grid-template-columns: 1fr 1fr; gap: 0 1.6rem; }
+  table.fill { font-size: .82rem; }
+  table.fill td { height: 1.85rem; padding-block: .1rem; }
+  table.fill td.n { font-family: var(--mono); width: 2.2rem; color: var(--ink-2); }
+  table.fill td.fn { font-family: var(--mono); font-size: .78rem; color: var(--ink-3); }
+  table.fill td.blank { width: 5.2rem; }
+  table.fill tr.used td.n, table.fill tr.used td.fn { color: var(--accent); font-weight: 600; }
+  table.fill tr.pwr td { background: var(--ok-bg); }
+  table.fill tr.pwr td.n, table.fill tr.pwr td.fn { color: var(--ok); font-weight: 600; }
+  caption { caption-side: top; text-align: left; font-family: var(--mono); font-size: .66rem;
+            letter-spacing: .08em; text-transform: uppercase; color: var(--ink-3); padding-bottom: .4rem; }
+
+  .sign { margin-top: 1.6rem; display: flex; flex-wrap: wrap; gap: 1.6rem 2.4rem;
+          font-size: .86rem; color: var(--ink-2); }
+  .sign span { border-bottom: 1px solid var(--rule-2); min-width: 11rem; padding-bottom: .1rem; }
+
+  @media print {
+    :root, :root:not([data-theme="light"]), :root[data-theme="dark"] {
+      --paper: #FFFFFF; --surface: #FFFFFF;
+      --ink: #000000; --ink-2: #333333; --ink-3: #666666;
+      --rule: #CCCCCC; --rule-2: #999999;
+      --accent: #7A3F18; --accent-bg: #F3F3F3;
+      --stop: #A32020; --stop-bg: #F7F0F0;
+      --ok: #2C6A4E; --ok-bg: #EEF4F0;
+    }
+    html, body { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+    body { padding-inline: 0; padding-block: 0; font-size: 10pt; }
+    section { padding-block: 0.9rem 0; }
+    h2, h3 { break-after: avoid; }
+    table, .stop, .note, .form { break-inside: avoid; }
+    header { padding-block: 0 0.8rem; }
+    /* 填表那一页要独立、完整：表格跨页会让人翻页对不上行号。
+       第 1 步的说明留在上一页，表格独占一页，第 2 步从再下一页开始。 */
+    .form { break-before: page; break-after: page; }
+    table.fill td { height: 2.3rem; }
+  }
+</style>
+
+<div class="wrap">
+
+<header>
+  <p class="eyebrow">投板前硬门槛 · P0 · 台面记录表</p>
+  <h1>微雪转接板 Pin 映射实测记录表</h1>
+  <p class="standfirst">
+    阵列载板的网表按「J3 针 n → 转接板输出针 n」绘制。<strong>这个前提没被验证过。</strong>
+    在冻结阵列板原理图之前，必须把下面两张表填完并存档 —— 若不是 1:1，载板网表要按实测结果重排，
+    否则整块板报废。
+  </p>
+</header>
+
+<section>
+  <h2><span class="num">准备</span></h2>
+  <ul>
+    <li>万用表：<strong>蜂鸣/通断档</strong>（第 1 步）+ <strong>直流电压档</strong>（第 2 步）</li>
+    <li><strong>一根 2.54 mm 单排公针</strong>或杜邦线公头 —— 转接板输入侧是母座，表笔伸不进去，
+        要拿公针插进孔里当探针</li>
+    <li>本表打印两份，或准备好记 40 行的地方</li>
+  </ul>
+</section>
+
+<section>
+  <h2><span class="num">第 1 步</span>断电、拔下转接板，量板子本身</h2>
+  <p class="lede">
+    得到「母座第 n 孔 → 输出第 m 针」的对应。公针插母座第 n 孔，另一根表笔在输出公针上逐根碰，
+    哪根响就记下 m。
+  </p>
+  <div class="stop">
+    <strong>40 针全量，不要抽样。</strong>
+    这类转接板最常见的毛病就是「部分脚重排、其余直通」—— 抽几根看着是 1:1，剩下的不是。
+  </div>
+
+  <div class="form">
+    <table class="fill">
+      <caption>母座孔 1–20</caption>
+      <thead><tr><th>n</th><th>J3 侧功能（参考）</th><th>实测 → m</th></tr></thead>
+      <tbody>
+        <tr><td class="n">1</td><td class="fn">UART2_RX</td><td class="blank"></td></tr>
+        <tr><td class="n">2</td><td class="fn">UART2_TX</td><td class="blank"></td></tr>
+        <tr><td class="n">3</td><td class="fn">CAN_TX</td><td class="blank"></td></tr>
+        <tr><td class="n">4</td><td class="fn">CAN_RX</td><td class="blank"></td></tr>
+        <tr><td class="n">5</td><td class="fn">T_PEN</td><td class="blank"></td></tr>
+        <tr><td class="n">6</td><td class="fn">T_MISO</td><td class="blank"></td></tr>
+        <tr><td class="n">7</td><td class="fn">T_CS</td><td class="blank"></td></tr>
+        <tr><td class="n">8</td><td class="fn">LCD_BL</td><td class="blank"></td></tr>
+        <tr><td class="n">9</td><td class="fn">LCD_DE</td><td class="blank"></td></tr>
+        <tr><td class="n">10</td><td class="fn">LCD_VSYNC</td><td class="blank"></td></tr>
+        <tr><td class="n">11</td><td class="fn">LCD_HSYNC</td><td class="blank"></td></tr>
+        <tr><td class="n">12</td><td class="fn">LCD_CLK</td><td class="blank"></td></tr>
+        <tr><td class="n">13</td><td class="fn">LCD_B7</td><td class="blank"></td></tr>
+        <tr><td class="n">14</td><td class="fn">LCD_B6</td><td class="blank"></td></tr>
+        <tr><td class="n">15</td><td class="fn">LCD_B5</td><td class="blank"></td></tr>
+        <tr><td class="n">16</td><td class="fn">LCD_B4</td><td class="blank"></td></tr>
+        <tr><td class="n">17</td><td class="fn">LCD_B3</td><td class="blank"></td></tr>
+        <tr><td class="n">18</td><td class="fn">LCD_B2</td><td class="blank"></td></tr>
+        <tr><td class="n">19</td><td class="fn">LCD_B1</td><td class="blank"></td></tr>
+        <tr><td class="n">20</td><td class="fn">LCD_B0</td><td class="blank"></td></tr>
+      </tbody>
+    </table>
+
+    <table class="fill">
+      <caption>母座孔 21–40　<span style="color:var(--accent)">■ 本项目使用 25–40</span></caption>
+      <thead><tr><th>n</th><th>J3 侧功能（参考）</th><th>实测 → m</th></tr></thead>
+      <tbody>
+        <tr><td class="n">21</td><td class="fn">LCD_G7</td><td class="blank"></td></tr>
+        <tr><td class="n">22</td><td class="fn">LCD_G6</td><td class="blank"></td></tr>
+        <tr><td class="n">23</td><td class="fn">LCD_G5</td><td class="blank"></td></tr>
+        <tr><td class="n">24</td><td class="fn">LCD_G4</td><td class="blank"></td></tr>
+        <tr class="used"><td class="n">25</td><td class="fn">LCD_G3 · TACHO</td><td class="blank"></td></tr>
+        <tr class="used"><td class="n">26</td><td class="fn">LCD_G2 · 备用</td><td class="blank"></td></tr>
+        <tr class="used"><td class="n">27</td><td class="fn">LCD_G1 · 备用</td><td class="blank"></td></tr>
+        <tr class="used"><td class="n">28</td><td class="fn">LCD_G0 · 备用</td><td class="blank"></td></tr>
+        <tr class="used"><td class="n">29</td><td class="fn">LCD_R7 · 备用</td><td class="blank"></td></tr>
+        <tr class="used"><td class="n">30</td><td class="fn">LCD_R6 · 备用</td><td class="blank"></td></tr>
+        <tr class="used"><td class="n">31</td><td class="fn">LCD_R5 · SD0</td><td class="blank"></td></tr>
+        <tr class="used"><td class="n">32</td><td class="fn">LCD_R4 · SD1</td><td class="blank"></td></tr>
+        <tr class="used"><td class="n">33</td><td class="fn">LCD_R3 · SD2</td><td class="blank"></td></tr>
+        <tr class="used"><td class="n">34</td><td class="fn">LCD_R2 · SD3</td><td class="blank"></td></tr>
+        <tr class="used"><td class="n">35</td><td class="fn">LCD_R1 · WS</td><td class="blank"></td></tr>
+        <tr class="used"><td class="n">36</td><td class="fn">LCD_R0 · BCLK</td><td class="blank"></td></tr>
+        <tr class="pwr"><td class="n">37</td><td class="fn">GND</td><td class="blank"></td></tr>
+        <tr class="pwr"><td class="n">38</td><td class="fn">+3.3V</td><td class="blank"></td></tr>
+        <tr class="pwr"><td class="n">39</td><td class="fn">GND</td><td class="blank"></td></tr>
+        <tr class="pwr"><td class="n">40</td><td class="fn">+5V</td><td class="blank"></td></tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<section>
+  <h2><span class="num">第 2 步</span>上电、装回底板、<strong>不接阵列载板</strong> —— 一根 5V 定方向</h2>
+  <p class="lede">
+    第 1 步只知道板内怎么连。「母座第 1 孔对的是 J3 的哪一根针」是机械/丝印决定的，
+    而 <strong>2×20 母座可以整个转 180° 插上去且照样导通</strong>，所以必须用上电的 5V 位置把它钉死。
+  </p>
+  <p>
+    J3 上 <strong>+5V 只有一根（第 40 脚）</strong>，这是唯一最好认的标记。用直流电压档在输出排针上找它：
+  </p>
+  <table>
+    <thead><tr><th>5V 出现在输出针</th><th>说明</th><th>动作</th></tr></thead>
+    <tbody>
+      <tr><td class="mono">40</td><td>方向正确，母座 1 孔对 J3 1 脚</td><td>通过</td></tr>
+      <tr><td class="mono">1</td><td><strong>反了 180°</strong>（n ↔ 41−n）：J3.40→1、J3.38→3、J3.37→4</td><td>把转接板掉个头重插</td></tr>
+      <tr><td>别的位置</td><td><strong>不是 1:1</strong>，是重排过的</td><td>按第 1 步的表建映射</td></tr>
+      <tr><td><strong>找不到 5V</strong></td><td>转接板没把电源引出来</td><td>方案要改，别往下走</td></tr>
+    </tbody>
+  </table>
+  <p style="margin-top:.7rem">顺手再确认 3.3 V 在 <span class="mono">38</span>、地能对通到 <span class="mono">37/39</span>。</p>
+
+  <div class="note">
+    <strong>输出侧若不止一组排针</strong>（A.1 写的是「选择其中一组」），
+    <strong>每一组的 5V 位置都量一遍</strong>，确认你打算用的那一组是直通 ——
+    别的一组很可能是为特定 HAT 重排过的。量错组，「1:1」这个结论就建立错了对象上。
+  </div>
+</section>
+
+<section>
+  <h2><span class="num">第 3 步</span>合成最终对照表并存档</h2>
+  <p>
+    <span class="mono">J3 针 n → 输出针 m</span>，40 行。签名、标日期、写板子编号。
+    <strong>这张表就是画载板网表的唯一依据</strong> —— 文档 B.2 那张「目标功能分配」要按它重排。
+  </p>
+</section>
+
+<section>
+  <h2><span class="num">安全</span>操作提醒</h2>
+  <div class="stop">
+    <strong>第 2 步底板是有电的，阵列载板一定不要接</strong> —— 接上去等于让 5 V 有机会进阵列，
+    8 个麦克风会一起报废。
+  </div>
+  <ul>
+    <li><strong>2.54 mm 间距很密，表笔尖容易在相邻针之间打滑短路。</strong>
+        建议拿一根杜邦线把输出针引出来再量，别直接拿表笔在排针上蹭。</li>
+    <li>上电前先确认转接板<strong>完全插到底</strong>、方向可辨。</li>
+    <li>第 1 步一定在<strong>断电、拔下</strong>的状态下做 —— 通断档带电测会得到假读数，也可能伤表。</li>
+  </ul>
+
+  <div class="sign">
+    <span>量测人</span>
+    <span>日期</span>
+    <span>转接板型号/批次</span>
+    <span>结论（1:1 / 需重排）</span>
+  </div>
+</section>
+
+</div>
