@@ -1,0 +1,15 @@
+﻿build/
+.Xil/
+**/build/
+**/.Xil/
+*.jou
+*.log
+*.wdb
+*.vcd
+*.str
+*.tmp
+clf_work.mat
+__pycache__/
+*.pyc
+Thumbs.db
+.DS_Store

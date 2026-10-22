@@ -1,0 +1,16 @@
++--------------------------+--------------------------+----------------------------------------------------------------------------------------------------------+
+|       Launch Clock       |      Capture Clock       |                                                 Pin                                                      |
++--------------------------+--------------------------+----------------------------------------------------------------------------------------------------------+
+|         input port clock |                     pl40 |                                                              u_rx/g_line[0].g_phase_b.u_cic_b/bit_q_reg/D|
+|         input port clock |                     pl40 |                                                                                   u_rx/phase_a_q_reg[0]/D|
+|         input port clock |                     pl40 |                                                              u_rx/g_line[1].g_phase_b.u_cic_b/bit_q_reg/D|
+|         input port clock |                     pl40 |                                                                                   u_rx/phase_a_q_reg[1]/D|
+|         input port clock |                     pl40 |                                                              u_rx/g_line[5].g_phase_b.u_cic_b/bit_q_reg/D|
+|         input port clock |                     pl40 |                                                              u_rx/g_line[2].g_phase_b.u_cic_b/bit_q_reg/D|
+|         input port clock |                     pl40 |                                                                                   u_rx/phase_a_q_reg[2]/D|
+|         input port clock |                     pl40 |                                                                                   u_rx/phase_a_q_reg[5]/D|
+|         input port clock |                     pl40 |                                                                                   u_rx/phase_a_q_reg[4]/D|
+|         input port clock |                     pl40 |                                                              u_rx/g_line[4].g_phase_b.u_cic_b/bit_q_reg/D|
+|         input port clock |                     pl40 |                                                              u_rx/g_line[3].g_phase_b.u_cic_b/bit_q_reg/D|
+|         input port clock |                     pl40 |                                                                                   u_rx/phase_a_q_reg[3]/D|
++--------------------------+--------------------------+----------------------------------------------------------------------------------------------------------+
