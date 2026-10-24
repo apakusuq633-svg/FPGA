@@ -11,6 +11,7 @@
 #define LOCATION_WEAK 4u
 #define LOCATION_AMBIGUOUS 8u
 #define LOCATION_CONFIRMING 16u
+#define LOCATION_DEADLINE 64u
 #define LOCATION_MIN_PAIR_SCORE 64u
 #define LOCATION_MIN_CONTRAST 20u
 #define LOCATION_REFINED_MAGIC 0x4c524631u
@@ -106,6 +107,33 @@ static inline uint32_t location_map_reason(const int32_t *p,unsigned w,unsigned 
     if(best<=0)return LOCATION_WEAK;
     uint32_t competitor=far>0?(uint32_t)far:0;
     /* 120 * 32767 * 1000 fits uint32; avoid an RV32 software 64-bit divide. */
+    *contrast=((uint32_t)best-competitor)*1000u/(uint32_t)best;
+    if((uint32_t)best<pairs*LOCATION_MIN_PAIR_SCORE)return LOCATION_WEAK;
+    return *contrast<LOCATION_MIN_CONTRAST?LOCATION_AMBIGUOUS:0u;
+}
+
+/* Exact 32x32 specialization: scan the complement of the clipped 9x9
+ * exclusion square as contiguous spans, avoiding per-cell x/y distances. */
+static inline int32_t location_span_max(const int32_t *p,unsigned begin,unsigned end,int32_t far)
+{
+    for(unsigned g=begin;g<end;g++)if(p[g]>far)far=p[g];
+    return far;
+}
+static inline uint32_t location_map_reason32(const int32_t *p,unsigned pairs,
+                                            unsigned grid,uint32_t *contrast,int32_t *nonlocal)
+{
+    unsigned gx=grid&31u,gy=grid>>5;
+    unsigned x0=gx>4?gx-4:0,x1=gx<27?gx+5:32;
+    unsigned y0=gy>4?gy-4:0,y1=gy<27?gy+5:32;
+    int32_t best=p[grid],far=location_span_max(p,0,y0*32,INT32_MIN);
+    for(unsigned y=y0;y<y1;y++) {
+        far=location_span_max(p,y*32,y*32+x0,far);
+        far=location_span_max(p,y*32+x1,(y+1)*32,far);
+    }
+    far=location_span_max(p,y1*32,1024,far);
+    *nonlocal=far;*contrast=0;
+    if(best<=0)return LOCATION_WEAK;
+    uint32_t competitor=far>0?(uint32_t)far:0;
     *contrast=((uint32_t)best-competitor)*1000u/(uint32_t)best;
     if((uint32_t)best<pairs*LOCATION_MIN_PAIR_SCORE)return LOCATION_WEAK;
     return *contrast<LOCATION_MIN_CONTRAST?LOCATION_AMBIGUOUS:0u;

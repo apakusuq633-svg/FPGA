@@ -233,7 +233,8 @@ static inline void fea_env_spectrum(const double *x,int n,double *out,int *nw)
  *   fea_setup() 必须先跑过（df 在那儿定的）。
  * ------------------------------------------------------------------------------------------ */
 static double fea_last_envelope[PS_FEAT_NBIN];
-static void fea_frame18(const double *x, int n, double shaft_hz, double *v18)
+static void fea_frame18_orders(const double *x, int n, double shaft_hz,
+                               const double orders[PS_FEAT_NORD], double *v18)
 {
 
     int o, k;
@@ -244,7 +245,7 @@ static void fea_frame18(const double *x, int n, double shaft_hz, double *v18)
         for (k = 1; k <= PS_FEAT_NHARM; k++) {
             /* MATLAB v((o-1)*K + k)，1 起 → 这里 o*4 + (k-1) */
             v18[o * PS_FEAT_NHARM + (k - 1)] =
-                fea_peak_near(fea_last_envelope, PS_FEAT_NBIN, (double)k * fea_orders[o] * shaft_hz,
+                fea_peak_near(fea_last_envelope, PS_FEAT_NBIN, (double)k * orders[o] * shaft_hz,
                               fea_df_g, PS_FEAT_HW);
         }
     }
@@ -254,6 +255,10 @@ static void fea_frame18(const double *x, int n, double shaft_hz, double *v18)
             fea_peak_near(fea_last_envelope, PS_FEAT_NBIN, (double)k * shaft_hz, fea_df_g, PS_FEAT_HW);
     }
 }
+
+/* Preserve the trained legacy feature contract for every existing caller. */
+static inline void fea_frame18(const double *x, int n, double shaft_hz, double *v18)
+{ fea_frame18_orders(x,n,shaft_hz,fea_orders,v18); }
 
 /* ------------------------------------------------------------------------------------------
  * 原地归一化：v_db = 20*log10((v+eps)/(median(v)+eps))，中位数就取在这 18 维上。

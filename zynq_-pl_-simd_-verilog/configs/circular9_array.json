@@ -1,0 +1,108 @@
+{
+  "profile": "circular9",
+  "role": "DEVELOPMENT",
+  "physical_mics": 9,
+  "channels": 9,
+  "algorithm_channels": 9,
+  "capture_slots": 10,
+  "mics_per_line": 2,
+  "data_lines": 5,
+  "active_mask": 511,
+  "pairs": 36,
+  "sample_rate_hz": 156250,
+  "sample_rate_num": 156250,
+  "sample_rate_den": 1,
+  "pdm_decimation": 16,
+  "window_samples": 1024,
+  "localizer_hop": 512,
+  "band_low_hz": 200,
+  "band_high_hz": 8000,
+  "diagnostic_decimation": 4,
+  "pl_clock_hz": 40000000,
+  "pdm_clock_hz": 2500000,
+  "grid_w": 32,
+  "grid_count": 1024,
+  "r_len": 64,
+  "capture_frames_per_bank": 512,
+  "capture_words_per_frame": 5,
+  "capture_bytes_per_bank": 10240,
+  "pcb_radius_m": 0.03,
+  "ring_radius_m": 0.025,
+  "geometry_status": "proposed",
+  "physical_mapping_confirmed": false,
+  "board_tested": false,
+  "hardware_available": false,
+  "din_pins": [
+    "T14",
+    "Y17",
+    "W16",
+    "T15",
+    "Y16"
+  ],
+  "clock_pin": "V16",
+  "reset_pin": "N16",
+  "coordinate_unit": "m",
+  "coordinate_frame": "front view +x right +y up +z toward observer",
+  "sound_speed_m_s": 343,
+  "grid_half_m": 0.2,
+  "plane_z_m": 0.3,
+  "channel_to_mic": [
+    0,
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    8
+  ],
+  "channel_positions_m": [
+    [
+      0.025,
+      0,
+      0
+    ],
+    [
+      0.01767766953,
+      0.01767766953,
+      0
+    ],
+    [
+      0,
+      0.025,
+      0
+    ],
+    [
+      -0.01767766953,
+      0.01767766953,
+      0
+    ],
+    [
+      -0.025,
+      0,
+      0
+    ],
+    [
+      -0.01767766953,
+      -0.01767766953,
+      0
+    ],
+    [
+      0,
+      -0.025,
+      0
+    ],
+    [
+      0.01767766953,
+      -0.01767766953,
+      0
+    ],
+    [
+      0,
+      0,
+      0
+    ]
+  ],
+  "plan_sha256": "5496461712f7b4ea5a25c75e8b067932a31eeb56ae06eb9999d3c56d91b1e422"
+}

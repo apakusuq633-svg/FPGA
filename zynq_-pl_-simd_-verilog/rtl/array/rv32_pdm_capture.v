@@ -17,6 +17,7 @@
 // ⚠ N_CH 必须是偶数（打包按 2 通道 1 字）。8 / 16 都满足。
 module rv32_pdm_capture #(
   parameter integer N_CH     = 8,
+  parameter [N_CH-1:0] ACTIVE_MASK = {N_CH{1'b1}},
   parameter integer IN_W     = 24,
   parameter integer FRAME_AW = 9
 ) (
@@ -70,7 +71,7 @@ module rv32_pdm_capture #(
   genvar gi;
   generate
     for (gi = 0; gi < N_CH; gi = gi + 1) begin : g_pack
-      assign frame_i[gi*16 +: 16] = audio_vec_i[gi*IN_W + (IN_W-16) +: 16];
+      assign frame_i[gi*16 +: 16] = ACTIVE_MASK[gi] ? audio_vec_i[gi*IN_W + (IN_W-16) +: 16] : 16'b0;
     end
   endgenerate
 
@@ -122,7 +123,7 @@ module rv32_pdm_capture #(
   integer k;
   generate
     for (gi = 0; gi < N_CH; gi = gi + 1) begin : g_gain
-      assign gain_o[gi*16 +: 16] = gain_q[gi];
+      assign gain_o[gi*16 +: 16] = ACTIVE_MASK[gi] ? gain_q[gi] : 16'b0;
     end
   endgenerate
 
@@ -136,7 +137,7 @@ module rv32_pdm_capture #(
       ready_q <= 2'b0; sequence_q <= 0; dropped_q <= 0; ack_seq_q <= 0; ack_errors_q <= 0;
       seq0_q <= 0; seq1_q <= 0; first0_q <= 0; first1_q <= 0; meta0_q <= 0; meta1_q <= 0;
       rd_index_q <= 0; wr_active_q <= 1'b0; wr_word_q <= 0; frame_q <= 0;
-      for (k = 0; k < N_CH; k = k + 1) gain_q[k] <= 16'd16384;   // Q2.14 的 1.0，不是静音
+      for (k = 0; k < N_CH; k = k + 1) gain_q[k] <= ACTIVE_MASK[k] ? 16'd16384 : 16'd0;   // Q2.14 的 1.0，不是静音
     end else begin
       if (cfg_wr_i && cfg_addr_i == R_LEN && !capture_q &&
           cfg_wdata_i > 0 && cfg_wdata_i <= CAPACITY) length_q <= cfg_wdata_i[FRAME_AW:0];
@@ -149,8 +150,8 @@ module rv32_pdm_capture #(
       end
       for (k = 0; k < WORDS; k = k + 1) begin
         if (cfg_wr_i && cfg_addr_i == R_GAIN0 + k) begin
-          gain_q[2*k]   <= cfg_wdata_i[15:0];
-          gain_q[2*k+1] <= cfg_wdata_i[31:16];
+          gain_q[2*k]   <= ACTIVE_MASK[2*k] ? cfg_wdata_i[15:0] : 16'b0;
+          gain_q[2*k+1] <= ACTIVE_MASK[2*k+1] ? cfg_wdata_i[31:16] : 16'b0;
         end
       end
 
@@ -209,11 +210,11 @@ module rv32_pdm_capture #(
   always @* begin
     case (cfg_addr_i)
       R_CTRL:    cfg_rdata_o = {29'b0, snapshot_q, capture_q, en_q};
-      // ⚠ 原来是 `{16'b0, frozen_i, 13'b0, wr_active_q, ready_q}` —— N_CH=8 时那
+      // ⚠ 原来是 `{16'b0, (frozen_i & ACTIVE_MASK), 13'b0, wr_active_q, ready_q}` —— N_CH=8 时那
       //   已经是 **39 位**，赋给 32 位会被静默截掉高 7 位，frozen 落到 [22:15]，
       //   而文档写的是 [15:8]。现在按 N_CH 补零凑满 32 位：frozen 高位对齐在
       //   [31:16]（N_CH=16 时正好占满，N_CH 更小则左侧补零）。
-      R_STATUS:  cfg_rdata_o = {{(16-N_CH){1'b0}}, frozen_i, 13'b0, wr_active_q, ready_q};
+      R_STATUS:  cfg_rdata_o = {{(16-N_CH){1'b0}}, (frozen_i & ACTIVE_MASK), 13'b0, wr_active_q, ready_q};
       R_LEN:     cfg_rdata_o = {{(32-FRAME_AW){1'b0}}, length_q};
       R_SELECT:  cfg_rdata_o = {31'b0, select_q};
       R_SEQ:     cfg_rdata_o = selected_seq;
@@ -224,7 +225,7 @@ module rv32_pdm_capture #(
       R_ACKSEQ:  cfg_rdata_o = ack_seq_q;
       R_FRAME:   cfg_rdata_o = frame_cnt_i;
       7'd31:     cfg_rdata_o = 32'h41435303; // Reserved word, beyond gain registers 16..23.
-      R_FROZEN:  cfg_rdata_o = {{(32-N_CH){1'b0}}, frozen_i};
+      R_FROZEN:  cfg_rdata_o = {{(32-N_CH){1'b0}}, (frozen_i & ACTIVE_MASK)};
       R_META:    cfg_rdata_o = select_q ? meta1_q : meta0_q;
       default: begin
         if (cfg_addr_i >= R_GAIN0 && cfg_addr_i < R_GAIN0 + WORDS)

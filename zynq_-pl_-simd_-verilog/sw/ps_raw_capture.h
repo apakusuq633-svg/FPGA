@@ -40,7 +40,7 @@ static inline void raw_capture_poll(raw_capture_receiver *r,const das_bus *b,uin
         r->channels=raw_result_read(b,RAW_RESULT_CHANNELS);
         r->first=raw_result_read(b,RAW_RESULT_FIRST);
         r->bank_sequence=raw_result_read(b,RAW_RESULT_BANK_SEQ);
-        if((r->channels!=8&&r->channels!=12&&r->channels!=16)||
+        if((r->channels!=8&&r->channels!=10&&r->channels!=12&&r->channels!=16)||
            raw_result_read(b,RAW_RESULT_FRAMES)!=1024||
            raw_result_read(b,RAW_RESULT_END_SEQ)-r->bank_sequence!=1||
            raw_result_read(b,RAW_RESULT_FS_NUM)!=78125||raw_result_read(b,RAW_RESULT_FS_DEN)!=2) {

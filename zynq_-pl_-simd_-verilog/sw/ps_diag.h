@@ -34,6 +34,9 @@
 
 #include "ps_features.h"   /* 站 11：fea_setup / fea_frame18 / fea_norm18 */
 #include "ps_classifier.h" /* 站 12：clf_predict */
+#if defined(UI_DAS_ACTIVE_CHANNELS) && UI_DAS_ACTIVE_CHANNELS == 9
+#include "bearing_6004_2zr.h"
+#endif
 #include "ps_output.h"     /* 站 13：struct diag_result、out_split_grid、out_azim_pct */
 
 /* Cortex-A9 全局计时器，FCLK/2 = 333 MHz ⇒ 1 拍 3 ns。只用低 32 位：12.9 s 才回绕，
@@ -144,6 +147,17 @@ static void dia_classify_audio(const double *x, int n, double shaft_hz, struct d
     double med;
     int i;
 
+#if defined(UI_DAS_ACTIVE_CHANNELS) && UI_DAS_ACTIVE_CHANNELS == 9
+    /* Target-specific features may be inspected, but no validated 6004 model
+     * or real normal baseline exists yet. Never label it normal by fallback. */
+    r->cls=0;r->conf_pct=0;r->sev_pct=0;r->med_milli=0;
+    for(i=0;i<CLF_N_CLASS;i++)r->votes[i]=0;
+    if(n!=40000 || shaft_hz<10.0 || shaft_hz>30.0)return;
+    fea_frame18_orders(x,n,shaft_hz,bearing6004_orders,v);
+    med=fea_norm18(v);
+    r->med_milli=(int)(med*1000.0);
+    return;
+#endif
     fea_frame18(x, n, shaft_hz, v);            /* 站 11：波形 → 18 维 */
     med = fea_norm18(v);                   /* 原地归一化 */
     for (i = 0; i < PS_FEAT_NFEAT; i++) {

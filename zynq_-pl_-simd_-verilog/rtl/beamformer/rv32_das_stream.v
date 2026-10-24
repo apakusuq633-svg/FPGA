@@ -21,6 +21,7 @@ module rv32_das_stream #(parameter integer ACTIVE_CHANNELS = 8,
   reg [3:0] state;
   reg enable_q, auto_q, error_q, steer_seen, cubic_q, cubic_snap;
   reg smooth_q,pending_direction;
+  reg discard_fifo_q; // CTRL[5]: DMA tap owns audio; disable unused debug FIFO.
   reg [31:0] pending_version;
   reg [9:0] pending_id;
   reg [21:0] target_delay[0:CHANNELS-1];
@@ -72,9 +73,9 @@ module rv32_das_stream #(parameter integer ACTIVE_CHANNELS = 8,
   reg [7:0] wr_ptr, rd_ptr;
   reg [8:0] count;
   wire pop = cfg_rd_i && cfg_addr_i == 5'd3 && count != 0;
-  wire push = state == FIR && fir_done_i && (count < 256 || pop);
+  wire push = state == FIR && fir_done_i && !discard_fifo_q && (count < 256 || pop);
   wire input_drop = enable_q && valid_i && state != IDLE;
-  wire fifo_drop = state == FIR && fir_done_i && !push;
+  wire fifo_drop = state == FIR && fir_done_i && !push && !discard_fifo_q;
   wire clear = cfg_wr_i && cfg_addr_i == 0 && cfg_wdata_i[1] &&
                !enable_q && state == IDLE && accepted_q == 0;
   wire signed [16:0] difference = {v1[15],v1} - {v0[15],v0};
@@ -83,7 +84,10 @@ module rv32_das_stream #(parameter integer ACTIVE_CHANNELS = 8,
   wire signed [21:0] rounded_sum = $signed(sum) + 22'sd6;
   wire signed [21:0] average12 = rounded_sum < 0 ?
       -((-rounded_sum + 22'sd11) / 22'sd12) : rounded_sum / 22'sd12;
-  wire signed [21:0] average = ACTIVE_CHANNELS == 12 ? average12 : ACTIVE_CHANNELS == 16 ?
+  // Nine physical microphones: symmetric nearest rounding, ties cannot occur.
+  wire signed [21:0] sum9 = $signed(sum);
+  wire signed [21:0] average9 = sum9 < 0 ? -((-sum9 + 22'sd4) / 22'sd9) : (sum9 + 22'sd4) / 22'sd9;
+  wire signed [21:0] average = ACTIVE_CHANNELS == 9 ? average9 : ACTIVE_CHANNELS == 12 ? average12 : ACTIVE_CHANNELS == 16 ?
       ($signed(sum) + 22'sd8) >>> 4 : ACTIVE_CHANNELS == 4 ?
       ($signed(sum) + 21'sd2) >>> 2 : ($signed(sum) + 21'sd4) >>> 3;
   wire [5:0] idx0 = head - snap[ch][21:16];
@@ -104,6 +108,7 @@ module rv32_das_stream #(parameter integer ACTIVE_CHANNELS = 8,
       state<=IDLE; enable_q<=0; auto_q<=1; error_q<=0; steer_seen<=0;cubic_q<=0;cubic_snap<=0;
       v2<=0;v3<=0;tap<=0;cubic_acc<=0;
       smooth_q<=0;pending_direction<=0;pending_version<=0;pending_id<=0;
+      discard_fifo_q<=0;
       direction_applied_o<=0;direction_version_o<=0;direction_id_o<=0;
       effective_sample_seq_o<=0;audio_sample_seq_o<=0;group_delay_q16_o<=0;transitioning_o<=0;
       direction_trusted_o<=0;
@@ -134,7 +139,7 @@ module rv32_das_stream #(parameter integer ACTIVE_CHANNELS = 8,
           // Re-enabling requires a SoC reset to reset the shared FIR history too.
           if (cfg_wdata_i[1]) error_q<=1;
           else if(cfg_wdata_i[3]&&!cubic_range_ok)error_q<=1;
-          else begin enable_q<=cfg_wdata_i[0]; auto_q<=cfg_wdata_i[2];cubic_q<=cfg_wdata_i[3];smooth_q<=cfg_wdata_i[4]; end
+          else begin enable_q<=cfg_wdata_i[0]; auto_q<=cfg_wdata_i[2];cubic_q<=cfg_wdata_i[3];smooth_q<=cfg_wdata_i[4];discard_fifo_q<=cfg_wdata_i[5]; end
         end else if (delay_addr_valid) begin
           if (cfg_wdata_i >= (cubic_q?32'h003d0000:32'h003f0000)) error_q<=1;
           else delay_q[delay_channel]<=cfg_wdata_i[21:0];
@@ -220,7 +225,7 @@ module rv32_das_stream #(parameter integer ACTIVE_CHANNELS = 8,
         4'd10: begin das_q<=average[15:0];group_delay_q16_o<=group_max_delay+(cubic_snap?32'd65536:0);state<=EMIT; end
         EMIT: if (fir_ready_i) state<=FIR;
         FIR: if (fir_done_i) begin
-          if (push) output_q<=output_q+1;
+          if (push||discard_fifo_q) output_q<=output_q+1;
           if (ticks>max_ticks) max_ticks<=ticks;
           head<=head+1'b1; state<=IDLE;
         end
@@ -231,7 +236,7 @@ module rv32_das_stream #(parameter integer ACTIVE_CHANNELS = 8,
   always @(*) begin
     cfg_rdata_o=0;
     case (cfg_addr_i)
-      0: cfg_rdata_o={27'b0,smooth_q,cubic_q,auto_q,1'b0,enable_q};
+      0: cfg_rdata_o={26'b0,discard_fifo_q,smooth_q,cubic_q,auto_q,1'b0,enable_q};
       1: cfg_rdata_o={20'b0,count,error_q,steer_locked_i,(state!=IDLE)};
       2: cfg_rdata_o=output_q;
       3: cfg_rdata_o=count!=0 ? fifo[rd_ptr] : 32'b0;

@@ -55,13 +55,17 @@
 //   所以第 1 拍要用的 b' 必须**在第 0 拍就寄存下来**（b2r_q/b2i_q），
 //   不能到第 1 拍再算 —— 那时 ar 已经被自己的写回污染。拆分阶段同理
 //   （xi2_q/xr2_q，只在 X[k] 与 X[m] 撞同一个 bank 的那 65 次才用得上）。
-module rv32_fft_bfly (
+module rv32_fft_bfly #(
+  parameter INV_BAND_LO=0,
+  parameter INV_BAND_COUNT=513
+) (
   input                clk_i,
   input                rst_n_i,
   input                start_i,
   input                keep_i,
   input                commit_i,
   input                inv_i,        // 1 = 逆变换（VFFT-inv，指令的 instr[30]）
+  input                sparse_inv_i, // Only localizer-owned band-limited input; generic ISA unchanged.
   input                is_io_i,      // 1 = PUSH/POP
   input                io_sel_i,     // 0 = PUSH 输入帧，1 = POP 结果 bin
   input                io_seek_i,    // POP encoding bit27: set pointer, do not read/advance.
@@ -105,6 +109,7 @@ module rv32_fft_bfly (
   reg [31:0] nyq_q;            // 正变换：第 513 条输出（bin 512，纯实）
   reg [31:0] in_nyq_q;         // 逆变换：第 513 条输入（ψ[512]，纯实）
   reg        inv_q;            // 本趟的模式（RUN 发起 / 每次 PUSH、POP 时锁存）
+  reg        sparse_q;
 
   // ── 单拍 PUSH/POP（判据用 commit_i，理由见 rv32_acoustic_ext.v）────────
   wire io_fire   = (state_q == ST_IDLE) & start_i & is_io_i & commit_i;
@@ -302,12 +307,13 @@ module rv32_fft_bfly (
   generate
     for (g = 0; g < 8; g = g + 1) begin : g_q
       // lane g 读到的是**槽 g**（bank g、窗口内偏移 g）—— 因为窗口 8 对齐
-      assign q_a[g] = bq_a[g];
+      assign q_a[g] = in_rev&&sparse_q&&(kk<INV_BAND_LO||kk>=INV_BAND_LO+INV_BAND_COUNT)?32'b0:bq_a[g];
       // ⚠ 反向拆分也走 `bq_b`。它进来时 stage_q = 0（mode8 = 0），若不加
       //   `in_rev` 这一项，mode4 那条 `q_a[bsrc[g]]` 会**安静地**接管 b 路，
       //   而 bsrc 来自 FFT 地址发生器 —— 反向拆分读到的就是一格随便什么的
       //   数据。指纹：512 条输出全错，但每条都"像个相关序列"。
-      assign q_b[g] = (mode8 | in_rev) ? bq_b[g] : q_a[bsrc[g]];
+      assign q_b[g] = in_rev&&sparse_q&&(mm<INV_BAND_LO||mm>=INV_BAND_LO+INV_BAND_COUNT)?32'b0:
+                     (mode8 | in_rev) ? bq_b[g] : q_a[bsrc[g]];
     end
   endgenerate
 
@@ -415,6 +421,9 @@ module rv32_fft_bfly (
   //   `qa_q/qb_q` 那份寄存值。这两个寄存器现在唯一的理由是**写口只有一个**。
   reg signed [15:0] b2r_q [0:7], b2i_q [0:7];
   reg signed [15:0] xr2_q, xi2_q;
+  wire signed [15:0] xr, xi, xr2, xi2;
+  wire [31:0] rz_k, rz_m;
+  reg [15:0] rz_mr_q, rz_mi_q;
 
   generate
     for (g = 0; g < 8; g = g + 1) begin : g_b2q
@@ -492,7 +501,8 @@ module rv32_fft_bfly (
   // ⚠ ψ[512]（Nyquist）不在数组里（数组只有 0..511），只有 k=0 那一对用得到。
   //   那一对的第二个操作数必须走 in_nyq_q —— 数组里 brev(0)=0 存的是 ψ[0]，
   //   拿它冒充 ψ[512]，z[0] 会**安静地**算错，而后面 511 条看起来全都正常。
-  wire [31:0] rv_b = (in_rev_d & (kk_d == 9'd0)) ? in_nyq_q : zm;
+  wire [31:0] rv_b = (in_rev_d & (kk_d == 9'd0)) ?
+    (sparse_q&&INV_BAND_LO+INV_BAND_COUNT<=512?32'b0:in_nyq_q) : zm;
 
   wire signed [15:0] zkr = zk[15:0],   zki = zk[31:16];
   wire signed [15:0] zmr = rv_b[15:0], zmi = rv_b[31:16];
@@ -554,8 +564,8 @@ module rv32_fft_bfly (
   wire signed [31:0] xi_s  = ({{16{ei[15]}},   ei}  + sti)  >>> 1;
   wire signed [31:0] xr2_s = ({{16{er2[15]}},  er2} + str2) >>> 1;
   wire signed [31:0] xi2_s = ({{16{ei2[15]}},  ei2} + sti2) >>> 1;
-  wire signed [15:0] xr  = xr_s[15:0],   xi  = xi_s[15:0];
-  wire signed [15:0] xr2 = xr2_s[15:0],  xi2 = xi2_s[15:0];
+  assign xr = xr_s[15:0], xi = xi_s[15:0];
+  assign xr2 = xr2_s[15:0], xi2 = xi2_s[15:0];
 
   // 反向拆分的产出：z[k] = (er − oi) + j(ei + orr)，oi = sti、orr = str。
   // C 存进 int16_t ⇒ 取低 16 位。（同一对 str/sti 在正变换里是 X[k] 的修正项。）
@@ -563,11 +573,10 @@ module rv32_fft_bfly (
   wire signed [31:0] rz_ki = ei  + str;
   wire signed [31:0] rz_mr = er2 - sti2;
   wire signed [31:0] rz_mi = ei2 + str2;
-  wire [31:0] rz_k = {rz_ki[15:0], rz_kr[15:0]};
-  wire [31:0] rz_m = {rz_mi[15:0], rz_mr[15:0]};
+  assign rz_k = {rz_ki[15:0], rz_kr[15:0]};
+  assign rz_m = {rz_mi[15:0], rz_mr[15:0]};
 
   // 反向拆分里 z[m] 撞 bank 时要留到第 1 拍写，那份值只能从这里寄存。
-  reg [15:0] rz_mr_q, rz_mi_q;
   always @(posedge clk_i) begin
     if (valid_d & wr_rev & ~phase_d & rev_same_d) begin
       rz_mr_q <= rz_mr[15:0];
@@ -593,6 +602,7 @@ module rv32_fft_bfly (
       nyq_q   <= 32'd0;
       in_nyq_q <= 32'd0;
       inv_q   <= 1'b0;
+      sparse_q <= 1'b0;
     end else begin
       // Nyquist（bin 512）在 k=0 那一对的**算相**拍算出：
       // W^512 = −1 ⇒ X[512] = (E[0] − O[0]) >>> 1，纯实。
@@ -602,6 +612,7 @@ module rv32_fft_bfly (
       // 模式锁存：PUSH/POP 用**组合**的 inv_i（当拍就要选地址），
       // RUN 之后的 ST_RUN / 反向拆分是几十上百拍，只能用锁存值。
       if (io_fire | run_start) inv_q <= inv_i;
+      if (run_start) sparse_q <= INV_BAND_COUNT<513 && sparse_inv_i===1'b1;
       // 逆变换的第 513 条输入（ψ[512]）：写口那边已经挡掉了，这里只收着。
       if (push_nyq) in_nyq_q <= scalar_i;
 

@@ -3,7 +3,7 @@ from pathlib import Path
 import argparse, hashlib, json, subprocess, re
 R=Path(__file__).resolve().parents[1]
 p=argparse.ArgumentParser();p.add_argument('--output',type=Path,required=True)
-p.add_argument('--channels',type=int,default=12,choices=[8,12])
+p.add_argument('--channels',type=int,default=12,choices=[8,10,12])
 p.add_argument('--hold',type=int,default=4);p.add_argument('--consume',type=int,default=12)
 p.add_argument('--shared-only',action='store_true');a=p.parse_args()
 assert 0 <= a.hold < 8 and a.consume == a.hold + 8

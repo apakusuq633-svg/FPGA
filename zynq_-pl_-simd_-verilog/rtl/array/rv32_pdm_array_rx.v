@@ -3,6 +3,7 @@
 // Pin capture spacing is not a measured acoustic delay.
 module rv32_pdm_array_rx #(
   parameter integer N_CH          = 8,
+  parameter [N_CH-1:0] ACTIVE_MASK = {N_CH{1'b1}},
   parameter integer MICS_PER_LINE = 2,
   parameter integer OUT_W         = 24,
   parameter integer ORDER         = 3,
@@ -32,7 +33,8 @@ module rv32_pdm_array_rx #(
 
   rv32_pdm_clkgen #(
     .HOLD_TICK    (HOLD_TICK),
-    .CONSUME_TICK (CONSUME_TICK)
+    .CONSUME_TICK (CONSUME_TICK),
+    .DECIM       (DECIM)
   ) u_clkgen (
     .clk_i      (clk_i),
     .rst_n_i    (rst_n_i),
@@ -111,7 +113,7 @@ module rv32_pdm_array_rx #(
         .sample_en_o(ch_valid_w[CH_A]),
         .sample_o   (ch_sample_w[CH_A])
       );
-      assign audio_vec_o[CH_A*OUT_W +: OUT_W] = ch_sample_w[CH_A];
+      assign audio_vec_o[CH_A*OUT_W +: OUT_W] = ACTIVE_MASK[CH_A] ? ch_sample_w[CH_A] : {OUT_W{1'b0}};
 
       if (MICS_PER_LINE == 2) begin : g_phase_b
         rv32_pdm_cic #(
@@ -129,7 +131,7 @@ module rv32_pdm_array_rx #(
           .sample_en_o(ch_valid_w[CH_B]),
           .sample_o   (ch_sample_w[CH_B])
         );
-        assign audio_vec_o[CH_B*OUT_W +: OUT_W] = ch_sample_w[CH_B];
+        assign audio_vec_o[CH_B*OUT_W +: OUT_W] = ACTIVE_MASK[CH_B] ? ch_sample_w[CH_B] : {OUT_W{1'b0}};
       end
     end
   endgenerate
@@ -200,6 +202,6 @@ module rv32_pdm_array_rx #(
     end
   end
 
-  assign frozen_o = frozen_q;
+  assign frozen_o = frozen_q & ACTIVE_MASK;
 
 endmodule

@@ -12,6 +12,8 @@
 #include "acoustic_debug4_image.h"
 #elif UI_DAS_ACTIVE_CHANNELS == 8
 #include "acoustic_planar8_image.h"
+#elif UI_DAS_ACTIVE_CHANNELS == 9
+#include "acoustic_circular9_image.h"
 #elif UI_DAS_ACTIVE_CHANNELS == 12
 #include "acoustic_live12_image.h"
 #elif UI_DAS_ACTIVE_CHANNELS == 16
@@ -38,6 +40,11 @@ static inline int pl_live_prepare(const das_bus *b)
     unsigned i;
     if(b->read(b->ctx,0x39c)!=0x44415301u)return -1;
     if(b->read(b->ctx,0x3c0)!=UI_DAS_ACTIVE_CHANNELS)return -6;
+#if UI_DAS_ACTIVE_CHANNELS == 9
+    if(b->read(b->ctx,0x3e4)!=ACOUSTIC_PDM_DECIM ||
+       b->read(b->ctx,0x3e8)!=ACOUSTIC_LOCALIZER_HOP ||
+       b->read(b->ctx,0x3ec)!=ACOUSTIC_CORRELATION_LAGS)return -10;
+#endif
 #if UI_LIVE16_LOCALIZATION
     if(b->read(b->ctx,0x3c4)!=0x41435303u)return -9;
     if((b->read(b->ctx,0x41c)>>16)!=0x12u)return -7;
@@ -65,7 +72,7 @@ static inline int pl_live_prepare(const das_bus *b)
 }
 static inline void pl_live_start(const das_bus *b)
 {
-    b->write(b->ctx,0x380,UI_DAS_ACTIVE_CHANNELS==16 && !UI_LIVE16_LOCALIZATION?1u:5u);b->write(b->ctx,0,3u);b->write(b->ctx,0,0);
+    b->write(b->ctx,0x380,UI_DAS_ACTIVE_CHANNELS==9?61u:UI_DAS_ACTIVE_CHANNELS==16 && !UI_LIVE16_LOCALIZATION?1u:5u);b->write(b->ctx,0,3u);b->write(b->ctx,0,0);
 }
 static inline void pl_live_stop(const das_bus *b)
 { b->write(b->ctx,0x380,4u);b->write(b->ctx,0,2u); }

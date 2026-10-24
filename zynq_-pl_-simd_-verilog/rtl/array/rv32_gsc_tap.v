@@ -1,6 +1,6 @@
 // Future PS-GSC boundary. Complete synchronous PCM is retained, with a bounded
 // independent packet queue. Sink backpressure never reaches PCM or localization.
-module rv32_gsc_tap # (parameter DEPTH=4)(
+module rv32_gsc_tap # (parameter DEPTH=4, parameter ACTIVE_CHANNELS=12)(
  input clk_i,rst_n_i,raw_valid_i,input[191:0]raw_pcm_i,input[31:0]raw_seq_i,
  input beam_valid_i,input[31:0]beam_seq_i,input[15:0]beam_i,fir_i,
  input[31:0]direction_version_i,effective_seq_i,window_id_i,group_delay_q16_i,recovery_epoch_i,
@@ -24,9 +24,11 @@ module rv32_gsc_tap # (parameter DEPTH=4)(
  end
  always @(posedge clk_i)begin
   if(push)time_mem[wp]<=raw_time_q;
-  if(push)mem[wp]<={overflow_o,recovery_epoch_i,raw_hold,{fir_i,beam_i},
+  if(push)mem[wp]<={overflow_o,recovery_epoch_i,
+   (ACTIVE_CHANNELS==9?{32'h000a0009,16'b0,raw_hold[143:0]}:raw_hold),{fir_i,beam_i},
    {14'b0,direction_id_i,6'b0,transition_i,trusted_i},group_delay_q16_i,
-   window_id_i,effective_seq_i,direction_version_i,beam_seq_i,32'h47534301};
+   window_id_i,effective_seq_i,direction_version_i,beam_seq_i,
+   (ACTIVE_CHANNELS==9?32'h47534302:32'h47534301)};
  end
  always @(posedge clk_i or negedge rst_n_i)begin
   if(!rst_n_i)begin wp<=0;rp<=0;count<=0;raw_hold<=0;raw_seq<=0;pending<=0;overflow_o<=0;alignment_errors_o<=0;end

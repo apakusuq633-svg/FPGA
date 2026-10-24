@@ -49,7 +49,10 @@
 // Supported configurations: 4/8/16 lanes; cache addressing follows the lane count.
 // Sixteen readers can dissolve input LUTRAM; compare routed resources before use.
 module rv32_acoustic_ext #(
-  parameter integer LANES = 8
+  parameter integer LANES = 8,
+  parameter integer CN = 208,
+  parameter integer BAND_LO = 0,
+  parameter integer BAND_HI = 203
 ) (
   input                clk_i,
   input                rst_n_i,
@@ -78,7 +81,6 @@ module rv32_acoustic_ext #(
   //
   // ⚠ 这个「6」和 fw_gcc.c 的 BAND_LO_BIN、fw_acou_model.py 的 BAND_LO 是
   //   同一个常量，改一处必须四处一起改（对照 docs/issues/019）。
-  localparam integer CN    = 208;                 // 只放带内：208 条（204 条有效）
   localparam integer CW    = 32;
   localparam integer NW    = LANES;
   localparam integer NPASS = CN / NW;             // 26 趟
@@ -88,8 +90,6 @@ module rv32_acoustic_ext #(
   localparam [PW-1:0] LAST_PASS = NPASS - 1;
 
   // 存储内序号下的带内上下界：原 bin 6..209 → 存储 0..203
-  parameter integer BAND_LO = 0;
-  parameter integer BAND_HI = 203;
 
   localparam [1:0] ST_IDLE = 2'd0, ST_RUN = 2'd1, ST_DRAIN = 2'd2, ST_DONE = 2'd3;
 

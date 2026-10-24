@@ -7,11 +7,15 @@
 #include <stdexcept>
 #include <string>
 #include <vector>
+double sc_time_stamp(){return 0.0;}
 static void need(bool b,const std::string&s){if(!b)throw std::runtime_error(s);}
 static uint32_t crc(const uint8_t*p,size_t n){uint32_t c=~0u;for(size_t i=0;i<n;i++){c^=p[i];for(int b=0;b<8;b++)c=(c>>1)^((0u-(c&1))&0xedb88320u);}return ~c;}
 static uint32_t word(const uint8_t*p){return uint32_t(p[0])|uint32_t(p[1])<<8|uint32_t(p[2])<<16|uint32_t(p[3])<<24;}
+#ifndef TEST_CHANNELS
+#define TEST_CHANNELS 12
+#endif
 static uint32_t source_word(uint32_t seq,unsigned i){
- if(i==0)return 0x47534301;if(i==1)return seq;
+ if(i==0)return TEST_CHANNELS==9?0x47534302:0x47534301;if(i==1)return seq;
  return (seq*0x9e3779b9u)^(i*0x10203041u)^0x73b19e25u;
 }
 struct Model {
@@ -107,7 +111,7 @@ struct Model {
    for(unsigned i=0;i<16;i++)need(word(slot.data()+4*i)==source_word(seq,i),"DDR_PAYLOAD_CORRUPTION");
    uint64_t stamp=word(slot.data()+64)|(uint64_t(word(slot.data()+68))<<32);
    need(stamp==uint64_t(seq)*1024+17,"TIMESTAMP_PAIRING");
-   need(word(slot.data()+80)==0x394d4450&&word(slot.data()+84)==128&&word(slot.data()+88)==calibration&&word(slot.data()+92)==0x0010000c,"FORMAT");
+   need(word(slot.data()+80)==0x394d4450&&word(slot.data()+84)==128&&word(slot.data()+88)==calibration&&word(slot.data()+92)==(0x00100000|TEST_CHANNELS),"FORMAT");
    for(unsigned i=96;i<120;i++)need(slot[i]==0,"RESERVED_DATA");
    if(!samples.empty())need(seq>samples.back(),"DUPLICATE_OR_REORDERED_SAMPLE");
    samples.push_back(seq);received++;consumer++;

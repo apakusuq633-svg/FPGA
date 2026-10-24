@@ -5,13 +5,13 @@ if {!$stream_dma_enabled} {
     connect_bd_net [get_bd_pins gsc_sink_ready/dout] [get_bd_pins u_rv32_ps/gsc_ready_i]
     puts "STREAM_DMA_DISABLED"
 } else {
-    if {$::env(DAS_ACTIVE_CHANNELS)!=12} {error "Legacy 12-channel stream/GSC ABI is not supported by the planar8 production profile"}
+    if {$::env(DAS_ACTIVE_CHANNELS) ni {9 12}} {error "Stream/GSC ABI requires circular9 v2 or legacy12 v1"}
     create_bd_cell -type module -reference rv32_stream_dma u_stream_dma
-    foreach bus {s_axi m_axi} {
+    set_property CONFIG.ACTIVE_CHANNELS $::env(DAS_ACTIVE_CHANNELS) [get_bd_cells u_stream_dma]
+    foreach bus {s_axi} {
         set_property CONFIG.FREQ_HZ 40000000 [get_bd_intf_pins u_stream_dma/$bus]
     }
     connect_bd_net [get_bd_pins u_ps7/FCLK_CLK0] [get_bd_pins u_stream_dma/clk_i] [get_bd_pins u_ps7/S_AXI_HP0_ACLK]
-    connect_bd_net [get_bd_pins u_ps7/FCLK_RESET0_N] [get_bd_pins u_stream_dma/rst_n_i]
     connect_bd_net [get_bd_pins u_rv32_ps/gsc_valid_o] [get_bd_pins u_stream_dma/stream_valid_i]
     connect_bd_net [get_bd_pins u_rv32_ps/gsc_data_o] [get_bd_pins u_stream_dma/stream_data_i]
     connect_bd_net [get_bd_pins u_rv32_ps/gsc_timestamp_o] [get_bd_pins u_stream_dma/stream_timestamp_i]
@@ -22,6 +22,7 @@ if {!$stream_dma_enabled} {
     connect_bd_net [get_bd_pins u_ps7/FCLK_CLK0] [get_bd_pins u_ps7_axi_periph/M01_ACLK]
     set reset_net [get_bd_nets -of_objects [get_bd_pins u_ps7_axi_periph/M00_ARESETN]]
     connect_bd_net -net $reset_net [get_bd_pins u_ps7_axi_periph/M01_ARESETN]
+    connect_bd_net -net $reset_net [get_bd_pins u_stream_dma/rst_n_i]
     apply_bd_automation -rule xilinx.com:bd_rule:axi4 -config {
         Clk_master {Auto} Clk_slave {Auto} Clk_xbar {Auto}
         Master "/u_stream_dma/m_axi" Slave "/u_ps7/S_AXI_HP0"

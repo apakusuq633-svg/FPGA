@@ -4,6 +4,10 @@ module rv32_core #(
   parameter RESET_PC = 32'h0000_0000,
   parameter AUDIO_STREAM = 0,
   parameter ACOU_LANES = 8,
+  parameter ACOU_CACHE_N = 208,
+  parameter ACOU_BAND_HI = 203,
+  parameter FFT_SPARSE_LO = 0,
+  parameter FFT_SPARSE_COUNT = 513,
   parameter LOCAL_TRANSFER = 0
 ) (
   input         clk_i,
@@ -825,7 +829,7 @@ module rv32_core #(
     ((transfer_request_i==3&&retire_instr_o[14:12]==6)||(transfer_request_i==4&&retire_instr_o[14:12]==5));
   assign transfer_ac_result_o=ac_hw_result;
 
-  rv32_acoustic_ext #(.LANES(ACOU_LANES)) u_acoustic_ext (
+  rv32_acoustic_ext #(.LANES(ACOU_LANES),.CN(ACOU_CACHE_N),.BAND_HI(ACOU_BAND_HI)) u_acoustic_ext (
     .clk_i     (clk_i),
     .rst_n_i   (rst_n_i),
     .start_i   (take_ac?1'b1:acou_start&&ac_allowed),
@@ -845,13 +849,14 @@ module rv32_core #(
     .result_o  (ac_hw_result),.io_ready_o(ac_hw_ready)
   );
 
-  rv32_fft_bfly u_fft_bfly (
+  rv32_fft_bfly #(.INV_BAND_LO(FFT_SPARSE_LO),.INV_BAND_COUNT(FFT_SPARSE_COUNT)) u_fft_bfly (
     .clk_i    (clk_i),
     .rst_n_i  (rst_n_i),
     .start_i  (take_fft?1'b1:fft_start&&fft_allowed),
     .keep_i   (take_fft?1'b1:idex_valid),
     .commit_i (take_fft?1'b1:fft_commit),
     .inv_i    (take_fft?transfer_fft_inv_i:idex_fft_inv),
+      .sparse_inv_i(transfer_enabled),
     .is_io_i  (take_fft?1'b1:idex_fft_op & idex_fft_io),
     .io_sel_i (take_fft?transfer_fft_pop_i:idex_fft_pop),
     .io_seek_i(take_fft?transfer_fft_seek_i:idex_instr[27]),
