@@ -2,7 +2,16 @@
 #include <stdint.h>
 #include "xil_io.h"
 #include "xil_printf.h"
+#ifndef LIVE_ACTIVE_CHANNELS
+#define LIVE_ACTIVE_CHANNELS 8
+#endif
+#if LIVE_ACTIVE_CHANNELS == 9
+#include "acoustic_circular9_image.h"
+#elif LIVE_ACTIVE_CHANNELS == 8
 #include "acoustic_planar8_image.h"
+#else
+#error Unsupported live profile
+#endif
 
 #ifndef RV32_BASE
 #define RV32_BASE 0x43C00000u
@@ -36,7 +45,7 @@ static int fail(unsigned stage)
 int main(void)
 {
     xil_printf("LIVE_DAS_START samples=%u SHA256=%s\r\n",(unsigned)LIVE_SAMPLES,ACOUSTIC_ITCM_SHA256);
-    if(rd(0x3c0u)!=8u) return fail(6);
+    if(rd(0x3c0u)!=LIVE_ACTIVE_CHANNELS) return fail(6);
     wr(0,18u);
     for(unsigned n=0;n<100000u && !(rd(4)&4u);++n) {}
     if(!(rd(4)&4u)) return fail(1);

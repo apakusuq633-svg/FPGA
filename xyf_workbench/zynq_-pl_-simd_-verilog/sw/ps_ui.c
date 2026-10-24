@@ -51,6 +51,9 @@
 #if UI_DAS_LIVE
 #include "ps_das_fifo.h"
 #include "ps_pl_live.h"
+#if UI_DAS_ACTIVE_CHANNELS == 9
+#include "ps_circular9_live.h"
+#endif
 static das_fifo_receiver fifo_receiver;
 static uint32_t live_start_tick,live_ready;
 static raw_capture_receiver raw_receiver;
@@ -128,7 +131,7 @@ void tcp_slowtmr(void);
 #define HTTP_MAX_CONN   4
 #define HTTP_REQ_MAX    512
 /* 头的余量 + body 上限。body 的上限由 ps_ui_page.h 定（UI_BODY_MAX），这里只留头的位置。 */
-#define HTTP_RESP_MAX   (RAW_FILE_MAX + 256)
+#define HTTP_RESP_MAX   ((RAW_FILE_MAX>UI_BODY_MAX?RAW_FILE_MAX:UI_BODY_MAX) + 256)
 
 typedef struct {
     struct tcp_pcb *pcb;
@@ -154,7 +157,12 @@ static struct ui_status g_status;
  *   一更新就会出现"每来一次 HTTP 请求都把基准重置到现在"，页面上年龄永远停在 0，
  *   而帧其实早就断了 —— 这类错在页面上看不出来。 */
 static uint32_t        g_frame_tick;
-static uint64_t g_location_tick;
+#if UI_DAS_LIVE && (UI_DAS_ACTIVE_CHANNELS == 4 || UI_DAS_ACTIVE_CHANNELS >= 8)
+static uint32_t g_location_tick;
+#endif
+#if UI_DAS_LIVE && UI_DAS_ACTIVE_CHANNELS == 9
+static uint32_t g_location_poll_tick;
+#endif
 static unsigned        g_frame;         /* 第几帧，从 1 起 */
 static uint32_t        g_last_seq;      /* ipc_consume 的游标：上一次已经看过的页序号。
                                          * 由本核持有、只增不改 —— ipc_consume 自己无状态，
@@ -192,6 +200,7 @@ static int due_ms(u32_t *mark, u32_t period)
 
 /* 空转 ms 毫秒。只在**启动那一次**等待里用（等 CPU1 出第一帧），不在主循环里 ——
  * 主循环里空转就等于把网口停了，那正是这次拆核要消掉的东西。 */
+#if !UI_DAS_LIVE || UI_DAS_ACTIVE_CHANNELS != 9
 static void wait_ms(unsigned ms)
 {
     u32_t t0 = gtimer_lo();
@@ -201,6 +210,7 @@ static void wait_ms(unsigned ms)
         /* spin */
     }
 }
+#endif
 
 /* ==========================================================================================
  * A9#1 那一半：站 11 -> 12 -> 13，以及把 CPU1 放出去的那几行
@@ -380,6 +390,9 @@ static void init_audio(void)
         das_bus bus=das_axi_bus(RV32_BASE);
         das_fifo_init(&fifo_receiver);
         audio_error=pl_live_prepare(&bus);
+#if UI_DAS_ACTIVE_CHANNELS == 9
+        if(!audio_error)audio_error=c9_live_init();
+#endif
         live_ready=0;
     }
 #endif
@@ -407,11 +420,42 @@ static void init_audio(void)
 #endif
 }
 
-/* Bounded work on CPU0: at most one block per network-loop iteration. */
+/* Exactly one owner receives location publications, including HTTP requests.
+ * Re-reading a retained result must not create another latency observation. */
+static void poll_location(void)
+{
+#if UI_DAS_LIVE && UI_DAS_ACTIVE_CHANNELS == 9
+    uint32_t now=dia_gtimer_now();
+    if((uint32_t)(now-g_location_poll_tick)<
+       (uint64_t)XPAR_CPU_CORTEXA9_0_CPU_CLK_FREQ_HZ*C9_LOCATION_POLL_US/2000000u)return;
+    if(g_location_poll_tick) {
+        uint32_t gap=c9_ticks_to_us(now-g_location_poll_tick);
+        if(gap>c9_location_poll_gap_max_us)c9_location_poll_gap_max_us=gap;
+        if(gap>200u)c9_location_poll_overruns++;
+    }
+    g_location_poll_tick=now;
+    das_bus b=das_axi_bus(RV32_BASE);
+    uint32_t sequence=mic_read_word(&b,90);
+    if(sequence && !(sequence&1u) && (!c9_location.have||sequence!=c9_location.sequence)){
+        mic_levels candidate=g_status.mics;
+        mic_location_poll(&b,&candidate);
+        uint32_t first=mic_read_word(&b,239),end=mic_read_word(&b,90);
+        uint32_t receipt=b.read(b.ctx,0x3e0);
+        if(end==sequence&&candidate.loc_seq==sequence&&
+           c9_deadline_receive(&c9_location,sequence,candidate.loc_frame,first,receipt,candidate.loc_valid)>0){
+            g_status.mics=candidate;g_location_tick=dia_gtimer_now();
+        }
+    }
+    if(c9_deadline_stale(&c9_location,b.read(b.ctx,0x3e0))){
+        g_status.mics.loc_valid=0;g_status.mics.loc_reason|=64u;
+    }
+#endif
+}
 static void poll_audio(void)
 {
     int rc;
     if(audio_error) return;
+    poll_location();
 #if UI_DAS_LIVE
     das_bus bus=das_axi_bus(RV32_BASE);
     uint32_t mailbox=bus.read(bus.ctx,0x34);
@@ -420,7 +464,12 @@ static void poll_audio(void)
        (!live_ready && (uint32_t)(dia_gtimer_now()-live_start_tick)>1666666665u)) {
         audio_error=-5;pl_live_stop(&bus);das_queue_break(&audio_shared.q);return;
     }
+#if UI_DAS_ACTIVE_CHANNELS == 9
+    rc=c9_live_poll(&received_audio,&pl_dropped);
+    poll_location();
+#else
     rc=das_fifo_poll(&bus,&fifo_receiver,&received_audio,&pl_dropped);
+#endif
     if(rc==DAS_EMPTY)return;
     if(rc!=DAS_OK){audio_error=rc;pl_live_stop(&bus);das_queue_break(&audio_shared.q);return;}
 #else
@@ -445,6 +494,16 @@ static void poll_audio(void)
     rc=das_queue_push(&audio_shared.q,&received_audio);
     if(rc==DAS_BAD_BLOCK) { /* invalid startup data resets accumulation, not the whole service */ }
 }
+
+#if UI_DAS_LIVE && UI_DAS_ACTIVE_CHANNELS == 9
+/* Safe inside HTTP callbacks: services MMIO/audio only, never re-enters lwIP.
+ * Avoid doing a whole audio slice after every tiny heatmap chunk. */
+static void c9_realtime_checkpoint(void)
+{
+    if(c9_ticks_to_us(dia_gtimer_now()-c9_last_poll)>=75u)poll_audio();
+    else poll_location();
+}
+#endif
 
 /* 放 CPU1 出去。三步的次序不能换：
  *   1. 先把共享页所在的 1 MB 段改成非缓存 —— CPU1 一起来就写它，改晚一步两边就可能
@@ -567,14 +626,70 @@ static u16_t build_response(http_conn *c)
     g_status.discontinuities=audio_shared.q.discontinuities;
     g_status.computing=ipc_busy((volatile struct ipc_page *)IPC_BASE);
 #if UI_DAS_LIVE && (UI_DAS_ACTIVE_CHANNELS == 4 || UI_DAS_ACTIVE_CHANNELS >= 8)
-    { das_bus bus=das_axi_bus(RV32_BASE);uint32_t previous=g_status.mics.loc_seq;
+    { das_bus bus=das_axi_bus(RV32_BASE);
       mic_levels_poll(&bus,&g_status.mics);
+#if UI_DAS_ACTIVE_CHANNELS == 9
+      poll_location();
+#else
+      uint32_t previous=g_status.mics.loc_seq;
       mic_location_poll(&bus,&g_status.mics);
       if(previous!=g_status.mics.loc_seq)g_location_tick=dia_gtimer_now();
+#endif
       g_status.mics.loc_age_ms=g_status.mics.loc_seq?dia_ticks_to_ms(dia_gtimer_now()-g_location_tick):0;
     }
 #endif
 #if UI_DAS_LIVE
+#if UI_DAS_ACTIVE_CHANNELS == 9
+    if(strncmp(c->req,"GET /api/target?grid=",sizeof("GET /api/target?grid=")-1)==0) {
+        unsigned grid;char tail;
+        if(sscanf(c->req,"GET /api/target?grid=%u%c",&grid,&tail)==2&&tail==' '&&grid<1024) {
+            das_bus b=das_axi_bus(RV32_BASE);b.write(b.ctx,0x3c,0xd1000000u|grid);
+            snprintf(g_body,sizeof(g_body),"{\"mode\":\"manual\",\"requested_grid\":%u,\"geometry_confirmed\":%u}",grid,ACOUSTIC_GEOMETRY_CONFIRMED);
+            rep=(struct ui_reply){202,"Accepted","application/json",(int)strlen(g_body)};
+        } else {strcpy(g_body,"{\"error\":\"invalid_grid\"}");rep=(struct ui_reply){400,"Bad Request","application/json",(int)strlen(g_body)};}
+    } else if(strncmp(c->req,"GET /api/target/auto ",sizeof("GET /api/target/auto ")-1)==0) {
+        das_bus b=das_axi_bus(RV32_BASE);b.write(b.ctx,0x3c,0xd2000000u);
+        strcpy(g_body,"{\"mode\":\"automatic_localization\"}");rep=(struct ui_reply){202,"Accepted","application/json",(int)strlen(g_body)};
+    } else if(strncmp(c->req,"GET /api/gsc/on ",16)==0||strncmp(c->req,"GET /api/gsc/off ",17)==0||
+       strncmp(c->req,"GET /api/gsc/freeze ",20)==0||strncmp(c->req,"GET /api/gsc/adapt ",19)==0) {
+        if(strncmp(c->req,"GET /api/gsc/on ",16)==0)c9_requested=1;
+        if(strncmp(c->req,"GET /api/gsc/off ",17)==0)c9_requested=0;
+        if(strncmp(c->req,"GET /api/gsc/freeze ",20)==0)c9_freeze=1;
+        if(strncmp(c->req,"GET /api/gsc/adapt ",19)==0)c9_freeze=0;
+        rep=(struct ui_reply){200,"OK","application/json",c9_status(g_body,sizeof(g_body))};
+    } else if(strncmp(c->req,"GET /api/gsc ",13)==0) {
+        rep=(struct ui_reply){200,"OK","application/json",c9_status(g_body,sizeof(g_body))};
+    } else if(strncmp(c->req,"GET /api/heatmap ",17)==0) {
+        das_bus b=das_axi_bus(RV32_BASE);uint32_t seq=mic_read_word(&b,90);
+        uint32_t accepted=mic_read_word(&b,91),reason=mic_read_word(&b,97),frame=mic_read_word(&b,1);
+        uint32_t ptr=mic_read_word(&b,235),first_tick=mic_read_word(&b,239);int32_t values[1024];
+        int valid=seq&&!(seq&1u)&&!(ptr&3u)&&ptr+sizeof(values)<=0x2800;
+        if(valid) {
+            for(unsigned i=0;i<1024;i+=16) {
+                /* Audio/location also use the indirect MMIO address. Restore it
+                 * for every chunk; the enclosing seqlock rejects mixed maps. */
+                b.write(b.ctx,0x80,0x80000000u+ptr/4u+i);
+                for(unsigned k=0;k<16;k++)values[i+k]=(int32_t)b.read(b.ctx,0x88);
+                c9_realtime_checkpoint();
+            }
+            valid=seq==mic_read_word(&b,90);
+        }
+        if(valid) {
+            uint32_t map_age_us=(b.read(b.ctx,0x3e0)-first_tick)/C9_PL_TICKS_PER_US;
+            if(map_age_us>C9_STALE_AFTER_US){accepted=0;reason|=64u;}
+            int n=snprintf(g_body,sizeof(g_body),"{\"sequence\":%u,\"frame\":%u,\"accepted\":%u,\"reason\":%u,\"map_age_us\":%u,\"stale_after_us\":%u,\"width\":32,\"plane_z_m\":0.3,\"half_width_m\":0.2,\"scores\":[",
+                (unsigned)seq,(unsigned)frame,(unsigned)accepted,(unsigned)reason,(unsigned)map_age_us,(unsigned)C9_STALE_AFTER_US);
+            for(unsigned i=0;i<1024;i++) {
+                n=ui_append(g_body,sizeof(g_body),n,"%s%d",i?",":"",(int)values[i]);
+                if((i&15u)==15u)c9_realtime_checkpoint();
+            }
+            n=ui_append(g_body,sizeof(g_body),n,"]}");rep=(struct ui_reply){200,"OK","application/json",n};
+        } else {strcpy(g_body,"{\"state\":\"updating\"}");rep=(struct ui_reply){202,"Accepted","application/json",(int)strlen(g_body)};}
+    } else if(strncmp(c->req,"GET /api/raw/start ",19)==0) {
+        strcpy(g_body,"{\"mode\":\"continuous_udp\",\"port\":1234,\"format\":\"C9C2\"}");
+        rep=(struct ui_reply){200,"OK","application/json",(int)strlen(g_body)};
+    } else
+#endif
     if(strncmp(c->req,"GET /api/raw/start ",19)==0) {
         das_bus bus=das_axi_bus(RV32_BASE);
         int rc=raw_capture_start(&raw_receiver,&bus,dia_ticks_to_ms(dia_gtimer_now()));
@@ -863,7 +978,9 @@ int main(void)
     unsigned char mac[6] = { 0x00, 0x0a, 0x35, 0x00, 0x02, 0x01 };
 
     u32_t t_fast = gtimer_lo(), t_slow = gtimer_lo(), t_rx = gtimer_lo(), t_link = gtimer_lo();
+#if !UI_DAS_LIVE || UI_DAS_ACTIVE_CHANNELS != 9
     int i;
+#endif
 
     xil_printf("\r\n== ps_ui: A9#0 serves the diagnosis, A9#1 runs 11->12->13 ==\r\n");
 
@@ -903,6 +1020,9 @@ int main(void)
         xil_printf("ps_ui: could not listen on port %u\r\n", (unsigned)UI_HTTP_PORT);
         return -1;
     }
+#if UI_DAS_LIVE && UI_DAS_ACTIVE_CHANNELS == 9
+    if(c9_network_start())return -1;
+#endif
 
     /* 到这一步驱动回调、netif、监听口都就位了，才放行全局中断。早了只会让中断落在还没
      * 连上 GIC 的窗口里 —— 那一位没人清，得等下一次事件才补上。 */
@@ -933,6 +1053,7 @@ int main(void)
 
     /* 等 CPU1 出第一帧再进主循环：页面上先有数比先空着好。**有上限** —— 卡在这里什么都不打，
      * 比页面空着难查得多。4000 x 1 ms = 4 s，等待期间持续接收音频。 */
+#if !UI_DAS_LIVE || UI_DAS_ACTIVE_CHANNELS != 9
     for (i = 0; i < 4000 && g_frame == 0u; i++) {
         poll_audio();
         poll_frame();
@@ -946,6 +1067,7 @@ int main(void)
         xil_printf("   no frame from A9#1 yet (busy=%u); the page will say 'waiting'\r\n",
                    (unsigned)ipc_busy((volatile struct ipc_page *)IPC_BASE));
     }
+#endif
 
     for (;;) {
         poll_audio();
@@ -956,34 +1078,51 @@ int main(void)
         /* 收包那一趟在中断里（emacps_recv_handler 由 XEmacPs_IntrHandler 调，见 gic_setup）。
          * 这里只把 recv_q 里已经排好的包交给 lwIP —— 没有中断时它自己什么都收不到。 */
         xemacif_input(&server_netif);
+        poll_audio();
+#if UI_DAS_LIVE && UI_DAS_ACTIVE_CHANNELS == 9
+        c9_network_poll();
+        poll_audio();
+#endif
         { int connection;
-          for (connection = 0; connection < HTTP_MAX_CONN; ++connection)
+          for (connection = 0; connection < HTTP_MAX_CONN; ++connection) {
               http_send_pending(&g_conn[connection]);
+#if UI_DAS_LIVE && UI_DAS_ACTIVE_CHANNELS == 9
+              c9_realtime_checkpoint();
+#endif
+          }
         }
 
         /* TCP 要喂拍子。厂商模板把这两个放 250 ms / 500 ms 的定时里。注意是 due_ms：
          * 判据是"距上次真的做这件事"过了多久，不是这一趟循环跑了多久（差别见 due_ms 的注释）。 */
         if (due_ms(&t_fast, 250u)) {
             tcp_fasttmr();
+            poll_audio();
         }
         if (due_ms(&t_slow, 500u)) {
             tcp_slowtmr();
+            poll_audio();
         }
 
         /* Xilinx SI #692601 的软件规避：重收流量下 RX 路径可能不再响应，这里把它复位。
          * 厂商模板是每 100 ms 一次，照跟。 */
         if (due_ms(&t_rx, 100u)) {
             xemacpsif_resetrx_on_no_rxdata(&server_netif);
+            poll_audio();
         }
 
         /* 重读 PHY，好让页面上能写"网线到底插没插"。厂商模板每秒一次，照跟。 */
         if (due_ms(&t_link, 1000u)) {
             eth_link_detect(&server_netif);
+            poll_audio();
         }
 
         /* 看一眼共享页有没有新帧。这一次调用是几十纳秒、没有就立刻返回 —— 费时的站 11
          * 在另一个核上跑，所以这一行放在哪里都不影响网口。 */
         poll_audio();
         poll_frame();
+#if UI_DAS_LIVE && UI_DAS_ACTIVE_CHANNELS == 9
+        c9_network_poll();
+        poll_location();
+#endif
     }
 }

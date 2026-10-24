@@ -53,7 +53,7 @@ module rv32_srp_regs #(
   parameter integer ADDR_W = 15,
   parameter integer GRID_IDX_W = $clog2(N_GRID),
   parameter integer DW     = 16,
-  parameter integer FAST_SCAN = 0,
+  parameter integer FAST_SCAN = 0, // 4 selects four parallel pair banks.
   parameter integer LOCAL_TRANSFER = 0
 ) (
   input               clk_i,
@@ -78,6 +78,10 @@ module rv32_srp_regs #(
 );
 
   localparam integer LUT_W = IDX_W + FRAC_W;
+  // 9-microphone DECIM=16 profile: R_LEN=64, IDX_W=6, FRAC_W=4.
+  // LUT writes remain ordinary 32-bit MMIO words; the low ten bits carry Q4
+  // ring delays. R and LUT addresses keep their existing ADDR_W-bit ports.
+  // Legacy R_LEN=32 / IDX_W=5 profiles and register offsets are unchanged.
   // 三条数组各自的长度（自增回绕用），**LUT 与 R 不是同一个数**。
   localparam integer NELEM = N_PAIR * N_GRID;    // LUT 条数
   localparam integer RELEM = N_PAIR * R_LEN;     // R 条数

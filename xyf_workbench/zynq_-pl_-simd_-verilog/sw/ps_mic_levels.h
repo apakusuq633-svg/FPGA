@@ -21,9 +21,9 @@ static inline uint32_t mic_read_word(const das_bus *b,unsigned word)
 static inline void mic_location_poll(const das_bus *b,mic_levels *out)
 {
     uint32_t profile=mic_read_word(b,0);
-    unsigned sequence_word=(profile==0xda508002u || profile==0xda516002u || profile==0xda512002u)?90u:30u;
+    unsigned sequence_word=(profile==0xda508002u || profile==0xda509002u || profile==0xda516002u || profile==0xda512002u)?90u:30u;
     out->loc_enabled=profile!=0xda508001u && profile!=0xda516001u && profile!=0xda512001u;
-    out->loc_grid_w=(profile==0xda508002u || profile==0xda516002u || profile==0xda512002u || profile==0xda512001u)?32u:16u;
+    out->loc_grid_w=(profile==0xda508002u || profile==0xda509002u || profile==0xda516002u || profile==0xda512002u || profile==0xda512001u)?32u:16u;
     if(!out->loc_enabled){out->loc_valid=0;out->loc_quality_supported=0;return;}
     uint32_t seq=mic_read_word(b,sequence_word),grid,frame,valid;
     int32_t best,second;
@@ -32,9 +32,9 @@ static inline void mic_location_poll(const das_bus *b,mic_levels *out)
     best=(int32_t)mic_read_word(b,6);second=(int32_t)mic_read_word(b,7);
     valid=mic_read_word(b,sequence_word+1);
     uint32_t compute=mic_read_word(b,4),total=mic_read_word(b,5),error=mic_read_word(b,3);
-    uint32_t first=(profile==0xda508002u || profile==0xda516002u || profile==0xda512002u)?mic_read_word(b,93):0;
-    uint32_t steer=(profile==0xda508002u || profile==0xda516002u || profile==0xda512002u)?mic_read_word(b,94):0;
-    unsigned meta=(profile==0xda508002u || profile==0xda516002u || profile==0xda512002u)?96u:1080u;
+    uint32_t first=(profile==0xda508002u || profile==0xda509002u || profile==0xda516002u || profile==0xda512002u)?mic_read_word(b,93):0;
+    uint32_t steer=(profile==0xda508002u || profile==0xda509002u || profile==0xda516002u || profile==0xda512002u)?mic_read_word(b,94):0;
+    unsigned meta=(profile==0xda508002u || profile==0xda509002u || profile==0xda516002u || profile==0xda512002u)?96u:1080u;
     uint32_t quality[8]={0};
     quality[0]=mic_read_word(b,meta);
     if(quality[0]==0x4c515431u)for(unsigned k=1;k<8;k++)quality[k]=mic_read_word(b,meta+k);
@@ -55,12 +55,12 @@ static inline void mic_levels_poll(const das_bus *b,mic_levels *out)
 {
     uint32_t data[80],seq,end;unsigned i;
     uint32_t profile=mic_read_word(b,0);
-    unsigned channels=(profile==0xda508001u || profile==0xda508002u)?8u:
+    unsigned channels=profile==0xda509002u?9u:(profile==0xda508001u || profile==0xda508002u)?8u:
         (profile==0xda512001u || profile==0xda512002u)?12u:
         (profile==0xDA516001u || profile==0xDA516002u)?16u:4u;
     unsigned sequence_word=channels>=8?88:28,magic_word=sequence_word+1;
     out->frozen=b->read(b->ctx,0x330);
-    if(mic_read_word(b,magic_word)!=(channels==8?0x4d493038u:channels==12?0x4d493132u:channels==16?0x4d493136u:0x4d494335u))return;
+    if(mic_read_word(b,magic_word)!=(channels==9?0x4d493039u:channels==8?0x4d493038u:channels==12?0x4d493132u:channels==16?0x4d493136u:0x4d494335u))return;
     seq=mic_read_word(b,sequence_word);if(!seq || (seq&1u))return;
     b->write(b->ctx,0x80,0x80000a08u);
     for(i=0;i<channels*5;i++)data[i]=b->read(b->ctx,0x88);

@@ -50,7 +50,7 @@ struct ui_status {
     unsigned age_ms;         /* 结果距现在多少毫秒 */
 };
 
-#define UI_BODY_MAX   20480   /* 页面与 JSON 的上限；超了报 500，不截断服务 */
+#define UI_BODY_MAX   32768   /* 页面与 JSON 的上限；超了报 500，不截断服务 */
 
 /* HTTP 应答的三个组成部分。body 已经写进调用方的缓冲区，这里只报状态与长度。 */
 struct ui_reply {
@@ -128,6 +128,67 @@ static const char UI_PAGE_HTML[] =
 "}\n"
 "var fetching=false;async function poll(){if(paused||fetching)return;fetching=true;try{var r=await fetch('/api/status',{cache:'no-store'});if(!r.ok)throw Error('HTTP '+r.status);var s=await r.json();latest=s;if(!paused){render(s);renderLocation(s);}el('err').textContent=''}catch(e){el('state').textContent='\\u8fde\\u63a5\\u5f02\\u5e38\\uff0c\\u4fdd\\u7559\\u4e0a\\u6b21\\u7ed3\\u679c';el('err').textContent=String(e)}finally{fetching=false}}\n"
 "el('pause').onclick=function(){paused=!paused;this.textContent=paused?'\\u7ee7\\u7eed\\u663e\\u793a':'\\u6682\\u505c\\u663e\\u793a';if(paused)el('state').textContent='\\u663e\\u793a\\u5df2\\u6682\\u505c\\uff08\\u91c7\\u96c6\\u7ee7\\u7eed\\uff09';else poll()};el('save').onclick=function(){if(!latest){el('err').textContent='\\u6682\\u65e0\\u53ef\\u4fdd\\u5b58\\u7684\\u5feb\\u7167';return}var blob=new Blob([JSON.stringify({saved_at:new Date().toISOString(),status:latest},null,2)],{type:'application/json'}),url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download='acoustic-snapshot.json';a.click();setTimeout(function(){URL.revokeObjectURL(url)},1000)};poll();setInterval(poll,100);\n"
+"var c9busy = false;\n"
+"async function c9view() {\n"
+"  if (paused || c9busy || !latest || latest.input_channels !== 9) return;\n"
+"  c9busy = true;\n"
+"  try {\n"
+"    if (!el('c9map')) {\n"
+"      var box = document.createElement('section');\n"
+"      box.innerHTML = '<h3>9 \\u9ea6\\u58f0\\u6e90\\u70ed\\u529b\\u56fe</h3><canvas id=\"c9map\" width=\"320\" height=\"320\"></canvas><p id=\"c9note\"></p><p id=\"c9gsc\"></p><button id=\"c9on\">\\u542f\\u7528\\u81ea\\u9002\\u5e94\\u62fe\\u97f3</button> <button id=\"c9off\">\\u539f\\u59cb\\u5b9a\\u5411\\u62fe\\u97f3</button> <button id=\"c9freeze\">\\u51bb\\u7ed3\\u66f4\\u65b0</button> <button id=\"c9adapt\">\\u7ee7\\u7eed\\u66f4\\u65b0</button>';\n"
+"      document.querySelector('main').appendChild(box);\n"
+"      var timing = document.createElement('p');timing.id='c9latency';box.appendChild(timing);\n"
+"      var autoButton=document.createElement('button');autoButton.textContent='\\u6062\\u590d\\u81ea\\u52a8\\u5b9a\\u4f4d\\u8ddf\\u8e2a';\n"
+"      autoButton.onclick=function(){fetch('/api/target/auto',{cache:'no-store'});};box.appendChild(autoButton);\n"
+"      el('c9map').onclick=async function(e){\n"
+"        var r=this.getBoundingClientRect(),x=Math.floor((e.clientX-r.left)*32/r.width),y=31-Math.floor((e.clientY-r.top)*32/r.height);\n"
+"        if(x<0||x>31||y<0||y>31)return;\n"
+"        try{var q=await fetch('/api/target?grid='+(y*32+x),{cache:'no-store'});if(!q.ok)throw Error('\\u76ee\\u6807\\u9009\\u62e9\\u5931\\u8d25');\n"
+"          el('c9gsc').textContent='\\u5df2\\u7533\\u8bf7\\u624b\\u52a8\\u5b9a\\u5411\\u62fe\\u97f3\\uff0c\\u4ecd\\u9700\\u901a\\u8fc7\\u51e0\\u4f55\\u548c\\u8f93\\u5165\\u8d28\\u91cf\\u68c0\\u67e5\\u3002';\n"
+"        }catch(err){el('c9gsc').textContent=String(err);}\n"
+"      };\n"
+"      ['on', 'off', 'freeze', 'adapt'].forEach(function(k) {\n"
+"        el('c9' + k).onclick = function() {\n"
+"          fetch('/api/gsc/' + k, {cache: 'no-store'}).catch(function(e) { el('c9gsc').textContent = String(e); });\n"
+"        };\n"
+"      });\n"
+"    }\n"
+"    var r = await fetch('/api/heatmap', {cache: 'no-store'});\n"
+"    if (r.status === 200) {\n"
+"      var m = await r.json(), v = m.scores;\n"
+"      if (v && v.length === 1024) {\n"
+"        var lo = Math.min.apply(null, v), hi = Math.max.apply(null, v), g = el('c9map').getContext('2d');\n"
+"        for (var i = 0; i < 1024; i++) {\n"
+"          var t = hi > lo ? (v[i] - lo) / (hi - lo) : 0;\n"
+"          g.fillStyle = 'hsl(' + (240 - 240 * t) + ',85%,45%)';\n"
+"          g.fillRect(i % 32 * 10, (31 - Math.floor(i / 32)) * 10, 10, 10);\n"
+"        }\n"
+"        el('c9note').textContent = (m.accepted ? '\\u5df2\\u901a\\u8fc7\\u5b9a\\u4f4d\\u5224\\u5b9a' : '\\u5019\\u9009\\u58f0\\u6e90\\u56fe\\uff0c\\u5c1a\\u672a\\u901a\\u8fc7\\u5b9a\\u4f4d\\u5224\\u5b9a') +\n"
+"          '\\uff1b\\u5e73\\u9762\\u8ddd\\u79bb ' + m.plane_z_m + ' m\\uff1b\\u6bcf\\u8f74\\u8303\\u56f4 \\u00b1' + m.half_width_m + ' m\\uff1b\\u5e27 ' + m.frame;\n"
+"      }\n"
+"    }\n"
+"    var q = await fetch('/api/gsc', {cache: 'no-store'});\n"
+"    if (q.ok) {\n"
+"      var z = await q.json();\n"
+"      el('c9latency').textContent = '\\u9996\\u4e2a PCM \\u2192 PS \\u9996\\u6b21\\u6536\\u5230\\u7ed3\\u679c\\uff1a\\u76ee\\u6807 ' +\n"
+"        (z.single_window_deadline_us / 1000).toFixed(2) + ' ms\\uff1b' +\n"
+"        (z.latency_samples ? '\\u672c\\u6b21 ' + (z.pcm_to_ps_us / 1000).toFixed(3) +\n"
+"          ' ms\\uff0c\\u6700\\u5927 ' + (z.pcm_to_ps_max_us / 1000).toFixed(3) +\n"
+"          ' ms\\uff0cP95/P99 \\u4e0a\\u754c ' + (z.pcm_to_ps_p95_upper_us / 1000).toFixed(3) +\n"
+"          '/' + (z.pcm_to_ps_p99_upper_us / 1000).toFixed(3) +\n"
+"          ' ms\\uff1b\\u8d85\\u65f6 ' + z.deadline_misses + '/' + z.latency_samples +\n"
+"          ' \\u5e27\\uff1b\\u672a\\u8bfb\\u5230\\u7684\\u53d1\\u5e03 ' + z.skipped_publications : '\\u7b49\\u5f85\\u9996\\u6b21\\u7ed3\\u679c') +\n"
+"        '\\u3002' + (z.location_stale ? '\\u5f53\\u524d\\u7ed3\\u679c\\u5df2\\u8fc7\\u671f\\u3002' : '') +\n"
+"        ' \\u6574\\u94fe\\u8def\\u5b9e\\u7269\\u9a8c\\u6536\\uff1a' + (z.board_validated ? '\\u5df2\\u5b8c\\u6210' : '\\u672a\\u5b8c\\u6210');\n"
+"      el('c9gsc').textContent = (!z.geometry_confirmed || !z.calibration_version ?\n"
+"        '\\u9635\\u5217\\u51e0\\u4f55\\u6216\\u6807\\u5b9a\\u5f85\\u9a8c\\u6536\\uff0c\\u81ea\\u9002\\u5e94\\u8f93\\u51fa\\u65c1\\u8def\\u3002' : '\\u81ea\\u9002\\u5e94\\u62fe\\u97f3\\u72b6\\u6001 ' + z.gsc_reason + '\\u3002') +\n"
+"        ' \\u8fde\\u7eed\\u5f55\\u97f3\\uff1aUDP 1234\\uff1b\\u5df2\\u53d1\\u9001 ' + z.udp_sent + ' \\u5305\\uff1b\\u91c7\\u96c6\\u4e22\\u6837 ' + z.dma_drops;\n"
+"    }\n"
+"  } catch (e) {\n"
+"    if (el('c9note')) el('c9note').textContent = '\\u70ed\\u529b\\u56fe\\u8bfb\\u53d6\\u5931\\u8d25\\uff1a' + String(e);\n"
+"  } finally { c9busy = false; }\n"
+"}\n"
+"setInterval(c9view, 100);\n"
 "</script></main></body></html>\n";
 
 /* 追加式格式化：放不下就返回 -1（而不是截断后照样发出去）。 */
@@ -239,7 +300,7 @@ static inline int ui_json(char *dst, int cap, const struct ui_status *s)
                     "{\"have\":1,\"synthetic\":%d,\"frame\":%u,\"age_ms\":%u,"
                     "\"cls\":\"%s\",\"conf\":%d,\"votes\":[",
                     s->synthetic ? 1 : 0, s->frame, s->age_ms,
-                    (s->r.cls >= 1 && s->r.cls <= CLF_N_CLASS) ? clf_class_names[s->r.cls - 1] : "?",
+                    (s->r.cls >= 1 && s->r.cls <= CLF_N_CLASS) ? clf_class_names[s->r.cls - 1] : "unverified_model",
                     s->r.conf_pct);
     if (off < 0) {
         return -1;

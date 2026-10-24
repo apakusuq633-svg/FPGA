@@ -267,7 +267,7 @@ def main():
         run([compiler,'-std=c11','-O2','-Wall','-Wextra','-Werror','-Isw',*defines,
              'sw/ps_das_fifo_test.c','-o',str(executable)])
         run([str(executable)])
-    for source in ('ps_display_test','ps_mic_levels_test','ps_http_tx_test','ps_location_scale_test','fw_location_quality_test'):
+    for source in ('ps_display_test','ps_mic_levels_test','ps_http_tx_test','ps_location_scale_test','fw_location_quality_test','circular9_deadline_test'):
         executable=ROOT/'build'/(source+('.exe' if os.name=='nt' else ''))
         run([compiler,'-std=c11','-O2','-Wall','-Wextra','-Werror','-Wno-unused-function','-Isw/cstub','-Isw',
              'sw/'+source+'.c','-o',str(executable),'-lm'])

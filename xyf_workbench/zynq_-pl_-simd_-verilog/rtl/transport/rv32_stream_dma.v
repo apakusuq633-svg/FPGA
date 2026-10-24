@@ -1,6 +1,6 @@
 // Independent nonblocking tap -> 128-byte DDR ownership ring, one AXI burst/slot.
 // Timeout quarantines a transaction but never withdraws AXI VALID or abandons it.
-module rv32_stream_dma #(parameter FIFO_DEPTH=4)(
+module rv32_stream_dma #(parameter FIFO_DEPTH=4, parameter ACTIVE_CHANNELS=12)(
  (* X_INTERFACE_PARAMETER="ASSOCIATED_BUSIF s_axi:m_axi, ASSOCIATED_RESET rst_n_i, FREQ_HZ 40000000", X_INTERFACE_INFO="xilinx.com:signal:clock:1.0 clk_i CLK" *) input clk_i,
  (* X_INTERFACE_PARAMETER="POLARITY ACTIVE_LOW", X_INTERFACE_INFO="xilinx.com:signal:reset:1.0 rst_n_i RST" *) input rst_n_i,
  input stream_valid_i,output stream_ready_o,input[511:0]stream_data_i,input[63:0]stream_timestamp_i,
@@ -70,7 +70,7 @@ module rv32_stream_dma #(parameter FIFO_DEPTH=4)(
    8:m_axi_wdata=active_time_q;
    9:m_axi_wdata={active_drops_q,active_seq_q};
    10:m_axi_wdata={32'd128,32'h394d4450};
-   11:m_axi_wdata={32'h0010000c,active_calibration_q};
+   11:m_axi_wdata={(ACTIVE_CHANNELS==9?32'h00100009:32'h0010000c),active_calibration_q};
    15:m_axi_wdata={~active_seq_q,~crc_q};
    default:m_axi_wdata=0;
   endcase
@@ -118,6 +118,7 @@ module rv32_stream_dma #(parameter FIFO_DEPTH=4)(
     12'h03c:reg_rdata_q<=used;
     12'h040:reg_rdata_q<=producer_q;
     12'h044:reg_rdata_q<=calibration_q;
+    12'h048:reg_rdata_q<=ACTIVE_CHANNELS==9?32'h000a0009:32'h000c000c;
     default:begin reg_rdata_q<=0;reg_rd_error_q<=1;end
    endcase
   end

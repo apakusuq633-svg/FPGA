@@ -1,5 +1,5 @@
 // TEST_GEOMETRY_ONLY gate is explicit and reset-disabled. No engine or LUT copy.
-module rv32_direction_link # (parameter CHANNELS=8)(
+module rv32_direction_link # (parameter CHANNELS=8, parameter COMMITTED_ONLY=0)(
  input clk_i,rst_n_i,enable_i,fault_i,result_valid_i,
  input [9:0] result_grid_i,input [31:0] result_version_i,
  input signed [31:0] result_score_i,
@@ -21,7 +21,12 @@ module rv32_direction_link # (parameter CHANNELS=8)(
    if(!enable_i||fault_i)state<=0;
    else case(state)
     0:if(result_valid_i)begin
-     if(result_grid_i<1024&&result_score_i>0)begin target<=result_grid_i;version<=result_version_i;state<=1;end
+     if(COMMITTED_ONLY)begin
+      if(steer_locked_i&&!steer_busy_i&&steer_committed_i==result_grid_i)begin
+       direction_comp_o<=steer_comp_i;direction_id_o<=result_grid_i;
+       direction_version_o<=result_version_i;state<=4;
+      end else rejected_o<=rejected_o+1;
+     end else if(result_grid_i<1024&&result_score_i>0)begin target<=result_grid_i;version<=result_version_i;state<=1;end
      else rejected_o<=rejected_o+1;
     end
     1:if(!steer_busy_i&&steer_bus_idle_i)begin steer_start_o<=1;steer_target_o<=target;state<=2;end

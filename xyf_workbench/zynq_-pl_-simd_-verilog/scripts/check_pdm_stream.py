@@ -1,14 +1,16 @@
 """PS ownership/cache model -> actual C ring/UDP -> Python receiver + UDP loopback."""
 from pathlib import Path
-import argparse,ctypes,hashlib,json,socket,struct,subprocess,sys,zlib
-import numpy as np
+import argparse,ctypes,hashlib,json,os,random,socket,struct,subprocess,sys,zlib
 R=Path(__file__).resolve().parents[1];sys.path.insert(0,str(R/'pc'))
 from pdm_stream_receive import decode,Statistics
-p=argparse.ArgumentParser();p.add_argument('--output',type=Path,required=True);a=p.parse_args()
+p=argparse.ArgumentParser();p.add_argument('--output',type=Path,required=True)
+p.add_argument('--synthetic-fixture',action='store_true',help='Explicit transport-only vectors; does NOT validate RTL or GSC arithmetic')
+a=p.parse_args()
 O=a.output.resolve();O.mkdir(parents=True,exist_ok=False)
 sources=[R/'sw/pdm_stream.c',R/'sw/pdm_stream.h',R/'pc/pdm_stream_receive.py',Path(__file__)]
 (O/'sources.json').write_text(json.dumps({str(f.relative_to(R)):hashlib.sha256(f.read_bytes()).hexdigest() for f in sources},indent=2))
-cmd=['gcc','-shared','-fPIC','-O2','-Wall','-Wextra','-Werror','-fsanitize=undefined','-fno-sanitize-recover=all','sw/pdm_stream.c','-o',str(O/'pdm_stream.so')]
+sanitizer=[] if os.name=='nt' else ['-fsanitize=undefined','-fno-sanitize-recover=all']
+cmd=['gcc','-shared','-fPIC','-O2','-Wall','-Wextra','-Werror',*sanitizer,'sw/pdm_stream.c','-o',str(O/'pdm_stream.so')]
 q=subprocess.run(cmd,cwd=R,capture_output=True,text=True);(O/'compile.log').write_text(q.stdout+q.stderr);assert q.returncode==0,q.stderr
 lib=ctypes.CDLL(str(O/'pdm_stream.so'))
 READ=ctypes.CFUNCTYPE(ctypes.c_uint32,ctypes.c_void_p,ctypes.c_uint32)
@@ -26,7 +28,17 @@ lib.pdm_ring_stat.argtypes=[ctypes.c_void_p,ctypes.c_uint];lib.pdm_ring_stat.res
 lib.pdm_ring_stream_id.argtypes=[ctypes.c_void_p];lib.pdm_ring_stream_id.restype=ctypes.c_uint32
 lib.pdm_udp_encode.argtypes=[ctypes.POINTER(Meta),ctypes.c_void_p,ctypes.c_void_p,ctypes.c_void_p,ctypes.c_uint,ctypes.c_void_p,ctypes.c_size_t];lib.pdm_udp_encode.restype=ctypes.c_size_t
 lib.pdm_crc32.argtypes=[ctypes.c_void_p,ctypes.c_size_t];lib.pdm_crc32.restype=ctypes.c_uint32
-templates=[int(t,16).to_bytes(64,'little') for t in (R/'build/m8_20261016/rtl_packets/packets.hex').read_text().split()]
+if a.synthetic_fixture:
+    templates=[];gsc_values=[]
+    for i in range(256):
+        w=[0]*16;w[0]=0x47534301;w[1]=i;w[2]=1;w[5]=65536;w[6]=1
+        beam=i-128;w[7]=(beam&65535)|((beam&65535)<<16)
+        for ch in range(12):w[8+ch//2]|=((i*13+ch*71)%2000-1000&65535)<<(16*(ch&1))
+        templates.append(struct.pack('<16I',*w));gsc_values.append(beam if i<128 else beam//2)
+else:
+    templates=[int(t,16).to_bytes(64,'little') for t in (R/'build/m8_20261016/rtl_packets/packets.hex').read_text().split()]
+    raw_gsc=(R/'build/m8_20261016/rtl_packets/gsc_output.bin').read_bytes()
+    gsc_values=list(struct.unpack('<%dh'%(len(raw_gsc)//2),raw_gsc))
 names=['frames','corrupt','ownership','io','poll_timeout','duplicates','out_of_order','sample_gaps','source_restarts','timestamp_rollbacks','recoveries']
 def stats(r):return {n:int(lib.pdm_ring_stat(r,i)) for i,n in enumerate(names)}
 def slot(owner,n,cal=2,seq=None,stamp=None):
@@ -142,10 +154,10 @@ for base,log,timeout,polls in [(0x08000001,4,64,10),(0,4,64,10),(0x0ffff800,12,6
     assert bytes(state)==before and not m.writes;invalids+=1
 m=CacheModel(0);m.reg[20]=1;state=ctypes.create_string_buffer(lib.pdm_stream_ring_size())
 assert lib.pdm_ring_open(state,ctypes.byref(m.io),0x08000000,4,64,2,0,33,10)==-2 and m.reg[20]==1 and m.reg[16]==0
-# Independent zlib comparison of the nibble-table firmware CRC.
-rng=np.random.default_rng(20261016)
+# Independent zlib comparison of the firmware CRC.
+rng=random.Random(20261016)
 for n in (0,1,7,120,128,572,1104,4096):
-    data=rng.integers(0,256,n,dtype=np.uint8).tobytes();buf=ctypes.create_string_buffer(data)
+    data=rng.randbytes(n);buf=ctypes.create_string_buffer(data)
     assert lib.pdm_crc32(buf,n)==zlib.crc32(data)
 def encode(records,packet=0,stream=33,active=False,values=None,reasons=None):
     n=len(records);slots=b''.join(records);buf=ctypes.create_string_buffer(slots)
@@ -173,10 +185,9 @@ for i,seq in enumerate((0xfffffffe,0xffffffff,0,1)):
     d=encode([record for _,record in normal[240+i*8:248+i*8]],seq)
     assert len(wrap_receiver.ingest(d))==8
 assert wrap_receiver.counts['frames_accepted']==32 and not wrap_receiver.counts['timestamp_rate_errors']
-# Actual RTL DAS/FIR packets and actual C GSC results from M8 survive C UDP
-# serialization and independent Python decoding. Only DDR ownership/time headers
-# are composed by the test's independent memory model.
-gsc_values=np.fromfile(R/'build/m8_20261016/rtl_packets/gsc_output.bin',dtype='<i2')
+# Default fixtures replay actual RTL DAS/FIR packets and C GSC results from M8.
+# --synthetic-fixture verifies transport fields only, not that arithmetic.
+# DDR ownership/time headers come from the independent memory model in both modes.
 active_receiver=Statistics()
 for start in range(0,256,8):
     records=[]
@@ -184,8 +195,8 @@ for start in range(0,256,8):
         b=bytearray(slot(i,i,seq=i,stamp=i*1024+17));b[:64]=templates[i]
         struct.pack_into('<I',b,120,zlib.crc32(b[:120]));records.append(bytes(b))
     reasons=[2 if i<128 else 0 for i in range(start,start+8)]
-    dg=encode(records,start//8,active=True,values=gsc_values[start:start+8].tolist(),reasons=reasons)
-    decoded=active_receiver.ingest(dg);assert [f['gsc'] for f in decoded]==gsc_values[start:start+8].tolist()
+    dg=encode(records,start//8,active=True,values=gsc_values[start:start+8],reasons=reasons)
+    decoded=active_receiver.ingest(dg);assert [f['gsc'] for f in decoded]==gsc_values[start:start+8]
 assert active_receiver.counts['frames_accepted']==256 and active_receiver.counts['gsc_active_frames']==128
 # Real sockets, localhost only. Does not alter interface/routing/proxy settings.
 loopback=Statistics()
@@ -194,6 +205,8 @@ with socket.socket(socket.AF_INET,socket.SOCK_DGRAM) as rx,socket.socket(socket.
     for d in datagrams:tx.sendto(d,rx.getsockname());loopback.ingest(rx.recvfrom(2048)[0])
 assert loopback.counts['frames_accepted']==64
 result={'status':'PASS_SOFTWARE_LOOPBACK','hardware':'DEFERRED_HARDWARE','normal_ring_frames':100000,
+ 'fixture':'synthetic_transport_only' if a.synthetic_fixture else 'actual_m8_rtl_gsc',
+ 'rtl_gsc_arithmetic_validated':not a.synthetic_fixture,'ubsan_enabled':bool(sanitizer),
  'normal_ring_stats':normal_stats,'cache_invalidations':model.invalidations,'cache_flushes':model.flushes,
  'fault_ring_stats':fault_stats,'invalid_configuration_rejections':invalids,
  'receiver_fault_stats':dict(fault_receiver.counts),'receiver_wrap_stats':dict(wrap_receiver.counts),

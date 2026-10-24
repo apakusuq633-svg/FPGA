@@ -29,6 +29,7 @@ module srp_throughput_case #(
 `else
       if(FAST)begin
         if(cycles>PAIRS*(GRIDS+16)+16)$fatal(1,"pipelined scan too slow cycles=%0d",cycles);
+        if(FAST==4&&cycles>((PAIRS+3)/4)*(GRIDS+12)+4)$fatal(1,"parallel scan too slow cycles=%0d",cycles);
       end else if(cycles!==4*PAIRS*GRIDS+1)$fatal(1,"unexpected scan cycles=%0d",cycles);
 `endif
       for(g=0;g<GRIDS;g=g+1)begin
@@ -60,8 +61,15 @@ module srp_throughput_case #(
     en=1;round=2;run_scan();finished=1;
   end
 endmodule
+module tb_srp_parallel4_edges;
+  wire a,b;
+  srp_throughput_case #(.PAIRS(5),.GRIDS(1),.GW(1),.RLEN(64),.IW(6),.FAST(4)) single_grid(a);
+  srp_throughput_case #(.PAIRS(7),.GRIDS(17),.GW(5),.RLEN(64),.IW(6),.FAST(4)) partial_group(b);
+  initial begin wait(a&&b);$display("SRP_PARALLEL4_EDGES_PASS partial_group_single_grid_restart_abort=1");$finish;end
+  initial begin #100000;$fatal(1,"timeout");end
+endmodule
 module tb_srp_throughput;
-  wire a,b,c,d,e,f,g;
+  wire a,b,c,d,e,f,g,h,i,j;
   srp_throughput_case production(a);
   srp_throughput_case #(.PAIRS(28),.GRIDS(256),.RLEN(1024),.IW(10),.GW(8),.AW(15)) eight(b);
   srp_throughput_case #(.PAIRS(4),.GRIDS(256),.RLEN(1024),.IW(10),.GW(8),.AW(15)) four(c);
@@ -69,6 +77,9 @@ module tb_srp_throughput;
   srp_throughput_case #(.PAIRS(28)) rect8(e);
   srp_throughput_case #(.PAIRS(66),.FAST(1)) pipelined12(f);
   srp_throughput_case #(.PAIRS(2),.GRIDS(1),.GW(1),.FAST(1)) single_grid(g);
-  initial begin wait(a&&b&&c&&d&&e&&f&&g);$display("SRP_THROUGHPUT_PASS signed_fractional_wrap_restart_abort=1");$finish;end
+  srp_throughput_case #(.PAIRS(36),.RLEN(64),.IW(6),.FAST(4)) parallel_circular9(h);
+  srp_throughput_case #(.PAIRS(5),.GRIDS(1),.GW(1),.RLEN(64),.IW(6),.FAST(4)) parallel_single_grid(i);
+  srp_throughput_case #(.PAIRS(7),.GRIDS(17),.GW(5),.RLEN(64),.IW(6),.FAST(4)) parallel_partial_group(j);
+  initial begin wait(a&&b&&c&&d&&e&&f&&g&&h&&i&&j);$display("SRP_THROUGHPUT_PASS signed_fractional_wrap_restart_abort=1");$finish;end
   initial begin #30000000;$fatal(1,"timeout");end
 endmodule

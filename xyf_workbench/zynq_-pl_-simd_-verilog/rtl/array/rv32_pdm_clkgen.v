@@ -1,9 +1,10 @@
-// 40MHz /16 PDM CLOCK; /1024 PCM cadence. No internal PDM clock domain.
+// 40MHz /16 PDM CLOCK; / (16*DECIM) PCM cadence. No internal PDM clock domain.
 // A/B latch 125ns after the respective drive edge, at HOLD=4/CONSUME=12.
 // HOLD must precede CONSUME. See docs/pdm_shared_timing.md for conditional budgets.
 module rv32_pdm_clkgen #(
   parameter integer HOLD_TICK    = 4,
-  parameter integer CONSUME_TICK = 12
+  parameter integer CONSUME_TICK = 12,
+  parameter integer DECIM        = 64
 ) (
   input  clk_i,
   input  rst_n_i,
@@ -15,6 +16,13 @@ module rv32_pdm_clkgen #(
 );
 
   reg [9:0] div_q;
+  localparam integer DECIM_BITS = $clog2(DECIM);
+`ifndef SYNTHESIS
+  initial begin
+    if (DECIM != 16 && DECIM != 32 && DECIM != 64)
+      $fatal(1, "PDM DECIM must be 16, 32 or 64");
+  end
+`endif
 
   always @(posedge clk_i or negedge rst_n_i) begin
     if (!rst_n_i) begin
@@ -28,11 +36,11 @@ module rv32_pdm_clkgen #(
     end
   end
 
-  // 抽取比 64 与 fs=clk/1024 是同一件事的两面，抽头位置写死。
-  // 不设 DECIM 参数：一个改不动的参数比没有参数更误导。
+  // PDM edges and A/B sampling phases stay identical for all supported rates.
+  // DECIM also controls the CIC gain/normalization in rv32_pdm_array_rx.
   assign pdm_clk_o  = div_q[3];
   assign hold_en_o  = en_i & (div_q[3:0] == HOLD_TICK[3:0]);
   assign bit_en_o   = en_i & (div_q[3:0] == CONSUME_TICK[3:0]);
-  assign decim_en_o = bit_en_o & (div_q[9:4] == 6'd63);
+  assign decim_en_o = bit_en_o & (&div_q[DECIM_BITS+3:4]);
 
 endmodule

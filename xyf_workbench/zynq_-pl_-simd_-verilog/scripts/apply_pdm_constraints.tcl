@@ -2,7 +2,7 @@
 set pdm_constraints_root [file normalize [file join [file dirname [info script]] ..]]
 
 proc write_pdm_constraints {template destination line_count} {
-    if {$line_count ni {4 6 8}} {error "PDM constraint profile must have 4, 6 or 8 DINs"}
+    if {$line_count ni {4 5 6 8}} {error "PDM constraint profile must have 4, 5, 6 or 8 DINs"}
     set fp [open $template r]
     fconfigure $fp -encoding utf-8
     set text [read $fp]
@@ -15,6 +15,11 @@ proc write_pdm_constraints {template destination line_count} {
         if {[regexp {pdm_din_i\[([0-9]+)\]} $line -> index] && $index >= $line_count} {continue}
         lappend selected $line
     }
+    if {$line_count == 5} {
+        set extra [open [file join [file dirname $template] circular9_extra.xdc] r]
+        lappend selected [read $extra]
+        close $extra
+    }
     file mkdir [file dirname $destination]
     set fp [open $destination w]
     fconfigure $fp -encoding utf-8 -translation lf
@@ -24,9 +29,9 @@ proc write_pdm_constraints {template destination line_count} {
 
 proc apply_pdm_constraints {{active_channels 8}} {
     global pdm_constraints_root
-    if {$active_channels ni {4 8 12 16}} {error "Active channels must be 4, 8, 12 or 16"}
+    if {$active_channels ni {4 8 9 12 16}} {error "Active channels must be 4, 8, 9, 12 or 16"}
     if {[llength [current_project -quiet]] == 0} {error "Open the intended project first"}
-    set line_count [expr {$active_channels >= 8 ? $active_channels/2 : 8}]
+    set line_count [expr {$active_channels >= 8 ? ($active_channels+1)/2 : 8}]
     set project_dir [get_property DIRECTORY [current_project]]
     set destination [file join $project_dir generated_constraints ps_pl_wrapper.xdc]
     write_pdm_constraints [file join $pdm_constraints_root constrs ps_pl_wrapper.xdc] $destination $line_count

@@ -1,0 +1,39 @@
+{
+  "profile": "6004_2zr_appendix_a",
+  "bearing": "6004-2ZR",
+  "source": "C:\\Users\\lenovo\\Desktop\\FPGA\\Appendix A.pdf",
+  "source_sha256": "5b8f79a19d6646844e94a2da46ae9710356054ec17abe353329a97ad1aa48d9c",
+  "source_page": 1,
+  "ball_count": 9,
+  "ball_diameter_mm": 6.35,
+  "pitch_diameter_mm": 31,
+  "bore_mm": 20,
+  "outside_diameter_mm": 42,
+  "width_mm": 12,
+  "rpm_min": 600,
+  "rpm_max": 1800,
+  "rpm_unit_status": "inferred_rpm_from_user_range",
+  "shaft_hz_min": 10,
+  "shaft_hz_max": 30,
+  "contact_angle_deg": 0,
+  "contact_angle_status": "assumed_radial_load_not_given_in_appendix",
+  "rotating_race": "inner_assumed",
+  "order_names": [
+    "FTF",
+    "BSF",
+    "BPFO",
+    "BPFI"
+  ],
+  "orders": [
+    0.3975806451612903,
+    2.338525527051054,
+    3.578225806451613,
+    5.421774193548387
+  ],
+  "model_compatible": false,
+  "model_status": "requires_target_recordings_and_validation",
+  "baseline_available": false,
+  "feature_window_samples": 40000,
+  "feature_fft_length": 8192,
+  "low_speed_ftf_status": "unresolved_at_8192_fft_do_not_claim_cage_diagnosis"
+}

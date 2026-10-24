@@ -16,7 +16,7 @@ module rv32_ps_top #(
   parameter DTCM_ADDR_WIDTH = 14,
   parameter LED_WIDTH = 3,
   parameter DAS_ACTIVE_CHANNELS = 8,
-  parameter PDM_CHANNELS = DAS_ACTIVE_CHANNELS == 4 ? 8 : DAS_ACTIVE_CHANNELS,
+  parameter PDM_CHANNELS = DAS_ACTIVE_CHANNELS == 4 ? 8 : 2*((DAS_ACTIVE_CHANNELS+1)/2),
   parameter LIVE16_LOCALIZATION = DAS_ACTIVE_CHANNELS >= 8,
   parameter PDM_MICS_PER_LINE = DAS_ACTIVE_CHANNELS >= 8 ? 2 : 1
 ) (

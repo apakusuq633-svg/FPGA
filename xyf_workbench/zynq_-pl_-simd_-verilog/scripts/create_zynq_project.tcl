@@ -152,7 +152,7 @@ set_property -dict [list \
 ] [get_bd_cells u_ps7]
 
 if {$stream_dma_enabled} {
-    set_property -dict [list CONFIG.PCW_USE_S_AXI_HP0 1 CONFIG.PCW_S_AXI_HP0_DATA_WIDTH 64 CONFIG.PCW_S_AXI_HP0_FREQMHZ 40] [get_bd_cells u_ps7]
+    set_property -dict [list CONFIG.PCW_USE_S_AXI_HP0 1 CONFIG.PCW_S_AXI_HP0_DATA_WIDTH 64] [get_bd_cells u_ps7]
 }
 
 # ---- I2C0 routed to PL via EMIO (comes from the PS side) ----
@@ -359,9 +359,9 @@ apply_bd_automation -rule xilinx.com:bd_rule:processing_system7 -config { \
 # FREQ_HZ 设对之后就自动关联上了，不需要给顶层起别名、也不需要 ASSOCIATED_BUSIF。
 create_bd_cell -type module -reference rv32_ps_top u_rv32_ps
 if {![info exists ::env(DAS_ACTIVE_CHANNELS)]} { set ::env(DAS_ACTIVE_CHANNELS) 8 }
-set pdm_line_count [expr {$::env(DAS_ACTIVE_CHANNELS) >= 8 ? $::env(DAS_ACTIVE_CHANNELS)/2 : 8}]
+set pdm_line_count [expr {$::env(DAS_ACTIVE_CHANNELS) >= 8 ? ($::env(DAS_ACTIVE_CHANNELS)+1)/2 : 8}]
 if {[info exists ::env(DAS_ACTIVE_CHANNELS)]} {
-    if {$::env(DAS_ACTIVE_CHANNELS) != 8} { error "Production board requires DAS_ACTIVE_CHANNELS=8 (four shared DINs)" }
+    if {$::env(DAS_ACTIVE_CHANNELS) ni {8 9}} { error "Supported profiles: planar8 or circular9" }
     set_property CONFIG.DAS_ACTIVE_CHANNELS $::env(DAS_ACTIVE_CHANNELS) [get_bd_cells u_rv32_ps]
     if {$::env(DAS_ACTIVE_CHANNELS) >= 8} {
         set live16_localization 1
@@ -371,7 +371,7 @@ if {[info exists ::env(DAS_ACTIVE_CHANNELS)]} {
         }
         set_property CONFIG.LIVE16_LOCALIZATION $live16_localization [get_bd_cells u_rv32_ps]
         puts "==> $::env(DAS_ACTIVE_CHANNELS) microphone SRP: localization=$live16_localization / 1024 cells"
-        set_property CONFIG.PDM_CHANNELS $::env(DAS_ACTIVE_CHANNELS) [get_bd_cells u_rv32_ps]
+        set_property CONFIG.PDM_CHANNELS [expr {2*$pdm_line_count}] [get_bd_cells u_rv32_ps]
         set_property CONFIG.PDM_MICS_PER_LINE 2 [get_bd_cells u_rv32_ps]
     }
 }

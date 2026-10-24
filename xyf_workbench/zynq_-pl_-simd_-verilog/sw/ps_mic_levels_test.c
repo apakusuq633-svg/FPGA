@@ -79,5 +79,11 @@ int main(void) {
     assert(levels.loc_enabled&&levels.loc_valid&&levels.loc_grid_w==32);
     m.words[0]=0xda508001u;mic_location_poll(&bus,&levels);
     assert(!levels.loc_enabled&&!levels.loc_valid);
+    m.words[0]=0xda509002u;m.words[88]=6;m.words[89]=0x4d493039u;
+    mic_levels_poll(&bus,&levels);
+    assert(levels.valid && levels.channels==9 && levels.rms_ppm[8]==281250);
+    m.words[90]=10;m.words[91]=0;m.words[97]=32;
+    mic_location_poll(&bus,&levels);
+    assert(levels.loc_enabled&&!levels.loc_valid&&levels.loc_grid_w==32&&levels.loc_reason==32);
     puts("MIC_LEVELS_PASS: planar8 and legacy levels, location seqlock");
 }

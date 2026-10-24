@@ -16,7 +16,11 @@ static __attribute__((noinline)) void raw_capture_hold(uint32_t request,uint32_t
     RESULT(RAW_RESULT_END_SEQ)=sequence+1;
     RESULT(RAW_RESULT_CHANNELS)=channels;
     RESULT(RAW_RESULT_FRAMES)=RAW_FRAME_COUNT;
+#if defined(FW_ARRAY_CHANNELS) && FW_ARRAY_CHANNELS == 9
+    RESULT(RAW_RESULT_FS_NUM)=156250u;RESULT(RAW_RESULT_FS_DEN)=1u;
+#else
     RESULT(RAW_RESULT_FS_NUM)=78125u;RESULT(RAW_RESULT_FS_DEN)=2u;
+#endif
     RESULT(90)=++loc_seq;RESULT(91)=0;
     RESULT(LOCATION_META16_WORD)=LOCATION_QUALITY_MAGIC;
     RESULT(LOCATION_META16_WORD+1)=32u; /* Explicit calibration pause. */
