@@ -1,5 +1,6 @@
 #include "pdm_stream.h"
 #include <limits.h>
+#include <string.h>
 static uint32_t get32(const uint8_t *p){return (uint32_t)p[0]|(uint32_t)p[1]<<8|(uint32_t)p[2]<<16|(uint32_t)p[3]<<24;}
 static void put16(uint8_t *p,uint16_t v){p[0]=(uint8_t)v;p[1]=(uint8_t)(v>>8);}
 static void put32(uint8_t *p,uint32_t v){for(unsigned i=0;i<4;i++)p[i]=(uint8_t)(v>>(8*i));}
@@ -93,7 +94,8 @@ int pdm_ring_next(pdm_stream_ring *r,uint8_t slot[PDM_SLOT_BYTES]){
  r->io.barrier(r->io.context);r->io.invalidate(r->io.context,address,128);r->io.barrier(r->io.context);
  const uint8_t *memory=r->io.map(r->io.context,address,128);
  if(!memory){increment(r,PDM_IO_ERRORS,1);return -4;}
- for(unsigned i=0;i<128;i++)slot[i]=memory[i];
+ /* Copy uncached DMA payload in compiler/libc word bursts, retaining CRC and ownership checks. */
+ memcpy(slot,memory,128);
  int valid=pdm_slot_validate(slot,r->consumer)==0&&get32(slot+88)==r->calibration_version;
  uint32_t next=r->consumer+1u;
  if(write(r,0x10,next))return -4;

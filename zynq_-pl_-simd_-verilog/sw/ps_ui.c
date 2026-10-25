@@ -58,6 +58,7 @@
 #include "ps_circular9_live.h"
 #include "ps_circular9_tasks.h"
 #include "ps_circular9_control.h"
+#include "ps_circular9_gui.h"
 #endif
 static das_fifo_receiver fifo_receiver;
 static uint32_t live_start_tick,live_ready;
@@ -402,6 +403,7 @@ static void init_audio(void)
         das_fifo_init(&fifo_receiver);
         audio_error=pl_live_prepare(&bus);
 #if UI_DAS_ACTIVE_CHANNELS == 9
+        c9h_init(&c9_health);c9_health.timer=dia_gtimer_now();
         c9_tasks_init();
         if(!audio_error)audio_error=c9_live_init();
         if(!audio_error)bus.write(bus.ctx,0x3c,0xd3000000u);
@@ -659,7 +661,9 @@ static u16_t build_response(http_conn *c)
 #endif
 #if UI_DAS_LIVE
 #if UI_DAS_ACTIVE_CHANNELS == 9
-    if(c9_tasks_route(c->req,&rep,g_body,sizeof(g_body))) {
+    if(c9_gui_route(c->req,&rep,g_body,sizeof(g_body))) {
+        /* Read-only plots and bounded monitoring; no DSP in HTTP callbacks. */
+    } else if(c9_tasks_route(c->req,&rep,g_body,sizeof(g_body))) {
         /* Candidate audio/diagnosis routes never execute DSP on CPU0. */
     } else if(strncmp(c->req,"GET /api/target?grid=",sizeof("GET /api/target?grid=")-1)==0) {
         uint32_t grid;
@@ -1147,6 +1151,7 @@ int main(void)
         poll_audio();
         poll_frame();
 #if UI_DAS_LIVE && UI_DAS_ACTIVE_CHANNELS == 9
+        c9_gui_poll();
         c9_network_poll();
         poll_location();
 #endif

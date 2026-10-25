@@ -8,6 +8,7 @@
 #include "xil_cache.h"
 static void c9_record_sample(const uint32_t packet[16]);
 static void c9_record_reset(void);
+static void c9_record_info(uint32_t info[4]);
 #define C9_DMA_BASE 0x43c10000u
 static union {uint8_t slots[524288];uint8_t section[1048576];} c9_ddr __attribute__((section(".c9_dma"),aligned(1048576)));
 static pdm_stream_ring c9_ring;
@@ -18,6 +19,8 @@ static uint8_t c9_slots[128*C9_MAX_FRAMES],c9_packet[C9_MAX_PACKET];
 static int16_t c9_outputs[C9_MAX_FRAMES];
 static uint16_t c9_reasons[C9_MAX_FRAMES];
 static unsigned c9_batch,c9_requested=1,c9_freeze;
+/* Full-rate raw UDP is opt-in; GUI monitoring must not pay its CRC/network cost. */
+static unsigned c9_recording;
 static uint32_t c9_packets,c9_sent,c9_software_drops,c9_last_poll,c9_max_poll_gap,c9_max_service;
 static circular9_deadline c9_location;
 static uint32_t c9_poll_gap_overruns,c9_service_overruns,c9_dma_backlog_max,c9_network_max_us;
@@ -61,6 +64,7 @@ static int c9_network_start(void){
 /* Queue only: audio servicing never calls into lwIP or allocates packet memory. */
 static void c9_queue_batch(void){
  if(!c9_batch)return;
+ if(!c9_recording){c9_batch=0;return;}
  if(c9_udp_head-c9_udp_tail==C9_UDP_QUEUE){c9_software_drops+=c9_batch;c9_batch=0;return;}
  c9_udp_batch *b=&c9_udp_queue[c9_udp_head%C9_UDP_QUEUE];
  b->metadata=(circular9_metadata){pdm_ring_stream_id(&c9_ring),c9_packets++,ACOUSTIC_GEOMETRY_VERSION,
@@ -81,6 +85,7 @@ static void c9_send_queued(void){
 }
 /* Cooperative budget, not a measured WCET: one lwIP call can exceed it. */
 static void c9_network_poll(void){
+ if(!c9_recording){c9_udp_tail=c9_udp_head;c9_batch=0;return;}
  uint32_t start=Xil_In32(0xf8f00200u);
  if(c9_batch&&c9_ticks_to_us(start-c9_batch_tick)>=1000u)c9_queue_batch();
  for(unsigned i=0;i<4u&&c9_udp_tail!=c9_udp_head;i++) {
@@ -129,9 +134,11 @@ static int c9_live_poll(das_audio_block *out,uint32_t *drops){
  return complete?DAS_OK:DAS_EMPTY;
 }
 static int c9_status(char *out,size_t n){
+ uint32_t history[4]={0};c9_record_info(history);
  int used=snprintf(out,n,"{\"localizer_abi\":\"P9D2\",\"rv32_itcm_sha256\":\"" ACOUSTIC_ITCM_SHA256 "\","
   "\"pdm_decimation\":16,\"window_samples\":1024,\"capture_slots\":10,\"active_channels\":9,\"active_mask\":511,"
   "\"calibration_status\":\"" ACOUSTIC_CALIBRATION_STATUS "\","
+  "\"udp_enabled\":%u,\"dma_frame_ok\":%llu,\"dma_corrupt\":%llu,\"history_frames\":%u,\"history_end\":%u,\"history_epoch\":%u,\"history_session\":%u,"
   "\"gsc_requested\":%u,\"freeze_updates\":%u,\"gsc_reason\":%u,"
   "\"geometry_confirmed\":%u,\"calibration_version\":%u,\"geometry_version\":%u,"
   "\"udp_sent\":%u,\"udp_frames_dropped\":%u,\"dma_drops\":%u,\"discontinuities\":%u,"
@@ -144,7 +151,7 @@ static int c9_status(char *out,size_t n){
   "\"ps_poll_gap_over_200us\":%u,\"ps_service_over_100us\":%u,\"dma_backlog_max\":%u,"
   "\"udp_queue_peak\":%u,\"udp_service_max_us\":%u,\"sample_rate_num\":%u,\"sample_rate_den\":%u,\"hop_samples\":%u,"
   "\"latency_scope\":\"first_pcm_to_first_ps_metadata_receipt\",\"latency_bin_us\":%u,"
-  "\"histogram_last_bin_includes_overflow\":true,\"tracking_deadline_us\":100000,\"board_validated\":false,\"latency_histogram\":[",c9_requested,c9_freeze,(unsigned)c9_audio.reason,
+  "\"histogram_last_bin_includes_overflow\":true,\"tracking_deadline_us\":100000,\"board_validated\":false,\"latency_histogram\":[",c9_recording,(unsigned long long)pdm_ring_stat(&c9_ring,PDM_FRAME_OK),(unsigned long long)pdm_ring_stat(&c9_ring,PDM_CORRUPT),history[1],history[0],history[2],history[3],c9_requested,c9_freeze,(unsigned)c9_audio.reason,
   ACOUSTIC_GEOMETRY_CONFIRMED,ACOUSTIC_CALIBRATION_VERSION,ACOUSTIC_GEOMETRY_VERSION,
   (unsigned)c9_sent,(unsigned)c9_software_drops,(unsigned)c9_read(NULL,0x18),(unsigned)c9_audio.discontinuities,
   (unsigned)c9_ticks_to_us(c9_max_poll_gap),(unsigned)c9_ticks_to_us(c9_max_service),C9_LOCATION_TARGET_US,
