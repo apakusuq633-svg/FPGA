@@ -38,8 +38,8 @@
   "supply_voltage_v": 3.3,
   "electrical_contract_reviewed": true,
   "electrical_contract_basis": "user-reported 3.3 V and IM73D122; datasheet 1.62..3.6 V and high-performance clock 2.0..2.6 MHz; physical waveforms unmeasured",
-  "geometry_status": "proposed",
-  "physical_mapping_confirmed": false,
+  "geometry_status": "channel_order_confirmed_unmeasured_calibration",
+  "physical_mapping_confirmed": true,
   "board_tested": false,
   "hardware_available": true,
   "din_pins": [
@@ -77,43 +77,43 @@
   ],
   "channel_positions_m": [
     [
-      0.03,
-      0,
-      0
-    ],
-    [
-      0.0212132034355964,
-      0.0212132034355964,
-      0
-    ],
-    [
-      0,
-      0.03,
-      0
-    ],
-    [
-      -0.0212132034355964,
-      0.0212132034355964,
-      0
-    ],
-    [
-      -0.03,
-      0,
-      0
-    ],
-    [
-      -0.0212132034355964,
-      -0.0212132034355964,
-      0
-    ],
-    [
-      0,
+      -0.0,
       -0.03,
       0
     ],
     [
+      -0.0212132034355964,
+      -0.0212132034355964,
+      0
+    ],
+    [
+      -0.03,
+      0.0,
+      0
+    ],
+    [
+      -0.0212132034355964,
+      0.0212132034355964,
+      0
+    ],
+    [
       0.0212132034355964,
       -0.0212132034355964,
+      0
+    ],
+    [
+      0.03,
+      0.0,
+      0
+    ],
+    [
+      0.0212132034355964,
+      0.0212132034355964,
+      0
+    ],
+    [
+      0.0,
+      0.03,
       0
     ],
     [
@@ -122,5 +122,16 @@
       0
     ]
   ],
-  "plan_sha256": "5496461712f7b4ea5a25c75e8b067932a31eeb56ae06eb9999d3c56d91b1e422"
+  "plan_sha256": "5496461712f7b4ea5a25c75e8b067932a31eeb56ae06eb9999d3c56d91b1e422",
+  "ring_channel_order_ccw_from_right": [
+    5,
+    6,
+    7,
+    3,
+    2,
+    1,
+    0,
+    4
+  ],
+  "channel_position_source": "user_confirmed_2026-10-26: front view, from rightmost CH5 counterclockwise CH5 CH6 CH7 CH3 CH2 CH1 CH0 CH4; center CH8 retained"
 }

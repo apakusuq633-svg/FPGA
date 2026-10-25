@@ -30,6 +30,7 @@ run('decimator_compile',[GCC,'-std=c11','-O2','-ffunction-sections','-fdata-sect
 run('decimator_exact',[O/'decimator_exact_test.exe'])
 run('status_no_diag_compile',[GCC,'-std=c11','-O2','-I'+str(R/'sw'),'-I'+str(R/'sw/cstub'),P/'tests/status_no_diag_test.c','-o',O/'status_no_diag_test.exe'])
 run('status_no_diag',[O/'status_no_diag_test.exe'])
+run('geometry_order',[sys.executable,P/'tests/geometry_order_test.py'])
 summary={'scope':'offline native C, mocked browser DOM and SQLite; no board measurements','results':results,'page_bytes':len(html.encode()),'protected_rtl_modified':False,'physical_board_tested':False,'source_sha256':{p.relative_to(R).as_posix():hashlib.sha256(p.read_bytes()).hexdigest() for p in list((R/'sw').glob('*gui*'))+list((R/'sw').glob('*health*')) if p.is_file()}}
 (O/'results.json').write_text(json.dumps(summary,indent=2)+'\n')
 print('GUI9_FOCUSED_CHECKS_PASS')
