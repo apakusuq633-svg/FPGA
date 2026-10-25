@@ -2,6 +2,10 @@
 import json
 from pathlib import Path
 ROOT=Path(__file__).resolve().parents[1]
+if (ROOT/'profiles/full_gui9/page_template.html').exists():
+ import runpy
+ runpy.run_path(str(ROOT/'profiles/full_gui9/make_ui.py'),run_name='__main__')
+ raise SystemExit(0)
 p=ROOT/'sw/ps_ui_page.h'
 s=p.read_text(encoding='utf-8')
 start=s.index('"var c9busy')

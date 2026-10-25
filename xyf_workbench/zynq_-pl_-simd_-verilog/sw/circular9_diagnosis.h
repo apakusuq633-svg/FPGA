@@ -5,6 +5,8 @@
 /* Change this ID if orders, rate, window, bands or feature normalization change. */
 #define C9_DIAG_FEATURE_CONTRACT 0x43394632u /* C9F2: full-segment decimated envelope */
 #define C9_DIAG_FEATURES 18u
+/* CPU1-only display copy of the existing envelope FFT; no DSP recomputation. */
+void c9_diag_export_envelope(uint16_t bins[128]);
 #define C9_DIAG_SAMPLES 40000u
 #define C9_DIAG_RATE_NUM 78125u
 #define C9_DIAG_RATE_DEN 2u

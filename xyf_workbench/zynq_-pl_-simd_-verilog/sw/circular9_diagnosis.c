@@ -125,3 +125,17 @@ void c9_diagnose(const double x[C9_DIAG_SAMPLES],double hz,
  const c9_diag_binding *b,c9_diag_report *r) {
  c9_diagnose_with_model(x,hz,b,c9_diag_configured_model(),r);
 }
+
+/* Display-only grouping of the already computed C9F2 FFT, 0..900Hz.
+ * DC excluded. No changes to features, filters, model or normalization. */
+void c9_diag_export_envelope(uint16_t bins[128]) {
+ double maximum=0;unsigned last=(unsigned)(900.0*C9_ENV_FFT/C9_ENV_RATE);
+ for(unsigned k=1;k<=last;k++)if(c9_env_spectrum[k]>maximum)maximum=c9_env_spectrum[k];
+ for(unsigned i=0;i<128;i++){
+  unsigned begin=(unsigned)(i*900.0*C9_ENV_FFT/(128.0*C9_ENV_RATE));
+  unsigned end=(unsigned)((i+1u)*900.0*C9_ENV_FFT/(128.0*C9_ENV_RATE));
+  if(!begin)begin=1;
+  double value=0;for(unsigned k=begin;k<=end;k++)if(c9_env_spectrum[k]>value)value=c9_env_spectrum[k];
+  bins[i]=maximum>0?(uint16_t)(value/maximum*1000.0+.5):0;
+ }
+}

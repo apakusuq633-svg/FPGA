@@ -21,6 +21,7 @@ typedef struct {
  uint32_t processing_us,queue_wait_us,total_elapsed_us,queue_age_samples,result_age_samples,deadline_missed,rejection;
  c9_separation_report separation;
  c9_diag_report diagnosis[3];
+ uint16_t gui_envelope[3][128];uint32_t gui_envelope_valid[3];
  int16_t audio[3][C9_AUDIO_FRAMES];
 } c9_diagnostic_result;
 typedef struct {
@@ -66,6 +67,7 @@ static void c9_metric_max(uint32_t *value,uint32_t observed){
 #include "ps_circular9_aux.h"
 static void c9_record_sample(const uint32_t packet[16]){c9_history_push(&c9_history_shared.history,packet);}
 static void c9_record_reset(void){c9_history_reset(&c9_history_shared.history);}
+static void c9_record_info(uint32_t info[4]){c9_history_info(&c9_history_shared.history,&info[0],&info[1],&info[2],&info[3]);}
 static void c9_tasks_init(void){
  Xil_DCacheFlushRange((INTPTR)&c9_history_shared,sizeof(c9_history_shared));
  Xil_DCacheFlushRange((INTPTR)&c9_tasks_shared,sizeof(c9_tasks_shared));
@@ -165,6 +167,9 @@ static void c9_tasks_cpu1(volatile struct ipc_page *ipc){
     r->diagnosis[i].feature_contract=C9_DIAG_FEATURE_CONTRACT;r->diagnosis[i].reason=C9_DIAG_BAD_BINDING;
     r->diagnosis[i].shaft_hz=job.shaft_confirmed?job.shaft_millihz/1000.0:0.0;
    }
+   r->gui_envelope_valid[i]=r->diagnosis[i].extraction.fft_count==1u;
+   if(r->gui_envelope_valid[i])c9_diag_export_envelope(r->gui_envelope[i]);
+   else memset(r->gui_envelope[i],0,sizeof(r->gui_envelope[i]));
    for(unsigned n=0;n<C9_AUDIO_FRAMES;n++){
     double v=c9_separated[i][n]*32768.0;
     r->audio[i][n]=v>=32767?32767:v<=-32768?-32768:(int16_t)v;

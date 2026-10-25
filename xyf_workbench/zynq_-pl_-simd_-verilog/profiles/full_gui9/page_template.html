@@ -1,0 +1,38 @@
+<!doctype html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>九麦声学故障监测</title><style>
+*{box-sizing:border-box}body{margin:0;background:#101820;color:#e5edf4;font:14px/1.5 system-ui}main{max-width:1050px;margin:auto;padding:24px}h1{margin:0}h2{font-size:17px}.muted{color:#a0b3c2}.bar,.card{padding:18px;background:#182530;border:1px solid #304352;border-radius:10px}.bar{margin:18px 0}.layout{display:grid;grid-template-columns:1fr 1fr;gap:16px}.wide{grid-column:1/-1}table{width:100%}td{padding:7px;border-bottom:1px solid #304352}td:last-child{text-align:right}.plot{position:relative;aspect-ratio:1;max-width:300px;margin:15px auto;border:1px solid #a0b3c2;background:linear-gradient(0deg,#304352 1px,transparent 1px),linear-gradient(90deg,#304352 1px,transparent 1px)}#dot{display:none;position:absolute;width:12px;height:12px;background:#52d6c1;border-radius:50%;transform:translate(-50%,-50%)}.empty{padding:30px 8px;border:1px dashed #526674;text-align:center;color:#a0b3c2}.warn{color:#ffd17c}button{background:#304352;color:white;border:1px solid #526674;border-radius:5px;padding:8px;cursor:pointer}#err{color:#ffacac;min-height:22px}canvas{width:100%;height:auto;background:#101820;border:1px solid #304352}@media(max-width:650px){.layout{grid-template-columns:1fr}main{padding:12px}}
+
+/* Fixed numeric slots keep changing digit counts from shifting adjacent text. */
+.layout{grid-template-columns:minmax(0,1fr) minmax(0,1fr)}.card{min-width:0;margin-bottom:16px}
+table{table-layout:fixed;border-collapse:collapse;font-variant-numeric:tabular-nums}td{overflow-wrap:anywhere}td:first-child{width:48%}td:last-child{font-variant-numeric:tabular-nums}
+.number{display:inline-block;width:11ch;text-align:right;white-space:nowrap;font-family:Consolas,monospace;font-variant-numeric:tabular-nums}
+#age,#connection{min-height:1.8em}#err{min-height:1.5em}#position{min-height:3em}#association{min-height:16em}#heatmap_note{min-height:5em}#gsc_state{min-height:6em}
+.table-scroll{overflow-x:auto}.data-table{min-width:720px}.data-table td,.data-table th{width:auto;text-align:right;padding:8px;white-space:nowrap;border-bottom:1px solid #304352;font-family:Consolas,monospace;font-variant-numeric:tabular-nums}
+.data-table th{font-family:system-ui}.data-table th:first-child,.data-table td:first-child{text-align:left;width:15%}.data-table td:last-child{white-space:normal;text-align:left;font-family:system-ui}.mic-table td:last-child{text-align:right;font-family:Consolas,monospace}
+.phase-controls{display:flex;gap:12px;align-items:center;flex-wrap:wrap}.phase-controls select{padding:8px;color:#e5edf4;background:#101820;border:1px solid #304352}#phase_meta,#phase_note,#phase_legend{min-height:3em}
+@media(max-width:650px){.layout{grid-template-columns:minmax(0,1fr)}}
+.gcc-table{min-width:1250px}.gcc-table td{white-space:pre-line!important;text-align:right!important;font-family:Consolas,monospace!important}.gcc-table td:first-child{text-align:left!important}.gcc-table td:last-child{width:12%}#gcc_panel input{width:8ch}#gcc_note,#gcc_selected{min-height:3em}
+table{table-layout:fixed;border-collapse:collapse}td{overflow-wrap:anywhere;font-variant-numeric:tabular-nums}td:first-child{width:46%}
+select,input{background:#101820;color:#e5edf4;padding:7px;border:1px solid #526674;max-width:100%}
+.alarm{color:#ff6174}.actions{display:flex;gap:8px;flex-wrap:wrap;margin:12px 0}.card{margin-bottom:16px;min-width:0}
+#direction_map{max-width:420px;display:block;margin:auto}pre{white-space:pre-wrap;max-height:300px;overflow:auto}
+#candidates p,#health_status p{min-height:42px}canvas{max-width:100%}details{margin:12px 0}
+</style></head><body><main>
+<h1>声学故障定位与设备健康监测</h1><p class="muted">九麦方向定位 · 多候选分离 · 诊断与事件管理</p>
+<div class="bar"><strong id="state">连接中</strong><p id="source"></p><button id="pause">暂停显示</button> <button id="save">保存系统快照</button><p id="err" role="status"></p></div>
+<div class="layout"><section class="card"><h2>声源方向与热力图</h2><canvas id="direction_map" width="410" height="390"></canvas><p id="map_note" class="muted"></p><p class="muted">水平角/俯仰角，无距离扫描。白色为候选，红色仅用于已验证故障方向。点击网格可申请定向。</p></section>
+<section class="card"><h2>诊断结果</h2><label>查看轨迹 <select id="candidate_select"></select></label><table id="diagnosis"></table><p id="model_note" class="muted"></p><div id="candidates"></div></section>
+<section class="card"><h2>选中轨迹的分离音频频谱</h2><canvas id="spectrum_plot" width="560" height="250"></canvas></section>
+<section class="card"><h2>同快照包络谱</h2><canvas id="envelope_plot" width="560" height="250"></canvas><p class="muted">C9F2载频2200–4600Hz；包络横轴为调制频率。1.024秒观察，补零不提高真实分辨率。</p></section></div>
+<section class="card"><button id="preview">获取同快照波形</button><p id="plot_note" class="muted">手动获取，避免大音频下载挤占实时通信。没有有效快照时不显示旧版单路频谱。</p><details><summary>18维诊断特征</summary><table id="features"></table></details></section>
+<div class="layout"><section class="card"><h2>音频电平与载频指标</h2><table id="levels"></table></section><section class="card"><h2>系统运行状态</h2><table id="runtime"></table></section></div>
+<section class="card"><h2>九路麦克风输入</h2><table id="mics"></table><p class="muted">独立定位快照电平；通道映射、幅相及实物几何仍须验收，不将PDM活动当作独立麦克风验证。</p></section>
+<section class="card"><h2>双麦同帧PCM与GCC调试</h2><select id="pair_a"></select> / <select id="pair_b"></select> <button id="pair_capture">抓取一帧</button> <button id="pair_save">导出PCM与GCC</button><button id="pair_run">&#36830;&#32493;&#37319;&#38598;10&#24103;</button> <button id="raw_download">&#19979;&#36733;&#20061;&#36335;&#21516;&#27493;&#24555;&#29031;</button><canvas id="pair_plot" width="1000" height="300"></canvas><table id="pair_result"></table><p id="pair_note" class="muted">读连续原始历史，不暂停PL；原始PCM时间轴保留时延。正峰、负谷、绝对峰只用于调试。</p></section>
+<section class="card"><h2>设备健康监测</h2><button id="health_toggle">启用/关闭监测</button><p id="health_note"></p><div id="health_status"></div><label>历史范围 <select id="history_range"><option value="60">最近1分钟</option><option value="300" selected>最近5分钟</option><option value="1800">最近30分钟</option></select></label><canvas id="history_plot" width="1000" height="240"></canvas><p id="history_note" class="muted"></p><p class="muted">RMS为真实分离音频值，不是健康度。板内日志容量固定；跨重启历史需运行PC归档服务。</p></section>
+<section class="card"><h2>故障与异常事件</h2><button id="export">导出当前历史与事件</button><table><thead><tr><th>ID</th><th>轨迹</th><th>状态</th><th>类别</th><th>生命周期</th><th>首次时间</th><th>详情</th></tr></thead><tbody id="events"></tbody></table><pre id="event_detail"></pre><p class="muted">轨迹ID只表示声学方向跟踪，不是机器身份。异常类别不自动等同机械故障；未知或断流不会解除报警。</p></section>
+<section class="card"><h2>拾音与实际转速</h2><div class="actions"><button data-control="/api/gsc/on">启用GSC</button><button data-control="/api/gsc/off">DAS旁路</button><button data-control="/api/gsc/freeze">冻结自适应</button><button data-control="/api/gsc/adapt">继续自适应</button><button data-control="/api/target/auto">跟踪最强峰</button><button data-control="/api/target/fault">跟踪已诊断故障</button></div><label>已知实际转速rpm <input id="rpm" type="number" min="600" max="1800" value="1500"></label> <button id="rpm_set">确认实际转速</button><p id="action_note"></p><p class="muted">默认值未被当作实测转速，需人工确认。几何/标定/模型门控保持原有规则。</p></section>
+<section class="card"><h2>跨重启历史归档</h2><button id="archive_load">查看PC归档</button><p id="archive_note" class="muted">可选SQLite服务：127.0.0.1:8769；不启用时仍有板内监测。</p><table id="archive_records"></table><div id="archive_events"></div></section>
+<section class="card"><h2>定位延迟与GSC运行指标</h2><table id="performance"></table></section>
+<script>
+{{GCC_CORE}}
+{{GUI9_JS}}
+</script></main></body></html>

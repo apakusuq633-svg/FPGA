@@ -1,4 +1,4 @@
-# Local build only: no deployment or changes to the shared Vitis workspace.
+﻿# Local build only: no deployment or changes to the shared Vitis workspace.
 param(
     [string]$ToolDir = 'D:\Vivado\Vitis\2020.2\gnu\aarch32\nt\gcc-arm-none-eabi\bin',
     [string]$BspDir = 'D:\Vitis\PS-PL\export\PS-PL\sw\PS-PL\standalone_domain',
@@ -13,6 +13,9 @@ param(
     [string]$DiagnosticModel = ''
 )
 $ErrorActionPreference = 'Stop'
+function Get-FileHash([string]$LiteralPath,[string]$Algorithm='SHA256') {
+ $sha=[Security.Cryptography.SHA256]::Create();try { $hash=$sha.ComputeHash([IO.File]::ReadAllBytes($LiteralPath));return [pscustomobject]@{Hash=([BitConverter]::ToString($hash).Replace('-',''));Path=$LiteralPath} } finally {$sha.Dispose()}
+}
 if ($Live -and $ActiveChannels -notin @(8,9)) { throw 'Supported live builds: planar8 or circular9' }
 if ($FixedDas16 -and ($Localization16 -or -not $Live -or $ActiveChannels -ne 16)) { throw 'FixedDas16 requires live sixteen-channel mode and cannot be combined with Localization16' }
 if ($Live -and $ActiveChannels -eq 16 -and -not $FixedDas16) { $Localization16 = $true }
