@@ -33,6 +33,7 @@ rtl/acoustic/rv32_acoustic_ext.v
 rtl/acoustic/rv32_fft_addr.v
 rtl/acoustic/rv32_fft_bfly.v
 rtl/array/rv32_chan_align.v
+rtl/array/rv32_circular9_control.v
 rtl/array/rv32_pdm_clkgen.v
 rtl/array/rv32_pdm_cic.v
 rtl/array/rv32_pdm_array_rx.v

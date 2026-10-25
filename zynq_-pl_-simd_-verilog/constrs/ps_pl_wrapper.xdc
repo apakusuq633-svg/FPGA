@@ -81,7 +81,9 @@ set_property -dict {PACKAGE_PIN F17 IOSTANDARD LVCMOS33} [get_ports IIC_0_0_sda_
 # ⚠ 未实测：板上零 bring-up 记录，那个外部上拉到底装没装是不知道的。如果 tacho 一直
 #   没边沿，先量这个脚的 DC 电平，别先动固件 —— 卡在 0 正是这个错。
 set_property -dict {PACKAGE_PIN R18 IOSTANDARD LVCMOS33 PULLUP true} [get_ports tacho_i]
-# tacho_i is reserved and currently unused in rv32_soc; no synchronizer path exists.
+# Circular9 synchronizes the asynchronous tachometer through tach_meta/tach_sync.
+# The pad only drives that first synchronizer stage; subsequent paths stay timed.
+set_false_path -from [get_ports tacho_i]
 
 # Production: planar eight microphones, four shared DATA lines + CLOCK.
 # 线序表见 docs/board_io.md §8，设计依据见 docs/pdm_array_spec.md。

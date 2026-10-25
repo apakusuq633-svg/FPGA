@@ -45,6 +45,9 @@
 #ifndef UI_DAS_WINDOW_PRESENT
 #define UI_DAS_WINDOW_PRESENT 0
 #endif
+#ifndef UI_SHAFT_MILLIHZ
+#define UI_SHAFT_MILLIHZ 25000u
+#endif
 #if UI_DAS_LIVE && !UI_DAS_WINDOW_PRESENT
 #error "Live DAS requires the matching PL FIFO bitstream"
 #endif
@@ -53,6 +56,8 @@
 #include "ps_pl_live.h"
 #if UI_DAS_ACTIVE_CHANNELS == 9
 #include "ps_circular9_live.h"
+#include "ps_circular9_tasks.h"
+#include "ps_circular9_control.h"
 #endif
 static das_fifo_receiver fifo_receiver;
 static uint32_t live_start_tick,live_ready;
@@ -349,6 +354,11 @@ void cpu1_prep(void)
 void cpu1_main(void)
 {
     volatile struct ipc_page *p=(volatile struct ipc_page *)IPC_BASE;
+#if UI_DAS_LIVE && UI_DAS_ACTIVE_CHANNELS == 9
+    (void)dia_classify_audio; /* Legacy single-beam classifier is not this path. */
+    (void)fea_setup;
+    for(;;)c9_tasks_cpu1(p);
+#else
     static double x[DAS_AUDIO_SEGMENT];
     struct ipc_frame f;
     fea_setup(FRAME_FS,1400.0,4600.0);
@@ -378,6 +388,7 @@ void cpu1_main(void)
         ipc_publish(p,&f);
         p->busy=0u;
     }
+#endif
 }
 
 static void init_audio(void)
@@ -391,7 +402,9 @@ static void init_audio(void)
         das_fifo_init(&fifo_receiver);
         audio_error=pl_live_prepare(&bus);
 #if UI_DAS_ACTIVE_CHANNELS == 9
+        c9_tasks_init();
         if(!audio_error)audio_error=c9_live_init();
+        if(!audio_error)bus.write(bus.ctx,0x3c,0xd3000000u);
 #endif
         live_ready=0;
     }
@@ -491,6 +504,11 @@ static void poll_audio(void)
 #endif
     audio_blocks++;
     pl_dropped=received_audio.desc.dropped_samples;
+#if UI_DAS_LIVE && UI_DAS_ACTIVE_CHANNELS == 9
+    /* CPU1 diagnoses independently separated same-snapshot candidates.
+     * Continuous chosen-target GSC audio remains available over UDP. */
+    return;
+#endif
     rc=das_queue_push(&audio_shared.q,&received_audio);
     if(rc==DAS_BAD_BLOCK) { /* invalid startup data resets accumulation, not the whole service */ }
 }
@@ -503,6 +521,7 @@ static void c9_realtime_checkpoint(void)
     if(c9_ticks_to_us(dia_gtimer_now()-c9_last_poll)>=75u)poll_audio();
     else poll_location();
 }
+#include "ps_circular9_api.h"
 #endif
 
 /* 放 CPU1 出去。三步的次序不能换：
@@ -640,14 +659,18 @@ static u16_t build_response(http_conn *c)
 #endif
 #if UI_DAS_LIVE
 #if UI_DAS_ACTIVE_CHANNELS == 9
-    if(strncmp(c->req,"GET /api/target?grid=",sizeof("GET /api/target?grid=")-1)==0) {
-        unsigned grid;char tail;
-        if(sscanf(c->req,"GET /api/target?grid=%u%c",&grid,&tail)==2&&tail==' '&&grid<1024) {
+    if(c9_tasks_route(c->req,&rep,g_body,sizeof(g_body))) {
+        /* Candidate audio/diagnosis routes never execute DSP on CPU0. */
+    } else if(strncmp(c->req,"GET /api/target?grid=",sizeof("GET /api/target?grid=")-1)==0) {
+        uint32_t grid;
+        if(c9_http_decimal(c->req+sizeof("GET /api/target?grid=")-1,0,1023,&grid)) {
+            c9_target_fault_mode=0;c9_fault_track=0;
             das_bus b=das_axi_bus(RV32_BASE);b.write(b.ctx,0x3c,0xd1000000u|grid);
-            snprintf(g_body,sizeof(g_body),"{\"mode\":\"manual\",\"requested_grid\":%u,\"geometry_confirmed\":%u}",grid,ACOUSTIC_GEOMETRY_CONFIRMED);
+            snprintf(g_body,sizeof(g_body),"{\"mode\":\"manual\",\"requested_grid\":%u,\"geometry_confirmed\":%u}",(unsigned)grid,ACOUSTIC_GEOMETRY_CONFIRMED);
             rep=(struct ui_reply){202,"Accepted","application/json",(int)strlen(g_body)};
         } else {strcpy(g_body,"{\"error\":\"invalid_grid\"}");rep=(struct ui_reply){400,"Bad Request","application/json",(int)strlen(g_body)};}
     } else if(strncmp(c->req,"GET /api/target/auto ",sizeof("GET /api/target/auto ")-1)==0) {
+        c9_target_fault_mode=0;c9_fault_track=0;
         das_bus b=das_axi_bus(RV32_BASE);b.write(b.ctx,0x3c,0xd2000000u);
         strcpy(g_body,"{\"mode\":\"automatic_localization\"}");rep=(struct ui_reply){202,"Accepted","application/json",(int)strlen(g_body)};
     } else if(strncmp(c->req,"GET /api/gsc/on ",16)==0||strncmp(c->req,"GET /api/gsc/off ",17)==0||
@@ -677,7 +700,7 @@ static u16_t build_response(http_conn *c)
         if(valid) {
             uint32_t map_age_us=(b.read(b.ctx,0x3e0)-first_tick)/C9_PL_TICKS_PER_US;
             if(map_age_us>C9_STALE_AFTER_US){accepted=0;reason|=64u;}
-            int n=snprintf(g_body,sizeof(g_body),"{\"sequence\":%u,\"frame\":%u,\"accepted\":%u,\"reason\":%u,\"map_age_us\":%u,\"stale_after_us\":%u,\"width\":32,\"plane_z_m\":0.3,\"half_width_m\":0.2,\"scores\":[",
+            int n=snprintf(g_body,sizeof(g_body),"{\"sequence\":%u,\"frame\":%u,\"accepted\":%u,\"reason\":%u,\"map_age_us\":%u,\"stale_after_us\":%u,\"width\":32,\"scan_model\":\"far_field_direction\",\"azimuth_min_deg\":-90,\"azimuth_max_deg\":90,\"elevation_min_deg\":-90,\"elevation_max_deg\":90,\"scores\":[",
                 (unsigned)seq,(unsigned)frame,(unsigned)accepted,(unsigned)reason,(unsigned)map_age_us,(unsigned)C9_STALE_AFTER_US);
             for(unsigned i=0;i<1024;i++) {
                 n=ui_append(g_body,sizeof(g_body),n,"%s%d",i?",":"",(int)values[i]);
@@ -1081,6 +1104,9 @@ int main(void)
         poll_audio();
 #if UI_DAS_LIVE && UI_DAS_ACTIVE_CHANNELS == 9
         c9_network_poll();
+        poll_audio();
+        {das_bus bus=das_axi_bus(RV32_BASE);
+         c9_rpm_poll(&bus);c9_tasks_map_poll(&bus);c9_tasks_receive();c9_tasks_schedule();c9_tasks_select_fault(&bus);}
         poll_audio();
 #endif
         { int connection;

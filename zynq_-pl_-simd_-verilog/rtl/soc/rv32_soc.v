@@ -531,15 +531,46 @@ module rv32_soc #(
       end
     end
   end
-  wire production_direction_fault=loc_fault||recovery_state!=0||(circular9_direction&&!direction_approved);
+  wire c9_fine_enabled,c9_fine_valid;
+  wire [9:0] c9_fine_grid;
+  wire [31:0] c9_fine_version,c9_control_rdata;
+  wire [287:0] c9_fine_comp;
+  wire c9_extension=DAS_ACTIVE_CHANNELS==9&&pdm_cfg_addr_i>=60&&pdm_cfg_addr_i<=63;
+  generate if(DAS_ACTIVE_CHANNELS==9)begin:g_c9_control
+   rv32_circular9_control u_control(.clk_i(clk_i),.rst_n_i(rst_n_i),
+    .clock_i(acquisition_clock),.epoch_i(recovery_epoch),.tacho_i(tacho_i),
+    .wr_i(pdm_cfg_wr_i&&c9_extension),.addr_i(pdm_cfg_addr_i[1:0]),.wdata_i(pdm_cfg_wdata_i),
+    .rdata_o(c9_control_rdata),.fine_enabled_o(c9_fine_enabled),.fine_valid_o(c9_fine_valid),
+    .fine_grid_o(c9_fine_grid),.fine_version_o(c9_fine_version),.fine_comp_o(c9_fine_comp));
+  end else begin:g_no_c9_control
+   assign c9_control_rdata=0;assign c9_fine_enabled=0;assign c9_fine_valid=0;
+   assign c9_fine_grid=0;assign c9_fine_version=0;assign c9_fine_comp=0;
+  end endgenerate
+  wire c9_fine_ready=c9_fine_valid&&committed_grid==c9_fine_grid;
+  wire production_direction_fault=loc_fault||recovery_state!=0||(circular9_direction&&!direction_approved)||
+    (c9_fine_enabled&&!c9_fine_ready);
+  // Firmware need not reload a coarse LUT cell when only its fine angle
+  // changes. Keep offering the selected vector until DAS acknowledges that
+  // version; the link's handshake makes this safe under backpressure. The
+  // same rule restores coarse steering immediately after fine OFF.
+  wire [31:0] c9_selected_version=c9_fine_enabled?c9_fine_version:approved_version;
+  reg [31:0] c9_offered_version;
+  always @(posedge clk_i or negedge rst_n_i)begin
+    if(!rst_n_i)c9_offered_version<=0;
+    else if(production_direction_fault)c9_offered_version<=0;
+    else if(direction_valid&&direction_ready)c9_offered_version<=direction_version;
+  end
+  wire c9_direction_pending=circular9_direction&&direction_approved&&
+    !production_direction_fault&&beam_locked&&!steer_busy&&
+    !direction_valid&&c9_offered_version!=c9_selected_version;
   rv32_direction_link #(.CHANNELS(ALGORITHM_CHANNELS),.COMMITTED_ONLY(DAS_ACTIVE_CHANNELS==9)) u_direction_link(
     .clk_i(clk_i),.rst_n_i(rst_n_i),.enable_i(circular9_direction||test_direction_enable),.fault_i(production_direction_fault),
-    .result_valid_i(circular9_direction?approved_pulse:loc_done),
+    .result_valid_i(circular9_direction?(approved_pulse||c9_direction_pending):loc_done),
     .result_grid_i(circular9_direction?committed_grid:loc_grid),
-    .result_version_i(circular9_direction?approved_version:loc_window),.result_score_i($signed(loc_score)),
+    .result_version_i(c9_fine_enabled?c9_fine_version:circular9_direction?approved_version:loc_window),.result_score_i($signed(loc_score)),
     .steer_busy_i(steer_busy),.steer_locked_i(beam_locked),
     .steer_bus_idle_i(!mmio_steer_win&&!steer_cfg_wr_i&&!steer_cfg_rd_i&&!core_steer_start),
-    .steer_committed_i(committed_grid),.steer_comp_i(beam_comp),
+    .steer_committed_i(committed_grid),.steer_comp_i(c9_fine_enabled?c9_fine_comp:beam_comp),
     .steer_start_o(link_start),.steer_target_o(link_target),.direction_valid_o(direction_valid),.direction_ready_i(direction_ready),
     .direction_comp_o(direction_comp),.direction_id_o(direction_id),.direction_version_o(direction_version),.rejected_o(link_rejected));
   wire [31:0] pdm_capture_rdata, beam_rdata;
@@ -558,13 +589,13 @@ module rv32_soc #(
     default:integrated_rdata=0;
   endcase
   wire integrated_page=pdm_cfg_addr_i[5]&&pdm_cfg_addr_i[4:0]>=18&&pdm_cfg_addr_i[4:0]<=27;
-  assign pdm_cfg_rdata_o = integrated_page?integrated_rdata:pdm_cfg_addr_i[5] ? beam_rdata : pdm_capture_rdata;
+  assign pdm_cfg_rdata_o = c9_extension?c9_control_rdata:integrated_page?integrated_rdata:pdm_cfg_addr_i[5] ? beam_rdata : pdm_capture_rdata;
   rv32_das_stream #(.ACTIVE_CHANNELS(DAS_ACTIVE_CHANNELS)) u_beam (
     .clk_i(clk_i), .rst_n_i(rst_n_i),
     .pcm_i(pdm_aligned[ALGORITHM_CHANNELS*24-1:0]), .valid_i(pdm_valid_aligned),
     .steer_comp_i(beam_comp), .steer_locked_i(beam_locked), .steer_busy_i(steer_busy),
-    .cfg_wr_i(pdm_cfg_wr_i & pdm_cfg_addr_i[5] & !integrated_page),
-    .cfg_rd_i(pdm_cfg_rd_i & pdm_cfg_addr_i[5] & !integrated_page),
+    .cfg_wr_i(pdm_cfg_wr_i & pdm_cfg_addr_i[5] & !integrated_page & !c9_extension),
+    .cfg_rd_i(pdm_cfg_rd_i & pdm_cfg_addr_i[5] & !integrated_page & !c9_extension),
     .cfg_addr_i(pdm_cfg_addr_i[4:0]), .cfg_wdata_i(pdm_cfg_wdata_i),
     .cfg_rdata_o(beam_rdata), .fir_valid_o(beam_fir_valid),
     .fir_sample_o(beam_fir_sample), .fir_ready_i(beam_fir_ready),

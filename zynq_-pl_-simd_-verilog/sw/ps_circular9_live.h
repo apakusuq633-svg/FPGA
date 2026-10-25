@@ -6,6 +6,8 @@
 #include "circular9_stream.h"
 #include "circular9_deadline.h"
 #include "xil_cache.h"
+static void c9_record_sample(const uint32_t packet[16]);
+static void c9_record_reset(void);
 #define C9_DMA_BASE 0x43c10000u
 static union {uint8_t slots[524288];uint8_t section[1048576];} c9_ddr __attribute__((section(".c9_dma"),aligned(1048576)));
 static pdm_stream_ring c9_ring;
@@ -47,6 +49,7 @@ static int c9_live_init(void){
  Xil_DCacheFlushRange((INTPTR)&c9_ddr,sizeof(c9_ddr));
  Xil_SetTlbAttributes((INTPTR)&c9_ddr,NORM_NONCACHE);
  circular9_audio_init(&c9_audio);
+ c9_audio.target_guard_requested=1;
  uint32_t session=Xil_In32(0xf8f00200u);if(!session)session=1;
  return pdm_ring_open(&c9_ring,&io,(uint32_t)(uintptr_t)c9_ddr.slots,12,4000000,
     ACOUSTIC_CALIBRATION_VERSION,0,session,100000);
@@ -99,14 +102,17 @@ static int c9_live_poll(das_audio_block *out,uint32_t *drops){
   uint8_t *slot=c9_slots+c9_batch*128;uint32_t old_session=pdm_ring_stream_id(&c9_ring);
   int rc=pdm_ring_next(&c9_ring,slot);
   if(rc==0)break;
-  if(rc==-3){c9_audio.count=0;c9_audio.filter_count=0;c9_audio.discontinuities++;continue;}
+  if(rc==-3){c9_record_reset();c9_audio.count=0;c9_audio.filter_count=0;c9_audio.discontinuities++;continue;}
   if(rc<0)return -11;
   if(old_session!=pdm_ring_stream_id(&c9_ring)) {
+   c9_record_reset();
    /* Do not combine pre-reset samples with the new timestamp epoch. */
    if(c9_batch){memmove(c9_slots,slot,128);c9_software_drops+=c9_batch;c9_batch=0;slot=c9_slots;}
    circular9_audio_init(&c9_audio);
+   c9_audio.target_guard_requested=1;
   }
   uint32_t w[16];for(unsigned k=0;k<16;k++)w[k]=c9_u32(slot+4*k);
+  c9_record_sample(w);
   if(!c9_batch)c9_batch_tick=Xil_In32(0xf8f00200u);
   *drops=c9_read(NULL,0x18)+w[15];
   complete=circular9_audio_push(&c9_audio,w,acoustic_steer_lut,acoustic_fir_coeff,
@@ -117,13 +123,16 @@ static int c9_live_poll(das_audio_block *out,uint32_t *drops){
   if(complete){*out=c9_audio.block;break;}
   if((budget&3u)==3u&&c9_ticks_to_us(Xil_In32(0xf8f00200u)-begin)>=75u)break;
  }
- if(c9_read(NULL,0x24)&16u){if(pdm_ring_recover(&c9_ring,256))return -13;c9_audio.count=0;}
+ if(c9_read(NULL,0x24)&16u){c9_record_reset();if(pdm_ring_recover(&c9_ring,256))return -13;c9_audio.count=0;}
  uint32_t elapsed=Xil_In32(0xf8f00200u)-begin;if(elapsed>c9_max_service)c9_max_service=elapsed;
  if(c9_ticks_to_us(elapsed)>100u)c9_service_overruns++;
  return complete?DAS_OK:DAS_EMPTY;
 }
 static int c9_status(char *out,size_t n){
- int used=snprintf(out,n,"{\"gsc_requested\":%u,\"freeze_updates\":%u,\"gsc_reason\":%u,"
+ int used=snprintf(out,n,"{\"localizer_abi\":\"P9D2\",\"rv32_itcm_sha256\":\"" ACOUSTIC_ITCM_SHA256 "\","
+  "\"pdm_decimation\":16,\"window_samples\":1024,\"capture_slots\":10,\"active_channels\":9,\"active_mask\":511,"
+  "\"calibration_status\":\"" ACOUSTIC_CALIBRATION_STATUS "\","
+  "\"gsc_requested\":%u,\"freeze_updates\":%u,\"gsc_reason\":%u,"
   "\"geometry_confirmed\":%u,\"calibration_version\":%u,\"geometry_version\":%u,"
   "\"udp_sent\":%u,\"udp_frames_dropped\":%u,\"dma_drops\":%u,\"discontinuities\":%u,"
   "\"max_ps_poll_gap_us\":%u,\"max_ps_service_us\":%u,\"single_window_deadline_us\":%u,"

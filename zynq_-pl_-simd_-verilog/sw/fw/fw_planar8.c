@@ -168,7 +168,9 @@ int main(void){
         uint32_t selection=REG(0x4000u,1);
         if((selection>>24)==0xd1u){manual=1;manual_grid=selection&1023u;}
         if((selection>>24)==0xd2u)manual=0;
-        if(manual){steer_grid=manual_grid;steer_reason&=LOCATION_SILENT|LOCATION_BAD_INPUT|LOCATION_DEADLINE|32u;}
+        if((selection>>24)==0xd3u)manual=2; /* PS diagnosis has no accepted fault target. */
+        if(manual==1u){steer_grid=manual_grid;steer_reason&=LOCATION_SILENT|LOCATION_BAD_INPUT|LOCATION_DEADLINE|32u;}
+        if(manual==2u)steer_reason|=LOCATION_CONFIRMING;
         RESULT(236)=manual;RESULT(237)=steer_grid;RESULT(238)=selection;
 #endif
         if(!steer_reason){

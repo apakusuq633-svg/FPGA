@@ -1,0 +1,203 @@
+{
+  "record_version": 1,
+  "source_config_sha256": "36e3b06e7b8c53c0f5e409b51b644fad1ae32ff5949f998110b326f349cde74a",
+  "array_id": null,
+  "operator": null,
+  "measured_at": null,
+  "sources": {
+    "geometry": null,
+    "mapping": null,
+    "clock": null,
+    "gain": null,
+    "delay": null
+  },
+  "evidence_files": [],
+  "microphones": [
+    {
+      "mic_id": 0,
+      "position_m": [
+        null,
+        null,
+        null
+      ]
+    },
+    {
+      "mic_id": 1,
+      "position_m": [
+        null,
+        null,
+        null
+      ]
+    },
+    {
+      "mic_id": 2,
+      "position_m": [
+        null,
+        null,
+        null
+      ]
+    },
+    {
+      "mic_id": 3,
+      "position_m": [
+        null,
+        null,
+        null
+      ]
+    },
+    {
+      "mic_id": 4,
+      "position_m": [
+        null,
+        null,
+        null
+      ]
+    },
+    {
+      "mic_id": 5,
+      "position_m": [
+        null,
+        null,
+        null
+      ]
+    },
+    {
+      "mic_id": 6,
+      "position_m": [
+        null,
+        null,
+        null
+      ]
+    },
+    {
+      "mic_id": 7,
+      "position_m": [
+        null,
+        null,
+        null
+      ]
+    },
+    {
+      "mic_id": 8,
+      "position_m": [
+        null,
+        null,
+        null
+      ]
+    }
+  ],
+  "channel_to_mic": [
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null
+  ],
+  "expected_capture_contract": {
+    "pdm_clock_hz": 2500000,
+    "pdm_decimation": 16,
+    "sample_rate_hz": 156250,
+    "sample_rate_num": 156250,
+    "sample_rate_den": 1,
+    "pl_clock_hz": 40000000,
+    "active_mask": 511,
+    "capture_slots": 10,
+    "window_samples": 1024,
+    "localizer_hop": 512,
+    "r_len": 64,
+    "diagnostic_decimation": 4
+  },
+  "capture_contract": {
+    "pdm_clock_hz": null,
+    "pdm_decimation": null,
+    "sample_rate_hz": null,
+    "sample_rate_num": null,
+    "sample_rate_den": null,
+    "pl_clock_hz": null,
+    "active_mask": null,
+    "capture_slots": null,
+    "window_samples": null,
+    "localizer_hop": null,
+    "r_len": null,
+    "diagnostic_decimation": null
+  },
+  "channel_gain_q14": [
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null
+  ],
+  "channel_delay_samples": [
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null
+  ],
+  "fit_residuals": {
+    "band_low_hz": null,
+    "band_high_hz": null,
+    "gain_rms_db": [
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null
+    ],
+    "phase_rms_deg": [
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null
+    ],
+    "delay_rms_samples": [
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null
+    ]
+  },
+  "confirmations": {
+    "geometry_measured": false,
+    "channel_mapping_measured": false,
+    "clock_and_decimation_verified": false,
+    "gain_delay_measured": false,
+    "fit_residuals_reviewed": false,
+    "accepted_for_build": false
+  },
+  "notes": [
+    "Unfilled values are NOT measurements. Units: metres and original156250-Hz PCM samples.",
+    "View the acoustic front: +x right,+y up,+z toward source; mic8 is center and MUST be capture slot8.",
+    "Map all9 live capture channels by individual microphone checks; do not infer mapping from connector labels.",
+    "Gain values correct each sensor amplitude; delay values are sensor arrival offsets AFTER removing known geometric propagation. Reference channel0 delay is0.",
+    "Record evidence files with path,sha256,roles; reviewed calibration requires gain,delay,fit roles.",
+    "Set confirmations true ONLY after actual measurement and independent residual review. This does not mark board_tested."
+  ]
+}
