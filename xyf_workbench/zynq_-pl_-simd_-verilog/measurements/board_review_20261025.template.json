@@ -1,0 +1,37 @@
+{
+  "schema": 1,
+  "board_id": "UNCONFIRMED",
+  "review_id": "",
+  "reviewed_at": "",
+  "electrical": {
+    "microphone_brand": "Infineon",
+    "microphone_chip_model": "IM73D122",
+    "measured_supply_volts": null,
+    "chip_supply_clock_rating_checked": true,
+    "measured_clock_hz": null,
+    "measured_clock_duty_percent": null,
+    "data5_independent_verified": false,
+    "fpga_header_wiring_checked": false,
+    "data5_wiring_report": "User reports real wiring correct; H1 schematic label is wrong. Independent ninth-channel response remains to be checked."
+  },
+  "deployment": {
+    "loaded_package_verified": false,
+    "package_manifest_sha256": "",
+    "pl_bit_sha256": "",
+    "ps_elf_sha256": ""
+  },
+  "localization": {
+    "channel_mapping_verified": false,
+    "sound_hole_coordinates_verified": false,
+    "amplitude_phase_calibration_verified": false,
+    "calibration_version": 0,
+    "calibration_review_id": ""
+  },
+  "diagnosis": {
+    "model_version": 0,
+    "model_validation_review_id": "",
+    "rpm": null,
+    "rpm_source": ""
+  },
+  "note": "Fill only from actual measurements/review. Booleans are operator attestations, not automatic hardware proof."
+}

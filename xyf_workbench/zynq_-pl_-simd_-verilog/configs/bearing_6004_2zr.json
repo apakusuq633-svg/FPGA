@@ -33,7 +33,19 @@
   "model_compatible": false,
   "model_status": "requires_target_recordings_and_validation",
   "baseline_available": false,
+  "feature_contract": "C9F2",
+  "separation_contract": "C9S3",
   "feature_window_samples": 40000,
-  "feature_fft_length": 8192,
-  "low_speed_ftf_status": "unresolved_at_8192_fft_do_not_claim_cage_diagnosis"
+  "feature_sample_rate_num": 78125,
+  "feature_sample_rate_den": 2,
+  "feature_observation_seconds": 1.024,
+  "feature_fft_domain": "decimated_full_segment_envelope",
+  "feature_fft_length": 4096,
+  "feature_envelope_samples": 2500,
+  "feature_envelope_rate_num": 78125,
+  "feature_envelope_rate_den": 32,
+  "feature_carrier_low_hz": 2200,
+  "feature_carrier_high_hz": 4600,
+  "feature_carrier_status": "engineering_choice_requires_real_acoustic_validation",
+  "low_speed_ftf_status": "C9F2_synthetic_FTF_vs_1X_passed_real_cage_fault_diagnosis_unverified"
 }

@@ -11,6 +11,7 @@ module tb_circular9_latency;
  reg [31:0] host=0;
  reg [4:0] pdm_data=0;wire pdm_clock;
  reg [8:0] pdm_vectors[0:65535];integer pdm_index=0,pdm_mode=0;
+ wire [31:0] cfg_rdata;
  string pdm_file;
  always @(negedge pdm_clock)if(pdm_mode)begin
   pdm_index=(pdm_index+1)%65536;
@@ -25,6 +26,7 @@ module tb_circular9_latency;
   .ps_sel_i(1'b0),.ps_addr_i(32'b0),.ps_wdata_i(32'b0),.tacho_i(1'b0),.pdm_din_i(pdm_data),.pdm_clk_o(pdm_clock),
   .coef_we_i(cw),.coef_re_i(1'b0),.coef_src_i(1'b0),.coef_ch_i(1'b1),.coef_idx_i(ci),.coef_wdata_i(cd),
   .pdm_cfg_wr_i(wr),.pdm_cfg_rd_i(rd),.pdm_cfg_addr_i(addr),.pdm_cfg_wdata_i(data),
+  .pdm_cfg_rdata_o(cfg_rdata),
   .srp_cfg_wr_i(1'b0),.srp_cfg_rd_i(1'b0),.srp_cfg_addr_i(7'b0),.srp_cfg_wdata_i(32'b0),
   .xsp_cfg_wr_i(1'b0),.xsp_cfg_rd_i(1'b0),.xsp_cfg_addr_i(7'b0),.xsp_cfg_wdata_i(32'b0),
   .steer_cfg_wr_i(1'b0),.steer_cfg_rd_i(1'b0),.steer_cfg_addr_i(7'b0),.steer_cfg_wdata_i(32'b0));
@@ -33,13 +35,18 @@ module tb_circular9_latency;
  rv32_pdm_array_rx #(.DECIM(16)) rx(.clk_i(clk),.rst_n_i(rst),.en_i(rst),.pdm_din_i(4'b0101),.sample_valid_o(rx_valid));
  reg [15:0] input_pcm[0:36863];
  string fw,pcm_file,dump,gsc_dump;
+ string fine_delay_file;
+ reg [31:0] fine_delay[0:17];
+ integer fine_mode=0,fine_committed=0,fine_packets=0,fine_second=0,fine_packets2=0;
+ integer fine_restore_requested=0,fine_restored_packets=0;
+ reg [31:0] fine_expected_group=0,fine_expected_group2=0;
  integer confirmed=0,gsc_fd=0,gsc_packets=0;
  integer i,n,ch,k,frames=0,previous_frame=0,phase=0,previous_phase=0;
  longint tick=0,first_input=0,last_input=0,last_result=0,phase_begin=0;
  longint first_input_id=0;
  longint audio_begin=0,audio_emit=0,fft_begin=0,srp_begin=0,rx_first=0;
  integer audio_count=0,overlap=0,production=0,windows=3;
- integer test_case=0;reg raw_done=0;
+ integer test_case=0;reg raw_done=0;reg manual_selected=0;
  integer forward_runs=0,inverse_runs=0,cross_runs=0,phat_runs=0,srp_runs=0;
  reg geo_start=0;wire geo_done;
  longint geo_begin=0;
@@ -53,8 +60,14 @@ module tb_circular9_latency;
   wait(rst);repeat(10)@(negedge clk);geo_start=1;
   @(negedge clk);geo_start=0;
  end
- always @(negedge clk)if(production && test_case==3 && dut.loc_done)begin
+ always @(negedge clk)if(production && (test_case==3 || test_case==5) && dut.loc_done)begin
   for(integer g=0;g<1024;g=g+1)dut.u_srp.u_scan.p_mem[g]=g==800?100000:0;
+ end
+ initial begin
+  wait(production && test_case==5);
+  @(negedge clk);host=32'hd3000001;
+  wait(frames==3);@(negedge clk);host=32'hd1000320;
+  wait(frames==6);@(negedge clk);host=32'hd3000002;
  end
  initial begin
   wait(production && test_case==4 && frames==1);
@@ -68,11 +81,58 @@ module tb_circular9_latency;
  task cfg(input [6:0] a,input [31:0] v);
   @(negedge clk);addr=a;data=v;wr=1;@(negedge clk);wr=0;
  endtask
+ task fine_indexed(input [31:0] index,input [31:0] value);
+  cfg(61,index);cfg(62,value);
+ endtask
+ task fine_expect(input [31:0] index,input [31:0] value);
+  cfg(61,index);@(negedge clk);addr=62;rd=1;
+  #1;if(cfg_rdata!==value)$fatal(1,"fine readback index=%0d got=%h expected=%h",index,cfg_rdata,value);
+  @(negedge clk);rd=0;
+ endtask
+ initial begin
+  wait(fine_mode&&production&&confirmed&&test_case==3&&frames==3);
+  // Pause only the shared cfg-port drain, then perform the actual PS indexed
+  // shadow protocol. Raw capture, custom instructions and audio keep running.
+  @(negedge clk);drain=0;rd=0;
+  cfg(60,32'h42454731);
+  fine_indexed(1,800);fine_indexed(2,1);
+  fine_indexed(3,dut.recovery_epoch);fine_indexed(4,dut.acquisition_clock);
+  for(integer fc=0;fc<9;fc=fc+1)fine_indexed(8+fc,fine_delay[fc]);
+  cfg(60,32'h434f4d31);
+  fine_expect(20,800);fine_expect(21,32'h80000001);
+  fine_expect(22,dut.recovery_epoch);fine_expect(25,3);
+  for(integer fc=0;fc<9;fc=fc+1)fine_expect(32+fc,fine_delay[fc]);
+  host=32'hd1000320;fine_committed=1;drain=1;
+  $display("FINE_SHADOW_COMMITTED version=2147483649 grid=800 epoch=%0d group_delay=%0d",dut.recovery_epoch,fine_expected_group);
+  wait(frames==8);@(negedge clk);drain=0;rd=0;
+  cfg(60,32'h42454731);
+  fine_indexed(1,800);fine_indexed(2,2);
+  fine_indexed(3,dut.recovery_epoch);fine_indexed(4,dut.acquisition_clock);
+  for(integer fc=0;fc<9;fc=fc+1)fine_indexed(8+fc,fine_delay[9+fc]);
+  cfg(60,32'h434f4d31);
+  fine_expect(21,32'h80000002);fine_expect(25,3);
+  for(integer fc=0;fc<9;fc=fc+1)fine_expect(32+fc,fine_delay[9+fc]);
+  fine_second=1;drain=1;
+  $display("FINE_SECOND_COMMITTED version=2147483650 grid=800");
+  wait(frames==14);@(negedge clk);drain=0;rd=0;
+  cfg(60,32'h4f464631);fine_expect(25,0);
+  host=32'hd1000320;fine_restore_requested=1;drain=1;
+  $display("FINE_OFF_RESTORE_COARSE requested_grid=800");
+ end
  initial begin
   if(!$value$plusargs("FW=%s",fw))$fatal(1,"missing FW");
   overlap=$test$plusargs("OVERLAP");
   production=$test$plusargs("PRODUCTION");
   confirmed=$test$plusargs("CONFIRMED_TEST_ONLY");
+  fine_mode=$test$plusargs("FINE_TEST");
+  if(fine_mode)begin
+   if(!$value$plusargs("FINE_DELAYS=%s",fine_delay_file))$fatal(1,"missing fine delays");
+   $readmemh(fine_delay_file,fine_delay);
+   for(integer fc=0;fc<9;fc=fc+1)if(fine_delay[fc]>fine_expected_group)fine_expected_group=fine_delay[fc];
+   for(integer fc=9;fc<18;fc=fc+1)if(fine_delay[fc]>fine_expected_group2)fine_expected_group2=fine_delay[fc];
+   fine_expected_group=fine_expected_group+65536;
+   fine_expected_group2=fine_expected_group2+65536;
+  end
   pdm_mode=$value$plusargs("PDM=%s",pdm_file);
   if(pdm_mode)$readmemh(pdm_file,pdm_vectors);
   if($value$plusargs("GSC_DUMP=%s",gsc_dump))begin gsc_fd=$fopen(gsc_dump,"w");if(!gsc_fd)$fatal(1,"GSC output open");end
@@ -115,7 +175,21 @@ module tb_circular9_latency;
  always @(posedge clk)begin
   tick=tick+1;
   if(rst)begin
-   if(gsc_fd&&dut.gsc_valid_o)begin $fdisplay(gsc_fd,"%0128h",dut.gsc_data_o);gsc_packets=gsc_packets+1;end
+   if(gsc_fd&&dut.gsc_valid_o)begin
+    $fdisplay(gsc_fd,"%0128h",dut.gsc_data_o);gsc_packets=gsc_packets+1;
+    if(fine_mode&&dut.gsc_data_o[95:64]==32'h80000001&&dut.gsc_data_o[193:192]==2'b01)begin
+     fine_packets=fine_packets+1;
+     if(dut.gsc_data_o[191:160]!==fine_expected_group||dut.gsc_data_o[209:200]!==10'd800)
+      $fatal(1,"fine version must carry actual fine group delay/grid");
+    end
+    if(fine_mode&&dut.gsc_data_o[95:64]==32'h80000002&&dut.gsc_data_o[193:192]==2'b01)begin
+     fine_packets2=fine_packets2+1;
+     if(dut.gsc_data_o[191:160]!==fine_expected_group2||dut.gsc_data_o[209:200]!==10'd800)
+      $fatal(1,"second fine token must carry its own delay vector metadata");
+    end
+    if(fine_mode&&fine_restore_requested&&!dut.gsc_data_o[95]&&dut.gsc_data_o[193:192]==2'b01)
+     fine_restored_packets=fine_restored_packets+1;
+   end
    if(pdm_mode?dut.pdm_valid_aligned:valid)begin
     if(audio_count==0)begin first_input=tick;first_input_id=pdm_mode?dut.pdm_frame_cnt:sample_id;end
     last_input=tick;audio_begin=tick;
@@ -180,6 +254,16 @@ module tb_circular9_latency;
      if(test_case==1 && !(dut.u_dtcm.memory['ha61]&1))$fatal(1,"silence not rejected");
      if(test_case==2 && !(dut.u_dtcm.memory['ha61]&2))$fatal(1,"clipping not rejected");
      if(test_case==3 && !confirmed && dut.beam_locked)$fatal(1,"unverified geometry steered");
+     if(test_case==5)begin
+      if(frames<=3 || frames>=7)begin
+       if(dut.u_dtcm.memory['haec]!=2 || dut.direction_approved || dut.direction_trusted || (frames<=3&&dut.beam_locked))
+        $fatal(1,"PS diagnosis hold retained trusted audio frame=%0d mode=%0d approved=%0d trusted=%0d",frames,dut.u_dtcm.memory['haec],dut.direction_approved,dut.direction_trusted);
+      end else begin
+       if(dut.u_dtcm.memory['haec]!=1 || dut.u_dtcm.memory['haed]!=800 || !dut.beam_locked || !dut.direction_approved || (frames>=5&&!dut.direction_trusted))
+        $fatal(1,"PS selected candidate did not steer frame=%0d mode=%0d grid=%0d locked=%0d approved=%0d trusted=%0d",frames,dut.u_dtcm.memory['haec],dut.u_dtcm.memory['haed],dut.beam_locked,dut.direction_approved,dut.direction_trusted);
+       manual_selected=1;
+      end
+     end
      $display("PRODUCTION_POST compute=%0d post=%0d custom_fft=%0d custom_ifft=%0d custom_cross=%0d custom_phat=%0d custom_srp=%0d",dut.u_dtcm.memory['hae8],dut.u_dtcm.memory['hae9],forward_runs,inverse_runs,cross_runs,phat_runs,srp_runs);
     end
     if(dut.u_dtcm.memory['ha81]==32'h43595031)begin
@@ -190,7 +274,15 @@ module tb_circular9_latency;
      if(production && !confirmed && dut.beam_locked)$fatal(1,"unverified geometry locked");
      if(confirmed && test_case==3 && (!dut.beam_locked || !dut.direction_trusted))$fatal(1,"approved direction never reached beam");
      if(gsc_fd)begin $fclose(gsc_fd);$display("GSC_PACKETS count=%0d",gsc_packets);end
+     if(fine_mode)begin
+      $display("FINE_STATUS enabled=%0d valid=%0d ready=%0d control_version=%h direction_version=%h applied_version=%h link_state=%0d fine_packets=%0d committed=%0d",dut.c9_fine_enabled,dut.c9_fine_valid,dut.c9_fine_ready,dut.c9_fine_version,dut.direction_version,dut.applied_version,dut.u_direction_link.state,fine_packets,fine_committed);
+      if(!fine_committed||!fine_second||fine_packets<1024||fine_packets2<1024||fine_restored_packets<1024||
+         !fine_restore_requested||dut.applied_version!==dut.approved_version||dut.applied_version[31])
+       $fatal(1,"fine SoC pipeline never published complete trusted raw stream");
+      $display("FINE_SOC_PASS trusted_packets=%0d second_packets=%0d restored_packets=%0d version=%0d",fine_packets,fine_packets2,fine_restored_packets,dut.applied_version);
+     end
      if(production && test_case==4 && !raw_done)$fatal(1,"raw capture did not resume");
+     if(test_case==5 && !manual_selected)$fatal(1,"PS selected direction never tested");
      if(production && (forward_runs!=9*windows || inverse_runs!=36*windows || cross_runs!=36*windows || phat_runs!=36*windows || srp_runs!=windows))$fatal(1,"custom instruction counts mismatch");
      $display("CIRCULAR9_LATENCY_PASS frames=%0d audio_samples=%0d",frames,audio_count);$finish;
     end

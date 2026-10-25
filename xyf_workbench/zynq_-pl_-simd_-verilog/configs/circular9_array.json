@@ -27,11 +27,21 @@
   "capture_words_per_frame": 5,
   "capture_bytes_per_bank": 10240,
   "pcb_radius_m": 0.03,
-  "ring_radius_m": 0.025,
+  "ring_radius_m": 0.03,
+  "ring_radius_source": "user_confirmed_2026-10-25: eight microphones on radius 30 mm and one at center",
+  "pcb_clearance_status": "unverified; pcb_radius_m remains the earlier nominal board outline",
+  "schematic_h1_status": "user_confirmed_label_error_only_actual_data_lines_correct_2026-10-25",
+  "microphone_vendor": "Infineon",
+  "microphone_part_number": "IM73D122",
+  "microphone_datasheet_url": "https://www.infineon.com/assets/row/public/documents/30/49/infineon-im73d122-datasheet-en.pdf",
+  "microphone_datasheet_revision": "1.00 2022-08-12",
+  "supply_voltage_v": 3.3,
+  "electrical_contract_reviewed": true,
+  "electrical_contract_basis": "user-reported 3.3 V and IM73D122; datasheet 1.62..3.6 V and high-performance clock 2.0..2.6 MHz; physical waveforms unmeasured",
   "geometry_status": "proposed",
   "physical_mapping_confirmed": false,
   "board_tested": false,
-  "hardware_available": false,
+  "hardware_available": true,
   "din_pins": [
     "T14",
     "Y17",
@@ -44,8 +54,16 @@
   "coordinate_unit": "m",
   "coordinate_frame": "front view +x right +y up +z toward observer",
   "sound_speed_m_s": 343,
-  "grid_half_m": 0.2,
-  "plane_z_m": 0.3,
+  "scan_model": "far_field_direction",
+  "direction_grid": "uniform_azimuth_elevation_cell_centers",
+  "azimuth_min_deg": -90,
+  "azimuth_max_deg": 90,
+  "elevation_min_deg": -90,
+  "elevation_max_deg": 90,
+  "azimuth_definition": "atan2(x,z), degrees, 0 is array front +z, positive toward +x",
+  "elevation_definition": "asin(y), degrees, positive toward +y",
+  "front_hemisphere_only": true,
+  "planar_front_back_ambiguous": true,
   "channel_to_mic": [
     0,
     1,
@@ -59,43 +77,43 @@
   ],
   "channel_positions_m": [
     [
-      0.025,
+      0.03,
       0,
       0
     ],
     [
-      0.01767766953,
-      0.01767766953,
+      0.0212132034355964,
+      0.0212132034355964,
       0
     ],
     [
       0,
-      0.025,
+      0.03,
       0
     ],
     [
-      -0.01767766953,
-      0.01767766953,
+      -0.0212132034355964,
+      0.0212132034355964,
       0
     ],
     [
-      -0.025,
+      -0.03,
       0,
       0
     ],
     [
-      -0.01767766953,
-      -0.01767766953,
+      -0.0212132034355964,
+      -0.0212132034355964,
       0
     ],
     [
       0,
-      -0.025,
+      -0.03,
       0
     ],
     [
-      0.01767766953,
-      -0.01767766953,
+      0.0212132034355964,
+      -0.0212132034355964,
       0
     ],
     [

@@ -8,7 +8,7 @@ from pathlib import Path
 import random
 import re
 import subprocess
-from build_circular9 import geometry
+from build_circular9 import geometry, plane_wave_delays
 
 ROOT = Path(__file__).resolve().parents[1]
 OUT = ROOT/'build/circular9_checks'
@@ -37,14 +37,17 @@ def main():
     c = json.loads((ROOT/'configs/circular9_array.json').read_text())
     srp, steer, pairs = geometry(c)
     assert len(srp)==36864 and len(steer)==9216 and len(set(pairs))==36
-    # Independent propagation calculation, decoded signed LUT including center pairs.
+    # Independent plane-wave projection, decoded signed LUT including center pairs.
+    # A grid cell denotes an angle; there is deliberately no source range here.
     for g in [0,31,496,511,512,527,992,1023]:
-        point=(-.2+.4*(g%32)/31,-.2+.4*(g//32)/31,.3)
+        az=math.radians(-90+180*((g%32)+.5)/32)
+        el=math.radians(-90+180*((g//32)+.5)/32)
+        point=(math.sin(az)*math.cos(el),math.sin(el),math.cos(az)*math.cos(el))
         for k,(i,j) in enumerate(pairs):
             delays=[]
             for ch in [i,j]:
                 x,y,z=c['channel_positions_m'][ch]
-                delays.append(math.sqrt((point[0]-x)**2+(point[1]-y)**2+(point[2]-z)**2)/343*c['sample_rate_hz'])
+                delays.append(-(point[0]*x+point[1]*y+point[2]*z)/343*c['sample_rate_hz'])
             q=srp[k*1024+g];q=q-c['r_len']*16 if q>=c['r_len']*8 else q
             assert abs(q/16-(delays[0]-delays[1]))<=1/16+1e-10
     # Schema negative controls must fail rather than silently becoming ten microphones.
@@ -68,8 +71,8 @@ def main():
             '-Irtl','--Mdir',model,*all_rtl,ROOT/'tb/tb_circular9_latency.v'])
         rng=random.Random(20261022)
         tones=[(k,rng.random()*2*math.pi) for k in range(14,53,2)]
-        point=(.08,.12,.3)
-        delays=[math.dist(point,m)/343*c['sample_rate_hz'] for m in c['channel_positions_m']]
+        # One broadband plane-wave source at known angles; no spherical-distance fixture.
+        delays=plane_wave_delays(c,16.5,22.5)
         samples=[int(100*sum(math.sin(2*math.pi*k*(n-d)/1024+phase) for k,phase in tones))&65535
                  for n in range(4096) for d in delays]
         pcm=OUT/'pcm.hex';pcm.write_text(''.join(f'{v:04x}\n' for v in samples))
@@ -129,6 +132,13 @@ def main():
                 assert len(rows)==len(old_rows)==windows
                 results['tests'][name]['reference_frames']=old_rows
                 results['tests'][name]['bit_exact_maps_and_statistics_windows']=1 if case==4 else windows
+        hold=run('diagnosis_hold',[model/'Vtb_circular9_latency.exe','+PRODUCTION',
+            '+CONFIRMED_TEST_ONLY','+FW='+str(ROOT/'build/circular9/fw_test').replace('\\','/'),
+            '+PCM='+pcm.as_posix(),'+WINDOWS=10','+CASE=5'],'CIRCULAR9_LATENCY_PASS')
+        results['tests']['diagnosis_hold']['test_fixture_only']=True
+        results['tests']['diagnosis_hold']['fixture_firmware_sha256']=hashlib.sha256(
+            (ROOT/'build/circular9/fw_test/itcm.hex').read_bytes()).hexdigest()
+        results['tests']['diagnosis_hold']['covered']='D3 hold, D1 selected candidate, D3 clear previous target'
         results['firmware_sha256']=hashlib.sha256((ROOT/'build/circular9/fw/itcm.hex').read_bytes()).hexdigest()
     deps=[*sorted((ROOT/'rtl').rglob('*.v')),ROOT/'tb/tb_circular9_units.v',ROOT/'tb/tb_circular9_latency.v',Path(__file__)]
     results['sources']={str(p.relative_to(ROOT)):hashlib.sha256(p.read_bytes()).hexdigest() for p in deps}
