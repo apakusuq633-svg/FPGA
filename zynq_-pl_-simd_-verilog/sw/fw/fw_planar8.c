@@ -24,8 +24,11 @@
 #define FW_PAIR_COUNT (FW_ARRAY_CHANNELS*(FW_ARRAY_CHANNELS-1)/2)
 #if FW_ARRAY_CHANNELS == 9
 /* In DTCM so PS can copy a complete map through the protected read-only window. */
-static int32_t scores9[1024];
-#define SCORES scores9
+/* Build into the inactive DTCM bank. PS may copy the committed bank
+ * throughout compute; only the short metadata publication is seqlocked. */
+static int32_t scores9[2][1024];
+static uint32_t score_bank;
+#define SCORES scores9[score_bank]
 #else
 #define SCORES ((int32_t *)0x1a000u)
 #endif
@@ -112,9 +115,6 @@ int main(void){
         if(window==completed)continue;
         if(window!=completed+1u || (LOC(1)&1u)){RESULT(3)=6;goto stop;}
         uint32_t post_start=cycles(),first=LOC(4),compute=LOC(11),latency=LOC(5);
-#if FW_ARRAY_CHANNELS == 9
-        RESULT(90)=++loc_seq; /* Seqlock also covers the map, not only metadata. */
-#endif
         for(unsigned ch=0;ch<FW_ARRAY_CHANNELS;ch++)for(unsigned k=0;k<5;k++){
             LOC(19)=ch*5+k;stats[ch][k]=LOC(20);
         }
@@ -151,6 +151,10 @@ int main(void){
 #endif
         unsigned raw_grid=grid;
         reason=location_track(&tracker,raw_grid,32,reason);grid=tracker.grid;
+#if FW_ARRAY_CHANNELS == 9
+        RESULT(90)=++loc_seq;
+        RESULT(235)=(uint32_t)(uintptr_t)SCORES;
+#endif
         RESULT(88)=++mic_seq;
         for(unsigned ch=0;ch<FW_ARRAY_CHANNELS;ch++)for(unsigned k=0;k<5;k++)RESULT(8+ch*5+k)=stats[ch][k];
         RESULT(88)=++mic_seq;
@@ -201,6 +205,9 @@ int main(void){
         RESULT(239)=LOC(28)+(first-LOC(29))*256u;
 #endif
         RESULT(1)=++frames;RESULT(90)=++loc_seq;
+#if FW_ARRAY_CHANNELS == 9
+        score_bank^=1u; /* Published bank remains untouched until next commit. */
+#endif
         completed=window;
         /* Existing raw snapshot protocol explicitly pauses localization. */
         uint32_t request=REG(0x4000u,1);

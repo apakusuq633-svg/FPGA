@@ -76,7 +76,7 @@ static int c9_candidates_json(char *out,size_t cap){
   "\"last_processing_us\":%u,\"last_queue_age_samples\":%u,\"last_result_age_samples\":%u,\"last_deadline_missed\":%u,\"last_rejection\":%u},"
   "\"auxiliary_search\":{\"hop_raw_samples\":%u,\"window_raw_samples\":%u,\"max_age_raw_samples\":%u,\"no_CPU0_FFT\":true,"
   "\"accepted\":%u,\"rejected\":%u,\"replayed\":%u,\"skipped_hops\":%u,\"pending_replaced\":%u,\"receive_us_max\":%u,"
-  "\"cpu1_started\":%u,\"cpu1_completed\":%u,\"cpu1_rejected\":%u,\"cpu1_late\":%u,\"cpu1_processing_us_max\":%u}}",
+  "\"cpu1_started\":%u,\"cpu1_completed\":%u,\"cpu1_rejected\":%u,\"cpu1_late\":%u,\"cpu1_processing_us_max\":%u,\"copy_us\":%u,\"prepare_us\":%u,\"observations_us\":%u,\"search_us\":%u,\"decimator_vector_status\":%u}}",
   (unsigned)C9_DIAGNOSTIC_HOP_RAW,(unsigned)C9_HISTORY_FRAMES,(unsigned)sizeof(c9_history_shared),
   (unsigned)c9_jobs_skipped,(unsigned)c9_pending_replaced,(unsigned)c9_schedule_coverage_rejected,
   (unsigned)__atomic_load_n(&metrics->started,__ATOMIC_ACQUIRE),(unsigned)__atomic_load_n(&metrics->completed,__ATOMIC_ACQUIRE),
@@ -87,13 +87,18 @@ static int c9_candidates_json(char *out,size_t cap){
   (unsigned)__atomic_load_n(&metrics->queue_age_samples_max,__ATOMIC_ACQUIRE),
   (unsigned)__atomic_load_n(&metrics->result_age_samples_max,__ATOMIC_ACQUIRE),r?(unsigned)r->processing_us:0,
   r?(unsigned)r->queue_age_samples:0,r?(unsigned)r->result_age_samples:0,r?(unsigned)r->deadline_missed:0,r?(unsigned)r->rejection:0,
-  (unsigned)C9_AUX_HOP_RAW,(unsigned)C9_SEARCH_RAW_FRAMES,(unsigned)C9_SEARCH_MAX_AGE_SAMPLES,
+  (unsigned)C9_AUX_HOP_RAW,(unsigned)C9_AUX_WINDOW_RAW,(unsigned)C9_SEARCH_MAX_AGE_SAMPLES,
   (unsigned)c9_aux_accepted,(unsigned)c9_aux_rejected,(unsigned)c9_aux_replayed,(unsigned)c9_aux_skipped,(unsigned)c9_aux_replaced,(unsigned)c9_aux_receive_us_max,
   (unsigned)__atomic_load_n(&c9_tasks_shared.data.auxiliary.started,__ATOMIC_ACQUIRE),
   (unsigned)__atomic_load_n(&c9_tasks_shared.data.auxiliary.completed,__ATOMIC_ACQUIRE),
   (unsigned)__atomic_load_n(&c9_tasks_shared.data.auxiliary.rejected,__ATOMIC_ACQUIRE),
   (unsigned)__atomic_load_n(&c9_tasks_shared.data.auxiliary.late,__ATOMIC_ACQUIRE),
-  (unsigned)__atomic_load_n(&c9_tasks_shared.data.auxiliary.processing_us_max,__ATOMIC_ACQUIRE));
+  (unsigned)__atomic_load_n(&c9_tasks_shared.data.auxiliary.processing_us_max,__ATOMIC_ACQUIRE),
+  (unsigned)__atomic_load_n(&c9_tasks_shared.data.auxiliary.copy_us,__ATOMIC_ACQUIRE),
+  (unsigned)__atomic_load_n(&c9_tasks_shared.data.auxiliary.prepare_us,__ATOMIC_ACQUIRE),
+  (unsigned)__atomic_load_n(&c9_tasks_shared.data.auxiliary.observations_us,__ATOMIC_ACQUIRE),
+  (unsigned)__atomic_load_n(&c9_tasks_shared.data.auxiliary.search_us,__ATOMIC_ACQUIRE),
+  (unsigned)__atomic_load_n(&c9_tasks_shared.data.auxiliary.decimator_vector_status,__ATOMIC_ACQUIRE));
  return n;
 }
 static int c9_tasks_route(const char *request,struct ui_reply *rep,char *body,size_t cap){

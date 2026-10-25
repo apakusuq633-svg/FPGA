@@ -21,6 +21,7 @@ typedef struct {
  uint32_t head_guard,end,count,epoch,session;
  c9_history_frame frames[C9_HISTORY_FRAMES];
 } c9_history;
+unsigned c9_candidates_acceleration(void); /* 7: ARM vector self-test passed; 3: fallback. */
 #define C9_CANDIDATE_REFINED 1u
 typedef struct {
  uint32_t grid;int32_t score;
@@ -61,6 +62,7 @@ typedef struct {
  double search_lags[36][64];
  int32_t search_scores[C9_SEARCH_BANDS][1024];
  uint32_t analysis_frames;
+ uint32_t search_ticks[3]; /* Preparation, observations, search; ARM timer ticks. */
 } c9_separation_workspace;
 typedef struct {
  uint32_t count,frames,usable_bins,total_bins,invalid_input;

@@ -21,6 +21,7 @@ static uint16_t c9_reasons[C9_MAX_FRAMES];
 static unsigned c9_batch,c9_requested=1,c9_freeze;
 /* Full-rate raw UDP is opt-in; GUI monitoring must not pay its CRC/network cost. */
 static unsigned c9_recording;
+static uint32_t c9_profile_count;static uint64_t c9_ring_ticks,c9_history_ticks,c9_output_ticks;
 static uint32_t c9_packets,c9_sent,c9_software_drops,c9_last_poll,c9_max_poll_gap,c9_max_service;
 static circular9_deadline c9_location;
 static uint32_t c9_poll_gap_overruns,c9_service_overruns,c9_dma_backlog_max,c9_network_max_us;
@@ -39,7 +40,11 @@ static uint32_t c9_ticks_to_us(uint32_t ticks){
 }
 static uint32_t c9_read(void *ctx,uint32_t off){(void)ctx;return Xil_In32(C9_DMA_BASE+off);}
 static int c9_write(void *ctx,uint32_t off,uint32_t v){(void)ctx;Xil_Out32(C9_DMA_BASE+off,v);return 0;}
-static void c9_cache(void *ctx,uint32_t a,size_t n){(void)ctx;(void)a;(void)n;/* Dedicated noncached section. */}
+/* Dedicated read-only-to-CPU DMA ring, cache-line-aligned128-byte slots.
+ * The producer publishes only completed DDR writes. Invalidate every owned
+ * slot before copying, and retain ownership/CRC checks before release. */
+static void c9_invalidate(void *ctx,uint32_t a,size_t n){(void)ctx;Xil_DCacheInvalidateRange((INTPTR)a,(u32)n);}
+static void c9_flush(void *ctx,uint32_t a,size_t n){(void)ctx;Xil_DCacheFlushRange((INTPTR)a,(u32)n);}
 static void c9_barrier(void *ctx){(void)ctx;__asm__ volatile("dsb sy":::"memory");}
 static const uint8_t *c9_map(void *ctx,uint32_t a,size_t n){
  (void)ctx;uintptr_t lo=(uintptr_t)c9_ddr.slots;
@@ -47,10 +52,10 @@ static const uint8_t *c9_map(void *ctx,uint32_t a,size_t n){
 }
 static uint32_t c9_u32(const uint8_t *p){return p[0]|(uint32_t)p[1]<<8|(uint32_t)p[2]<<16|(uint32_t)p[3]<<24;}
 static int c9_live_init(void){
- pdm_stream_io io={NULL,c9_read,c9_write,c9_cache,c9_cache,c9_barrier,c9_map};
+ pdm_stream_io io={NULL,c9_read,c9_write,c9_invalidate,c9_flush,c9_barrier,c9_map};
  if(c9_read(NULL,0x48)!=0x000a0009u)return -10;
  Xil_DCacheFlushRange((INTPTR)&c9_ddr,sizeof(c9_ddr));
- Xil_SetTlbAttributes((INTPTR)&c9_ddr,NORM_NONCACHE);
+ Xil_SetTlbAttributes((INTPTR)&c9_ddr,NORM_WB_CACHE);
  circular9_audio_init(&c9_audio);
  c9_audio.target_guard_requested=1;
  uint32_t session=Xil_In32(0xf8f00200u);if(!session)session=1;
@@ -105,7 +110,9 @@ static int c9_live_poll(das_audio_block *out,uint32_t *drops){
  if(backlog>c9_dma_backlog_max)c9_dma_backlog_max=backlog;
  for(unsigned budget=0;budget<16;budget++) {
   uint8_t *slot=c9_slots+c9_batch*128;uint32_t old_session=pdm_ring_stream_id(&c9_ring);
+  unsigned profile=(c9_ring.consumer&255u)==0;uint32_t t0=profile?Xil_In32(0xf8f00200u):0,t1=0,t2=0;
   int rc=pdm_ring_next(&c9_ring,slot);
+  if(profile)t1=Xil_In32(0xf8f00200u);
   if(rc==0)break;
   if(rc==-3){c9_record_reset();c9_audio.count=0;c9_audio.filter_count=0;c9_audio.discontinuities++;continue;}
   if(rc<0)return -11;
@@ -118,10 +125,17 @@ static int c9_live_poll(das_audio_block *out,uint32_t *drops){
   }
   uint32_t w[16];for(unsigned k=0;k<16;k++)w[k]=c9_u32(slot+4*k);
   c9_record_sample(w);
+  if(profile)t2=Xil_In32(0xf8f00200u);
   if(!c9_batch)c9_batch_tick=Xil_In32(0xf8f00200u);
   *drops=c9_read(NULL,0x18)+w[15];
+  /* CPU1 diagnosis consumes the independent raw history. Continuous GSC/FIR
+   * output has no consumer while raw UDP recording is disabled; do not run
+   * that optional output DSP at156250Hz during monitor-only operation. */
+  if(c9_recording){
   complete=circular9_audio_push(&c9_audio,w,acoustic_steer_lut,acoustic_fir_coeff,
     c9_requested&&ACOUSTIC_GEOMETRY_CONFIRMED&&ACOUSTIC_CALIBRATION_VERSION,c9_freeze,*drops,&c9_outputs[c9_batch]);
+  }else {complete=0;c9_outputs[c9_batch]=(int16_t)(uint16_t)(w[7]>>16);c9_audio.reason=GSC9_BYPASS_DISABLED;}
+  if(profile){uint32_t t3=Xil_In32(0xf8f00200u);c9_profile_count++;c9_ring_ticks+=t1-t0;c9_history_ticks+=t2-t1;c9_output_ticks+=t3-t2;}
   if(complete<0)return -12;
   c9_reasons[c9_batch]=(uint16_t)c9_audio.reason;c9_batch++;
   if(c9_batch==C9_MAX_FRAMES)c9_queue_batch();
@@ -138,6 +152,7 @@ static int c9_status(char *out,size_t n){
  int used=snprintf(out,n,"{\"localizer_abi\":\"P9D2\",\"rv32_itcm_sha256\":\"" ACOUSTIC_ITCM_SHA256 "\","
   "\"pdm_decimation\":16,\"window_samples\":1024,\"capture_slots\":10,\"active_channels\":9,\"active_mask\":511,"
   "\"calibration_status\":\"" ACOUSTIC_CALIBRATION_STATUS "\","
+  "\"profile_samples\":%u,\"ring_avg_ticks\":%u,\"history_avg_ticks\":%u,\"output_avg_ticks\":%u,"
   "\"udp_enabled\":%u,\"dma_frame_ok\":%llu,\"dma_corrupt\":%llu,\"history_frames\":%u,\"history_end\":%u,\"history_epoch\":%u,\"history_session\":%u,"
   "\"gsc_requested\":%u,\"freeze_updates\":%u,\"gsc_reason\":%u,"
   "\"geometry_confirmed\":%u,\"calibration_version\":%u,\"geometry_version\":%u,"
@@ -151,7 +166,7 @@ static int c9_status(char *out,size_t n){
   "\"ps_poll_gap_over_200us\":%u,\"ps_service_over_100us\":%u,\"dma_backlog_max\":%u,"
   "\"udp_queue_peak\":%u,\"udp_service_max_us\":%u,\"sample_rate_num\":%u,\"sample_rate_den\":%u,\"hop_samples\":%u,"
   "\"latency_scope\":\"first_pcm_to_first_ps_metadata_receipt\",\"latency_bin_us\":%u,"
-  "\"histogram_last_bin_includes_overflow\":true,\"tracking_deadline_us\":100000,\"board_validated\":false,\"latency_histogram\":[",c9_recording,(unsigned long long)pdm_ring_stat(&c9_ring,PDM_FRAME_OK),(unsigned long long)pdm_ring_stat(&c9_ring,PDM_CORRUPT),history[1],history[0],history[2],history[3],c9_requested,c9_freeze,(unsigned)c9_audio.reason,
+  "\"histogram_last_bin_includes_overflow\":true,\"tracking_deadline_us\":100000,\"board_validated\":false,\"latency_histogram\":[",(unsigned)c9_profile_count,(unsigned)(c9_profile_count?c9_ring_ticks/c9_profile_count:0),(unsigned)(c9_profile_count?c9_history_ticks/c9_profile_count:0),(unsigned)(c9_profile_count?c9_output_ticks/c9_profile_count:0),c9_recording,(unsigned long long)pdm_ring_stat(&c9_ring,PDM_FRAME_OK),(unsigned long long)pdm_ring_stat(&c9_ring,PDM_CORRUPT),(unsigned)history[1],(unsigned)history[0],(unsigned)history[2],(unsigned)history[3],c9_requested,c9_freeze,(unsigned)c9_audio.reason,
   ACOUSTIC_GEOMETRY_CONFIRMED,ACOUSTIC_CALIBRATION_VERSION,ACOUSTIC_GEOMETRY_VERSION,
   (unsigned)c9_sent,(unsigned)c9_software_drops,(unsigned)c9_read(NULL,0x18),(unsigned)c9_audio.discontinuities,
   (unsigned)c9_ticks_to_us(c9_max_poll_gap),(unsigned)c9_ticks_to_us(c9_max_service),C9_LOCATION_TARGET_US,

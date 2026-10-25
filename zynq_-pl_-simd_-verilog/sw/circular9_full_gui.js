@@ -27,7 +27,7 @@ function plot(id,values,xmax,xlabel,ylabel='相对幅值（峰值=1）',signed=f
 }
 function renderStatus(s){latest=s;text('source','9麦同步PDM → PL方向定位 → PS多候选分离与诊断');
  text('state',s.input_error?'采集错误 '+s.input_error:'持续采集中；分类有效性见候选与监测状态');
- rows('runtime',[['已接收音频块',s.received_blocks],['PL丢失采样点',s.pl_dropped],['PS丢失采样点',s.ps_dropped],['CPU1忙',s.computing],['诊断观察窗','1024 ms；更新间隔512 ms'],['采样率','156250 Hz原始 / 39062.5 Hz诊断']]);
+ rows('runtime',[['旧单路音频块（九麦不使用）',s.received_blocks],['PL丢失采样点',s.pl_dropped],['PS丢失采样点',s.ps_dropped],['CPU1忙',s.computing],['诊断观察窗','1024 ms；更新间隔512 ms'],['采样率','156250 Hz原始 / 39062.5 Hz诊断']]);
  $('mics').textContent='';for(let i=0;i<9;i++)line($('mics'),'CH'+i,s.mic_valid?'AC RMS '+num((s.mic_rms_ppm||[])[i]/10000,4)+' %FS；峰值 '+num((s.mic_peak_ppm||[])[i]/10000,4)+' %FS；均值 '+num((s.mic_mean_ppm||[])[i]/10000,4)+' %FS；削顶 '+((s.mic_clipped||[])[i]??'未提供'):'等待通道快照');
 }
 function renderCandidates(s){c9state=s;guiLastCandidate=Date.now();
@@ -38,7 +38,7 @@ function renderCandidates(s){c9state=s;guiLastCandidate=Date.now();
  });
  if((s.candidates||[]).some(c=>c.track_id===chosen))$('candidate_select').value=chosen;
  text('model_note','模型版本 '+s.model_version+'；'+(s.model_validated?'已验证':'未验证/未配置，保持未知')+'；'+(s.shaft_confirmed?'已确认转速 '+num(s.shaft_millihz*.06,0)+' rpm':'转速未确认')+'；快照 #'+s.sequence+'，年龄 '+s.result_age_ms+' ms');
- if(!(s.candidates||[]).length)text('candidates','等待满足条件的候选方向；不会使用旧结果冒充当前诊断。');
+ if(!(s.candidates||[]).length){text('candidates','尚无覆盖完整1.024秒的稳定诊断方向；下列仅为定位提议，不是故障结果。');(s.proposals||[]).forEach(p=>{let el=document.createElement('p');el.className='muted';el.textContent='提议轨迹 '+p.track_id+'：水平角 '+angle(p.azimuth_mdeg)+'，俯仰角 '+angle(p.elevation_mdeg)+'；观察次数 '+p.observations;$('candidates').appendChild(el);});}
  const c=(s.candidates||[]).find(c=>c.track_id===Number($('candidate_select').value));renderDiagnosis(c,s);
 }
 function renderDiagnosis(c,s){if(!c){rows('diagnosis',[['状态','等待候选诊断']]);return;}let d=c.diagnosis||{};
@@ -47,20 +47,35 @@ function renderDiagnosis(c,s){if(!c){rows('diagnosis',[['状态','等待候选�
  $('features').textContent='';(d.features||[]).forEach((v,i)=>line($('features'),'特征 '+(i+1),num(v,5)));
  if(guiSequence!==s.sequence||guiTrack!==c.track_id){guiSequence=s.sequence;guiTrack=c.track_id;text('plot_note','选中轨迹发生变化；点击“获取同快照波形”更新，旧波形已清除。');plot('spectrum_plot',null,19.53125,'频率(kHz)');plot('envelope_plot',null,900,'频率(Hz)');}
 }
-function renderMap(m){if(!m||!m.scores||m.scores.length!==1024)return;let c=$('direction_map'),g=c.getContext('2d'),L=54,T=18,W=320,H=320;g.clearRect(0,0,c.width,c.height);let lo=Math.min(...m.scores),hi=Math.max(...m.scores);
+function renderMap(m){if(!m||!m.scores||m.scores.length!==1024){text('map_note','等待完整评分图；此前图像仅供回看，不代表当前定位。');return;}let c=$('direction_map'),g=c.getContext('2d'),L=54,T=18,W=320,H=320;g.clearRect(0,0,c.width,c.height);let lo=Math.min(...m.scores),hi=Math.max(...m.scores);
  m.scores.forEach((v,i)=>{let t=hi>lo?(v-lo)/(hi-lo):0;g.fillStyle='hsl('+(240-180*t)+',85%,45%)';g.fillRect(L+i%32*10,T+(31-Math.floor(i/32))*10,10,10);});
  g.fillStyle='#a0b3c2';g.font='12px system-ui';[-90,-45,0,45,90].forEach(a=>{g.fillText(a+'°',L+(a+90)*W/180-10,T+H+19);g.fillText(a+'°',8,T+(90-a)*H/180+4);});g.fillText('水平角（正前方0°）',L+72,T+H+39);g.fillText('俯仰角',3,12);
  const now=Date.now();(c9state&&c9state.proposals||[]).forEach(p=>{let trail=guiTrails.get(p.track_id)||[];if(trail.length===0||trail.at(-1).sequence!==p.observations)trail.push({x:p.azimuth_mdeg/1000,y:p.elevation_mdeg/1000,t:guiLastCandidate,sequence:p.observations});guiTrails.set(p.track_id,trail.slice(-60));});
  guiTrails.forEach((trail,id)=>{trail=trail.filter(p=>now-p.t<=5000);if(!trail.length){guiTrails.delete(id);return;}guiTrails.set(id,trail);g.strokeStyle='#ffffff70';g.beginPath();trail.forEach((p,i)=>{let x=L+(p.x+90)*W/180,y=T+(90-p.y)*H/180;i?g.lineTo(x,y):g.moveTo(x,y);});g.stroke();});
  (c9state&&c9state.candidates||[]).forEach(p=>{if(p.stale)return;let x=L+(p.azimuth_mdeg/1000+90)*W/180,y=T+(90-p.elevation_mdeg/1000)*H/180;g.strokeStyle=validFault(p,c9state)?'#ff6174':'white';g.strokeRect(x-5,y-5,10,10);g.fillStyle='white';g.fillText('轨迹 '+p.track_id,x+6,y);});
- text('map_note',(m.accepted?'通过定位门控':'候选评分图')+'；帧 '+m.frame+'；数据年龄 '+num(m.map_age_us/1000)+' ms；白线为最近5秒候选方向留痕。评分不代表故障概率。');
+ text('map_note',(m.map_age_us>m.stale_after_us?'评分图已过期，仅供回看':m.accepted?'通过定位门控':'候选评分图（未确认定位）')+'；帧 '+m.frame+'；数据年龄 '+num(m.map_age_us/1000)+' ms；白线为最近5秒候选方向留痕。评分不代表故障概率。');
 }
 function renderHealth(s){c9health=s;if(guiSession!==s.session){guiSession=s.session;guiHistory=[];guiEvents.clear();guiHealthCursor=guiEventCursor=0;guiTrails.clear();}
  text('health_note',(s.enabled?'监测已启用':'监测已关闭')+'；连续'+s.thresholds.join(' / ')+'次：疑似 / 报警 / 恢复；断流或未知结果不会解除报警。');
  $('health_status').textContent='';(s.tracks||[]).forEach(t=>{let r=t.record,p=document.createElement('p');p.className=r.state>=2?'alarm':'';p.textContent='轨迹 '+r.track+'：'+states[r.state]+'；'+(t.fresh?'有效诊断':'数据无效/过期，保留报警状态')+'；最近有效时间 '+num(t.last_valid_ms/1000,1)+' s；RMS '+num(r.rms*100,4)+' %FS';$('health_status').appendChild(p);});
  if(!(s.tracks||[]).length)text('health_status','等待真实候选诊断；当前没有有效诊断，不表示设备正常。');
 }
-function renderPerformance(z){rows('performance',[['GSC请求 / 旁路原因',z.gsc_requested+' / '+z.gsc_reason],['定位首PCM到PS（当前/最大）',z.latency_samples?num(z.pcm_to_ps_us/1000,3)+' / '+num(z.pcm_to_ps_max_us/1000,3)+' ms':'等待真实测量'],['定位超时/观察数',z.deadline_misses+' / '+z.latency_samples],['音频服务最大间隔',z.max_ps_poll_gap_us+' us'],['音频服务最大耗时',z.max_ps_service_us+' us'],['DMA丢样 / UDP发送',z.dma_drops+' / '+z.udp_sent],['实板验收',z.board_validated?'已完成':'未完成']]);}
+function renderPerformance(z){let aux=c9state&&c9state.auxiliary_search||{},d=c9state&&c9state.diagnostic_scheduler||{};
+ rows('performance',[
+ ['原始PCM已接收 / 历史保留',z.dma_frame_ok+' / '+z.history_frames+' 采样帧'],
+ ['采集连续会话 / DMA错误',z.history_session+' / '+z.dma_corrupt],
+ ['DMA丢样 / UDP丢样',z.dma_drops+' / '+z.udp_frames_dropped],
+ ['UDP连续录音',z.udp_enabled?'已启用（包含连续输出处理）':'已关闭；独立候选分离/诊断继续运行'],
+ ['GSC请求 / 旁路原因',z.gsc_requested+' / '+z.gsc_reason],
+ ['完整评分图 / 重试',c9state?c9state.map_copies+' / '+c9state.map_retries:'等待'],
+ ['辅助搜索完成 / 接受 / 超时',aux.cpu1_completed+' / '+aux.accepted+' / '+aux.cpu1_late],
+ ['辅助搜索最大耗时',num(aux.cpu1_processing_us_max/1000,3)+' ms / 200 ms期限'],
+ ['搜索分段：读取/降采样/统计/搜索',[aux.copy_us,aux.prepare_us,aux.observations_us,aux.search_us].map(x=>num(x/1000,2)).join(' / ')+' ms'],
+ ['诊断任务 / 完成 / 窗口未稳定',d.cpu1_started+' / '+d.cpu1_completed+' / '+d.coverage_rejected],
+ ['定位首PCM到PS（当前/最大）',z.latency_samples?num(z.pcm_to_ps_us/1000,3)+' / '+num(z.pcm_to_ps_max_us/1000,3)+' ms':'等待真实测量'],
+ ['音频服务最大间隔 / 耗时',z.max_ps_poll_gap_us+' / '+z.max_ps_service_us+' us'],
+ ['定位与故障准确性验收',z.board_validated?'已完成':'尚未完成，采集连通不代表准确性通过']]);}
+
 function renderHistory(){let seconds=Number($('history_range').value),now=c9health?c9health.uptime_ms:0,track=Number($('candidate_select').value),r=guiHistory.filter(v=>now-v.ms<=seconds*1000&&(!track||v.track===track));
  let c=$('history_plot'),g=c.getContext('2d'),L=62,R=c.width-16,T=26,B=c.height-38;g.clearRect(0,0,c.width,c.height);g.font='12px system-ui';g.fillStyle='#a0b3c2';g.fillText('RMS (%FS)，每条曲线只对应选中轨迹',L,16);let max=Math.max(.01,...r.map(v=>v.rms*100));g.strokeStyle='#304352';for(let i=0;i<=4;i++){let y=T+(B-T)*i/4;g.beginPath();g.moveTo(L,y);g.lineTo(R,y);g.stroke();g.fillText(num(max*(1-i/4),2),4,y+3);g.fillText('-'+num(seconds*(1-i/4),0)+'s',L+i*(R-L)/4-10,B+18);}let previous=null;r.forEach(v=>{let x=L+(1-(now-v.ms)/seconds/1000)*(R-L),y=B-v.rms*100/max*(B-T);if(previous&&v.track===previous.track&&v.ms-previous.ms<3000){g.strokeStyle=v.valid?'#52d6c1':'#738598';g.beginPath();g.moveTo(previous.x,previous.y);g.lineTo(x,y);g.stroke();}g.fillStyle=v.valid?['#52d6c1','#ffd17c','#ff6174','#ffb454'][v.state]:'#738598';g.fillRect(x-2,y-2,4,4);previous={...v,x,y};});text('history_note','当前窗口 '+seconds+' 秒；'+r.length+'条真实诊断记录。灰点表示无效诊断；板内最多保留256条。');
  $('events').textContent='';Array.from(guiEvents.values()).sort((a,b)=>b.id-a.id).forEach(e=>{let r=document.createElement('tr');[e.id,'轨迹 '+e.track,states[e.state],labels[e.label],e.closed?'已关闭':'进行中',num(e.first_ms/1000,1)+' s'].forEach(v=>{let td=document.createElement('td');td.textContent=v;r.appendChild(td);});let td=document.createElement('td'),b=document.createElement('button');b.textContent='详情';b.onclick=()=>text('event_detail',JSON.stringify(e,null,2));td.appendChild(b);r.appendChild(td);$('events').appendChild(r);});

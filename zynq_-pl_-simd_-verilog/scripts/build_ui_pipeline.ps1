@@ -94,7 +94,8 @@ $objects = @($obj)
 if ($Live -and $ActiveChannels -eq 9) {
     foreach ($unit in @('gsc9','pdm_stream','circular9_stream','circular9_audio','circular9_candidates','circular9_diagnosis')) {
         $unitObj = Join-Path $out "$unit.o"
-        & $gcc -std=c11 -Wall -Wextra -Werror -O2 -g -fstack-usage -c -mcpu=cortex-a9 -mfpu=vfpv3 -mfloat-abi=hard `
+        $unitFpu = if ($unit -eq 'circular9_candidates') { '-mfpu=neon' } else { '-mfpu=vfpv3' }
+        & $gcc -std=c11 -Wall -Wextra -Werror -O2 -g -fstack-usage -c -mcpu=cortex-a9 $unitFpu -mfloat-abi=hard `
             "-I$(Join-Path $BspDir 'bspinclude\include')" "-I$(Join-Path $project 'sw')" @defs `
             -o $unitObj (Join-Path $project "sw\$unit.c")
         if ($LASTEXITCODE -ne 0) { throw "UI ARM compile failed: $unit" }

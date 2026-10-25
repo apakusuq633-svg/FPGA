@@ -3,11 +3,18 @@
 #include "circular9_direction.h"
 #include "circular9_diagnosis.h" /* One fixed carrier definition for readiness. */
 #include <string.h>
+#ifdef __arm__
+#include "xtime_l.h"
+static uint32_t search_clock(void){XTime t;XTime_GetTime(&t);return (uint32_t)t;}
+#else
+static uint32_t search_clock(void){return 0;}
+#endif
 _Static_assert((C9_HISTORY_FRAMES&(C9_HISTORY_FRAMES-1u))==0,"power-of-two history");
 _Static_assert(sizeof(c9_history)<=32u*1024u*1024u,"shared history reservation");
 
-/* Both cores map the shared history as noncached. Acquire/release additionally
- * order the 16/32-bit atomic accesses on Cortex-A9 and keep native SPSC tests
+/* Both cores map CPU-only history as Normal WB shareable, with SMP/SCU
+ * coherence enabled. Acquire/release order the 16/32-bit atomic accesses
+ * on Cortex-A9 and keep native SPSC tests
  * within the C memory model. Invalidate BEFORE writing PCM, not afterwards. */
 #define LOAD(p) __atomic_load_n((p),__ATOMIC_ACQUIRE)
 #define STORE(p,v) __atomic_store_n((p),(v),__ATOMIC_RELEASE)
@@ -297,6 +304,46 @@ static double square_root(double x){
  double y=v.d;for(unsigned i=0;i<6;i++)y=.5*(y+x/y);return y;
 }
 static unsigned analysis_band(unsigned bin){return bin<58u?0u:bin<=120u?1u:2u;}
+/* Integer-only acceleration. Never use floating reassociation/fast-math. */
+#if defined(__ARM_NEON) && !defined(C9_DISABLE_NEON_DECIMATOR)
+#include <arm_neon.h>
+static void decimate_eight(const int16_t (*raw)[9],unsigned index,int32_t out[8]){
+ int32x4_t lo=vdupq_n_s32(0),hi=lo;
+ for(unsigned j=6;j<63;j++){
+  int16x8_t a=vld1q_s16(&raw[index-j][0]),b=vld1q_s16(&raw[index-126+j][0]);
+  lo=vaddq_s32(lo,vmulq_n_s32(vaddl_s16(vget_low_s16(a),vget_low_s16(b)),c9_decim_coeff[j]));
+  hi=vaddq_s32(hi,vmulq_n_s32(vaddl_s16(vget_high_s16(a),vget_high_s16(b)),c9_decim_coeff[j]));
+ }
+ int16x8_t middle=vld1q_s16(&raw[index-63][0]);
+ lo=vaddq_s32(lo,vmulq_n_s32(vmovl_s16(vget_low_s16(middle)),c9_decim_coeff[63]));
+ hi=vaddq_s32(hi,vmulq_n_s32(vmovl_s16(vget_high_s16(middle)),c9_decim_coeff[63]));
+ vst1q_s32(out,lo);vst1q_s32(out+4,hi);
+}
+static unsigned vector_status;
+static unsigned decimator_vector_check(void){
+ if(vector_status)return vector_status;
+ static int16_t probe[160][9];uint32_t seed=17;int32_t actual[8];
+ for(unsigned pattern=0;pattern<6;pattern++){
+  for(unsigned n=0;n<160;n++)for(unsigned ch=0;ch<9;ch++){
+   seed=seed*1664525u+1013904223u;
+   probe[n][ch]=pattern==0?(int16_t)(seed>>16):pattern==1?32767:pattern==2?-32768:
+    pattern==3?(n&1?32767:-32768):pattern==4?(n==127?32767:0):
+    (c9_decim_coeff[(159u-n)%127u]>=0?32767:-32768);
+  }
+  for(unsigned index=127;index<160;index+=4){
+   decimate_eight(probe,index,actual);
+   for(unsigned ch=0;ch<8;ch++){
+    int64_t expected=0;for(unsigned j=0;j<127;j++)expected+=(int64_t)probe[index-j][ch]*c9_decim_coeff[j];
+    if(expected!=actual[ch]){vector_status=3u;return vector_status;}
+   }
+  }
+ }
+ vector_status=7u;return vector_status;
+}
+#else
+static unsigned decimator_vector_check(void){return 0;}
+#endif
+unsigned c9_candidates_acceleration(void){return decimator_vector_check();}
 static void prepare_samples(const int16_t (*raw)[9],unsigned frames,c9_separation_workspace *w,
  uint32_t *invalid,uint32_t clipped[9]){
  uint64_t energy[9]={0};uint32_t clips[9]={0};
@@ -307,13 +354,37 @@ static void prepare_samples(const int16_t (*raw)[9],unsigned frames,c9_separatio
   if(energy[ch]<frames*4ull||clips[ch])*invalid|=1u<<ch;
   if(clipped)clipped[ch]=clips[ch];
  }
- for(unsigned ch=0;ch<9;ch++)for(unsigned n=0;n<frames/4u;n++){
-  int index=(int)(4*n+3);int64_t sum=0;
-  for(int j=0;j<63;j++){
-   int v=index>=j?raw[index-j][ch]:0;if(index>=126-j)v+=raw[index-126+j][ch];
-   sum+=(int64_t)v*c9_decim_coeff[j];
+ unsigned scalar_frames=frames/4u;
+#if defined(__ARM_NEON) && !defined(C9_DISABLE_NEON_DECIMATOR)
+ if(decimator_vector_check()==7u&&scalar_frames>32u){
+  for(unsigned n=32;n<scalar_frames;n++){
+   unsigned index=4*n+3;int32_t sums[8];decimate_eight(raw,index,sums);
+   for(unsigned ch=0;ch<8;ch++)w->decimated[ch][n]=(float)(sums[ch]/(32768.0*32768.0));
+   int32_t sum=0;for(unsigned j=6;j<63;j++)sum+=((int)raw[index-j][8]+raw[index-126+j][8])*c9_decim_coeff[j];
+   sum+=(int)raw[index-63][8]*c9_decim_coeff[63];w->decimated[8][n]=(float)(sum/(32768.0*32768.0));
   }
-  if(index>=63)sum+=(int64_t)raw[index-63][ch]*c9_decim_coeff[63];
+  scalar_frames=32u;
+ }
+#endif
+ for(unsigned ch=0;ch<9;ch++)for(unsigned n=0;n<scalar_frames;n++){
+  /* Sum(abs(Q15 taps))=55056, so every partial accumulation is bounded
+   * by 32768*55056=1804075008 < INT32_MAX, including full-scale inputs.
+   * This preserves the exact integer result and avoids 64-bit conversion. */
+  int index=(int)(4*n+3);int32_t sum=0;
+  if(index>=126){
+   /* Steady-state convolution: no per-tap zero-padding branches. The
+    * symmetric integer sum and accumulation order are bit-for-bit unchanged. */
+   const int16_t *front=&raw[index][ch],*back=&raw[index-126][ch];
+   for(unsigned j=0;j<63;j++,front-=9,back+=9)
+    sum+=((int)*front+(int)*back)*c9_decim_coeff[j];
+   sum+=*front*c9_decim_coeff[63];
+  }else{
+   for(int j=0;j<63;j++){
+    int v=index>=j?raw[index-j][ch]:0;if(index>=126-j)v+=raw[index-126+j][ch];
+    sum+=v*c9_decim_coeff[j];
+   }
+   if(index>=63)sum+=raw[index-63][ch]*c9_decim_coeff[63];
+  }
   w->decimated[ch][n]=(float)(sum/(32768.0*32768.0));
  }
  for(unsigned n=0;n<C9_SEPARATION_FFT;n++){
@@ -407,8 +478,12 @@ int c9_candidates_search(const int16_t (*raw)[9],uint32_t raw_frames,const uint3
  r->abi=C9_SEARCH_FEEDBACK_ABI;r->session=ctx->session;r->epoch=ctx->epoch;r->first_sample=ctx->first_sample;
  r->end_sample=ctx->end_sample;r->valid_until_sample=ctx->end_sample+C9_SEARCH_MAX_AGE_SAMPLES;
  r->geometry_version=ctx->geometry_version;r->calibration_version=ctx->calibration_version;r->geometry_confirmed=ctx->geometry_confirmed;
- prepare_samples(raw,raw_frames,w,&r->invalid_input,NULL);if(r->invalid_input)return 1;
+ uint32_t profile=search_clock();
+ prepare_samples(raw,raw_frames,w,&r->invalid_input,NULL);
+ w->search_ticks[0]=search_clock()-profile;if(r->invalid_input)return 1;
+ profile=search_clock();
  analyze_observations(w,raw_frames/4u);r->analysis_frames=w->analysis_frames;
+ w->search_ticks[1]=search_clock()-profile;profile=search_clock();
  double band_energy[3]={0},largest=0;
  for(unsigned f=0;f<w->analysis_frames;f++)for(unsigned b=0;b<3;b++)band_energy[b]+=w->band_energy[f][b];
  for(unsigned b=0;b<3;b++)if(band_energy[b]>largest)largest=band_energy[b];
@@ -485,7 +560,7 @@ int c9_candidates_search(const int16_t (*raw)[9],uint32_t raw_frames,const uint3
    r->support_end_sample[slot]=ctx->first_sample+4u*(w->observed_start[last]+C9_SEPARATION_FFT);
   }
  }
- return 1;
+ w->search_ticks[2]=search_clock()-profile;return 1;
 }
 static void steering_sector(const c9_candidate *cand,const uint32_t *lut,unsigned bin,
  c9_complex a[5][9]){

@@ -687,20 +687,10 @@ static u16_t build_response(http_conn *c)
     } else if(strncmp(c->req,"GET /api/gsc ",13)==0) {
         rep=(struct ui_reply){200,"OK","application/json",c9_status(g_body,sizeof(g_body))};
     } else if(strncmp(c->req,"GET /api/heatmap ",17)==0) {
-        das_bus b=das_axi_bus(RV32_BASE);uint32_t seq=mic_read_word(&b,90);
-        uint32_t accepted=mic_read_word(&b,91),reason=mic_read_word(&b,97),frame=mic_read_word(&b,1);
-        uint32_t ptr=mic_read_word(&b,235),first_tick=mic_read_word(&b,239);int32_t values[1024];
-        int valid=seq&&!(seq&1u)&&!(ptr&3u)&&ptr+sizeof(values)<=0x2800;
-        if(valid) {
-            for(unsigned i=0;i<1024;i+=16) {
-                /* Audio/location also use the indirect MMIO address. Restore it
-                 * for every chunk; the enclosing seqlock rejects mixed maps. */
-                b.write(b.ctx,0x80,0x80000000u+ptr/4u+i);
-                for(unsigned k=0;k<16;k++)values[i+k]=(int32_t)b.read(b.ctx,0x88);
-                c9_realtime_checkpoint();
-            }
-            valid=seq==mic_read_word(&b,90);
-        }
+        das_bus b=das_axi_bus(RV32_BASE);uint32_t seq=c9_map_cache.seq;
+        uint32_t accepted=c9_map_cache.accepted,reason=c9_map_cache.reason,frame=c9_map_cache.frame;
+        uint32_t first_tick=c9_map_cache.first_tick;
+        const int32_t *values=c9_map_cache.scores;int valid=seq!=0;
         if(valid) {
             uint32_t map_age_us=(b.read(b.ctx,0x3e0)-first_tick)/C9_PL_TICKS_PER_US;
             if(map_age_us>C9_STALE_AFTER_US){accepted=0;reason|=64u;}

@@ -1,5 +1,6 @@
 /* Bare-metal AMP bridge: CPU0 captures/maps; CPU1 separates then diagnoses.
- * Shared sections have one uncached mapping on BOTH cores. Bulk work never
+ * CPU-only history and atomic task ownership use coherent cached memory.
+ * Both cores share identical section attributes. Bulk work never
  * runs in an HTTP callback or in the DMA/audio service. */
 #ifndef PS_CIRCULAR9_TASKS_H
 #define PS_CIRCULAR9_TASKS_H
@@ -33,6 +34,7 @@ typedef struct {uint32_t state,sequence,generation,processing_us;c9_search_feedb
 typedef struct {
  c9_aux_job job;c9_aux_result results[3];
  uint32_t started,completed,rejected,late,no_output,processing_us_max;
+ uint32_t copy_us,prepare_us,observations_us,search_us,decimator_vector_status;
 } c9_aux_memory;
 typedef struct {c9_diagnostic_job job;c9_diagnostic_result results[2];c9_cpu1_metrics metrics;c9_aux_memory auxiliary;} c9_task_memory;
 static union {c9_history history;uint8_t section[33554432];} c9_history_shared
@@ -45,6 +47,8 @@ static c9_tracker c9_tracks;
 static c9_tracker c9_aux_tracks;
 static c9_proposal_map c9_proposals;
 static uint32_t c9_job_sequence,c9_jobs_started,c9_map_retries;
+/* CPU0 owns this complete committed map; HTTP reuses it, never rereads 1024 MMIO words. */
+static struct {uint32_t seq,frame,sample,reason,accepted,first_tick;int32_t scores[1024];} c9_map_cache;
 static uint32_t c9_map_copies,c9_map_max_us,c9_tracks_last_tick,c9_tracks_last_sequence;
 static uint32_t c9_candidate_service_max_us,c9_candidate_service_overruns;
 static uint32_t c9_latest_tick,c9_latest_sequence;
@@ -72,8 +76,11 @@ static void c9_tasks_init(void){
  Xil_DCacheFlushRange((INTPTR)&c9_history_shared,sizeof(c9_history_shared));
  Xil_DCacheFlushRange((INTPTR)&c9_tasks_shared,sizeof(c9_tasks_shared));
  for(unsigned off=0;off<sizeof(c9_history_shared);off+=1048576)
-  Xil_SetTlbAttributes((INTPTR)&c9_history_shared+off,NORM_NONCACHE);
- Xil_SetTlbAttributes((INTPTR)&c9_tasks_shared,NORM_NONCACHE);
+  Xil_SetTlbAttributes((INTPTR)&c9_history_shared+off,NORM_WB_CACHE);
+ /* The task protocol uses LDREX/STREX RMW operations. Use Normal WB
+  * shareable memory on BOTH SMP/SCU-enabled cores, not noncached DDR
+  * transactions that can fail exclusive completion and leave state3. */
+ Xil_SetTlbAttributes((INTPTR)&c9_tasks_shared,NORM_WB_CACHE);
  c9_history_init(&c9_history_shared.history);
  memset(&c9_tasks_shared.data,0,sizeof(c9_tasks_shared.data));
  c9_aux_tracks.next_id=0x40000000u;
@@ -198,7 +205,7 @@ static void c9_tasks_cpu1(volatile struct ipc_page *ipc){
 /* Incremental, protected map read. Restoring MMIO INDEX every slice lets the
  * location/audio service interleave safely. Changed seqlocks discard maps. */
 static void c9_tasks_map_poll(const das_bus *b){
- static struct {uint32_t seq,ptr,frame,sample,reason,position,start,first_tick;int32_t scores[1024];} m;
+ static struct {uint32_t seq,ptr,frame,sample,reason,accepted,position,start,first_tick;int32_t scores[1024];} m;
  static uint32_t last;
  uint32_t now=dia_gtimer_now();
  if(c9_tracks_last_tick&&(uint32_t)(now-c9_tracks_last_tick)>66666666u){
@@ -209,7 +216,7 @@ static void c9_tasks_map_poll(const das_bus *b){
   uint32_t seq=mic_read_word(b,90);if(!seq||(seq&1u))return;
   if(seq==c9_tracks_last_sequence)return;
   m.ptr=mic_read_word(b,235);m.frame=mic_read_word(b,1);
-  m.sample=mic_read_word(b,93);m.reason=mic_read_word(b,97);
+  m.sample=mic_read_word(b,93);m.reason=mic_read_word(b,97);m.accepted=mic_read_word(b,91);
   m.first_tick=mic_read_word(b,239);
   if((m.ptr&3u)||m.ptr>0x2800u-sizeof(m.scores))return;
   m.seq=seq;m.position=0;m.start=now;
@@ -218,7 +225,7 @@ static void c9_tasks_map_poll(const das_bus *b){
  do {
   if(mic_read_word(b,90)!=m.seq){m.seq=0;c9_map_retries++;return;}
   b->write(b->ctx,0x80,0x80000000u+m.ptr/4u+m.position);
-  for(unsigned k=0;k<32;k++)m.scores[m.position++]=(int32_t)b->read(b->ctx,0x88);
+  for(unsigned k=0;k<128;k++)m.scores[m.position++]=(int32_t)b->read(b->ctx,0x88);
   c9_realtime_checkpoint();
   if(m.position==1024)break;
  }while(c9_ticks_to_us(dia_gtimer_now()-slice_start)<500u);
@@ -228,6 +235,9 @@ static void c9_tasks_map_poll(const das_bus *b){
     (uint32_t)(end-m.sample)>31250u||
     (uint32_t)(b->read(b->ctx,0x3e0)-m.first_tick)>C9_STALE_AFTER_US*C9_PL_TICKS_PER_US){m.seq=0;c9_map_retries++;return;}
  uint32_t duration=c9_ticks_to_us(dia_gtimer_now()-m.start);if(duration>c9_map_max_us)c9_map_max_us=duration;
+ c9_map_cache.seq=m.seq;c9_map_cache.frame=m.frame;c9_map_cache.sample=m.sample;
+ c9_map_cache.reason=m.reason;c9_map_cache.accepted=m.accepted;c9_map_cache.first_tick=m.first_tick;
+ memcpy(c9_map_cache.scores,m.scores,sizeof(m.scores));
  c9_map_copies++;c9_tracks_last_sequence=m.seq;c9_tracks_last_tick=dia_gtimer_now();
  last=now;m.seq=0;
  c9_candidate candidates[3];unsigned n=0;

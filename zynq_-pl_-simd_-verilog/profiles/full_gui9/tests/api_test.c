@@ -9,6 +9,7 @@
 #define XPAR_CPU_CORTEXA9_0_CPU_CLK_FREQ_HZ 666666666u
 struct ui_reply{int code;const char *reason,*ctype;int len;};
 static unsigned ticks;
+static unsigned c9_recording,c9_batch,c9_udp_tail,c9_udp_head;
 static uint32_t dia_gtimer_now(void){return ticks+=10000;}
 static int ui_append(char *s,int cap,int n,const char *fmt,...){
  if(n<0||n>=cap)return -1;va_list args;va_start(args,fmt);int k=vsnprintf(s+n,(size_t)(cap-n),fmt,args);va_end(args);return k<0||k>=cap-n?-1:n+k;

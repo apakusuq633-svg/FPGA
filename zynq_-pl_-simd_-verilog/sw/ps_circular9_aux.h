@@ -2,6 +2,9 @@
 #define PS_CIRCULAR9_AUX_H
 /* Included by tasks after its shared structures. No FFT runs on CPU0. */
 #define C9_AUX_HOP_RAW 8192u
+/* 256 warmup + 52.4288ms, three complete overlapping STFT observations.
+ * Keep the 200ms freshness bound; the old seven-observation job exceeded it. */
+#define C9_AUX_WINDOW_RAW C9_SEARCH_MIN_RAW_FRAMES
 static uint32_t c9_aux_last_tick,c9_aux_issued_end,c9_aux_issued_session,c9_aux_issued_epoch,c9_aux_issued_generation,c9_aux_have;
 static uint32_t c9_aux_sequence,c9_aux_skipped,c9_aux_replaced,c9_aux_accepted,c9_aux_rejected,c9_aux_replayed,c9_aux_receive_us_max;
 static uint32_t c9_aux_received_end,c9_aux_received_session,c9_aux_received_epoch,c9_aux_received_have;
@@ -28,7 +31,7 @@ static void c9_aux_schedule(void){
  uint32_t state=__atomic_load_n(&job->state,__ATOMIC_ACQUIRE);
  if(state!=0u&&state!=1u)return;
  uint32_t end=0,count=0,epoch=0,session=0;
- if(!c9_history_info(&c9_history_shared.history,&end,&count,&epoch,&session)||count<C9_SEARCH_RAW_FRAMES+3u)return;
+ if(!c9_history_info(&c9_history_shared.history,&end,&count,&epoch,&session)||count<C9_AUX_WINDOW_RAW+3u)return;
  end&=~3u;uint32_t selected=end,steps=1;
  if(c9_aux_have&&session==c9_aux_issued_session&&epoch==c9_aux_issued_epoch&&c9_shaft_generation==c9_aux_issued_generation){
   uint32_t advance=end-c9_aux_issued_end;
@@ -49,7 +52,7 @@ static int c9_aux_feedback_current(const c9_aux_result *result,uint32_t end,uint
     result->generation!=c9_shaft_generation||f->session!=session||f->epoch!=epoch||
     f->geometry_version!=ACOUSTIC_GEOMETRY_VERSION||f->calibration_version!=ACOUSTIC_CALIBRATION_VERSION||
     f->geometry_confirmed!=ACOUSTIC_GEOMETRY_CONFIRMED||
-    (uint32_t)(f->end_sample-f->first_sample)!=C9_SEARCH_RAW_FRAMES||
+    (uint32_t)(f->end_sample-f->first_sample)!=C9_AUX_WINDOW_RAW||
     f->valid_until_sample!=f->end_sample+C9_SEARCH_MAX_AGE_SAMPLES||
     (uint32_t)(end-f->end_sample)>C9_SEARCH_MAX_AGE_SAMPLES||
     f->analysis_frames<3||f->analysis_frames>8||(f->band_valid_mask&~7u)||(!f->band_valid_mask&&f->count))return 0;
@@ -94,26 +97,25 @@ static int c9_aux_cpu1(volatile struct ipc_page *ipc){
  uint32_t expected=1u;
  if(!__atomic_compare_exchange_n(&memory->job.state,&expected,2u,0,__ATOMIC_ACQ_REL,__ATOMIC_ACQUIRE))return 0;
  memcpy(&job,&memory->job,sizeof(job));c9_metric_increment(&memory->started);ipc->busy=1;
- static uint32_t have,last_end,last_session,last_epoch,last_generation;
+ /* Coalesce delayed work to the newest requested window. Do not replay up
+  * to three expensive old searches, which makes the newest result stale. */
  uint32_t first_end=job.end_sample;
- if(have&&last_session==job.session&&last_epoch==job.epoch&&last_generation==job.generation){
-  uint32_t distance=job.end_sample-last_end;
-  if(distance<0x80000000u&&distance>C9_AUX_HOP_RAW){
-   uint32_t steps=distance/C9_AUX_HOP_RAW;if(steps>3u)steps=3u;
-   first_end=job.end_sample-(steps-1u)*C9_AUX_HOP_RAW;
-  }
- }
  for(uint32_t selected=first_end;;selected+=C9_AUX_HOP_RAW){
   c9_aux_result *result=NULL;
   for(unsigned i=0;i<3;i++)if(__atomic_load_n(&memory->results[i].state,__ATOMIC_ACQUIRE)==0u){result=&memory->results[i];break;}
   if(!result){c9_metric_increment(&memory->no_output);break;}
   __atomic_store_n(&result->state,1u,__ATOMIC_RELEASE);
   uint32_t t0=dia_gtimer_now(),first=0,epoch=0,session=0;
-  int valid=c9_history_copy(&c9_history_shared.history,c9_snapshot,C9_SEARCH_RAW_FRAMES,selected,&first,&epoch,&session)&&epoch==job.epoch&&session==job.session;
+  int valid=c9_history_copy(&c9_history_shared.history,c9_snapshot,C9_AUX_WINDOW_RAW,selected,&first,&epoch,&session)&&epoch==job.epoch&&session==job.session;
   c9_search_context context={.session=session,.epoch=epoch,.first_sample=first,.end_sample=selected,
    .geometry_version=ACOUSTIC_GEOMETRY_VERSION,.calibration_version=ACOUSTIC_CALIBRATION_VERSION,.geometry_confirmed=ACOUSTIC_GEOMETRY_CONFIRMED};
+  __atomic_store_n(&memory->copy_us,c9_ticks_to_us(dia_gtimer_now()-t0),__ATOMIC_RELEASE);
   memset(&result->feedback,0,sizeof(result->feedback));
-  if(valid)valid=c9_candidates_search(c9_snapshot,C9_SEARCH_RAW_FRAMES,acoustic_steer_lut,&c9_separator,&context,&result->feedback)>0;
+  if(valid)valid=c9_candidates_search(c9_snapshot,C9_AUX_WINDOW_RAW,acoustic_steer_lut,&c9_separator,&context,&result->feedback)>0;
+  __atomic_store_n(&memory->decimator_vector_status,c9_candidates_acceleration(),__ATOMIC_RELEASE);
+  __atomic_store_n(&memory->prepare_us,c9_ticks_to_us(c9_separator.search_ticks[0]),__ATOMIC_RELEASE);
+  __atomic_store_n(&memory->observations_us,c9_ticks_to_us(c9_separator.search_ticks[1]),__ATOMIC_RELEASE);
+  __atomic_store_n(&memory->search_us,c9_ticks_to_us(c9_separator.search_ticks[2]),__ATOMIC_RELEASE);
   uint32_t end=0,count=0,current_epoch=0,current_session=0;
   result->processing_us=c9_ticks_to_us(dia_gtimer_now()-t0);
   c9_metric_max(&memory->processing_us_max,result->processing_us);
@@ -122,7 +124,7 @@ static int c9_aux_cpu1(volatile struct ipc_page *ipc){
   if(valid){
    result->sequence=job.sequence*4u+(selected-first_end)/C9_AUX_HOP_RAW;result->generation=job.generation;
    __atomic_store_n(&result->state,2u,__ATOMIC_RELEASE);c9_metric_increment(&memory->completed);
-   have=1;last_end=selected;last_session=job.session;last_epoch=job.epoch;last_generation=job.generation;
+
   }else{c9_metric_increment(&memory->rejected);__atomic_store_n(&result->state,0u,__ATOMIC_RELEASE);}
   if(selected==job.end_sample)break;
  }
