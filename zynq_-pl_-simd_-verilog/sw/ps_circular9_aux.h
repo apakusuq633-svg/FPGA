@@ -2,11 +2,12 @@
 #define PS_CIRCULAR9_AUX_H
 /* Included by tasks after its shared structures. No FFT runs on CPU0. */
 #define C9_AUX_HOP_RAW 8192u
-/* 256 warmup + 52.4288ms, three complete overlapping STFT observations.
- * Keep the 200ms freshness bound; the old seven-observation job exceeded it. */
-#define C9_AUX_WINDOW_RAW C9_SEARCH_MIN_RAW_FRAMES
+/* 256 warmup + 104.8576ms of genuine evidence, seven overlapping STFTs.
+ * Paired real-IFFT search removes duplicate work; retain the200ms bound. */
+#define C9_AUX_WINDOW_RAW C9_SEARCH_RAW_FRAMES
 static uint32_t c9_aux_last_tick,c9_aux_issued_end,c9_aux_issued_session,c9_aux_issued_epoch,c9_aux_issued_generation,c9_aux_have;
 static uint32_t c9_aux_sequence,c9_aux_skipped,c9_aux_replaced,c9_aux_accepted,c9_aux_rejected,c9_aux_replayed,c9_aux_receive_us_max;
+static uint32_t c9_aux_interval_raw,c9_aux_interval_max_raw,c9_aux_age_raw,c9_aux_age_max_raw;
 static uint32_t c9_aux_received_end,c9_aux_received_session,c9_aux_received_epoch,c9_aux_received_have;
 static unsigned c9_collect_tracks(const c9_track *out[3],uint32_t end,uint32_t epoch,uint32_t session){
  unsigned n=0;
@@ -83,6 +84,9 @@ static void c9_aux_receive(void){
   if(valid&&c9_aux_received_have&&f->session==c9_aux_received_session&&f->epoch==c9_aux_received_epoch&&
      (int32_t)(f->end_sample-c9_aux_received_end)<=0){valid=0;c9_aux_replayed++;}
   if(valid){
+   c9_aux_interval_raw=c9_aux_received_have&&f->session==c9_aux_received_session&&f->epoch==c9_aux_received_epoch?f->end_sample-c9_aux_received_end:0;
+   if(c9_aux_interval_raw>c9_aux_interval_max_raw)c9_aux_interval_max_raw=c9_aux_interval_raw;
+   c9_aux_age_raw=end-f->end_sample;if(c9_aux_age_raw>c9_aux_age_max_raw)c9_aux_age_max_raw=c9_aux_age_raw;
    c9_tracks_update_intervals(&c9_aux_tracks,f->candidates,f->count,f->support_first_sample,f->support_end_sample,f->end_sample,f->epoch,f->session);
    c9_aux_received_have=1;c9_aux_received_end=f->end_sample;c9_aux_received_session=f->session;c9_aux_received_epoch=f->epoch;
    c9_aux_last_tick=dia_gtimer_now();c9_aux_accepted++;

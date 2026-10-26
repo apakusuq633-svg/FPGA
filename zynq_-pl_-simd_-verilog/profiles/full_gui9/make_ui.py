@@ -10,6 +10,7 @@ def main():
  if len(positions)!=9 or any(len(p)!=3 for p in positions):raise ValueError('Nine channel-order positions required')
  geometry_js='var c9ChannelPositions='+json.dumps(positions,separators=(',',':'),allow_nan=False)+';\n'
  html=html.replace('{{GCC_CORE}}',(R/'sw/circular9_gcc_debug.js').read_text(encoding='utf-8')).replace('{{GUI9_JS}}',geometry_js+(R/'sw/circular9_full_gui.js').read_text(encoding='utf-8'))
+ html=html.replace('{{GUI9_COMPLETENESS}}',(R/'sw/circular9_gui_complete.js').read_text(encoding='utf-8'))
  if len(html.encode())>=60000:raise ValueError('Page exceeds the bounded 16-bit HTTP response budget')
  def encode(line):
   raw=json.dumps(line+'\n',ensure_ascii=False)

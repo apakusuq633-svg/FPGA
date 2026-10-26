@@ -100,7 +100,14 @@ void c9_diagnose_with_model(const double x[C9_DIAG_SAMPLES],double hz,
  double v[C9_DIAG_FEATURES]={0},energy=0.0;unsigned clipped=0;
  if(!r)return;
  if(!x || !finite_number(hz) || hz<10.0 || hz>30.0) {
-  c9_diag_score_features(0,0.0,hz,b,m,r);r->extraction.status=C9_DIAG_EXTRACT_BAD_INPUT;return;
+  c9_diag_score_features(0,0.0,hz,b,m,r);r->extraction.status=C9_DIAG_EXTRACT_BAD_INPUT;
+  /* Unknown speed is exactly0 in the task ABI. Display the real envelope,
+   * but leave order features/classification UNKNOWN; never substitute RPM. */
+  if(x&&hz==0.0&&c9_env_analyze(x,&r->extraction)){
+   for(unsigned i=0;i<C9_DIAG_SAMPLES;i++){energy+=x[i]*x[i];if(x[i]>=.999||x[i]<=-.999)clipped++;}
+   r->rms=d_sqrt(energy/C9_DIAG_SAMPLES);r->clipped_samples=clipped;
+  }
+  return;
  }
  for(unsigned i=0;i<C9_DIAG_SAMPLES;i++) {
   if(!finite_number(x[i]) || x[i]>1.0 || x[i]<-1.0) {

@@ -96,11 +96,12 @@ static void c9_env_normalize(double v[18],double carrier) {
  double median=.5*(sorted[8]+sorted[9]);
  for(unsigned i=0;i<18;i++)v[i]=20*d_log10((v[i]+floor)/(median+floor));
 }
-static int c9_env_extract(const double *x,double shaft,double v[18],c9_diag_extraction *meta) {
- if(!meta || !v)return 0;
- memset(meta,0,sizeof(*meta));memset(v,0,18*sizeof(*v));
+/* Envelope/Hz spectrum does not require a shaft speed. Static CPU1 workspace. */
+static int c9_env_analyze(const double *x,c9_diag_extraction *meta) {
+ if(!meta)return 0;
+ memset(meta,0,sizeof(*meta));
  meta->status=C9_DIAG_EXTRACT_BAD_INPUT;
- if(!x || !c9_env_finite(shaft) || shaft<10 || shaft>30)return 0;
+ if(!x)return 0;
  double input_energy=0.0;
  for(unsigned i=0;i<C9_DIAG_SAMPLES;i++) {
   if(!c9_env_finite(x[i]) || x[i]<-1 || x[i]>1)return 0;
@@ -148,12 +149,8 @@ static int c9_env_extract(const double *x,double shaft,double v[18],c9_diag_extr
  fft_core(c9_env_re,c9_env_im,C9_ENV_FFT);
  for(unsigned i=0;i<C9_ENV_BINS;i++)
   c9_env_spectrum[i]=2*d_hypot(c9_env_re[i],c9_env_im[i])/c9_env_window_sum;
- for(unsigned o=0;o<4;o++)for(unsigned h=1;h<=4;h++)
-  v[4u*o+h-1u]=c9_env_peak(h*bearing6004_orders[o]*shaft);
- v[16]=c9_env_peak(shaft);v[17]=c9_env_peak(2*shaft);
  meta->carrier_rms=d_sqrt(band_energy/(2.0*C9_ENV_ANALYTIC_SAMPLES));
  meta->modulation_rms=d_sqrt(modulation_energy/c9_env_window_sum);
- c9_env_normalize(v,meta->carrier_rms);
  meta->status=meta->carrier_rms<d_sqrt(input_energy/C9_DIAG_SAMPLES)*1e-4+1e-10?C9_DIAG_EXTRACT_NO_CARRIER:
   meta->modulation_rms<mean*1e-4+1e-10?C9_DIAG_EXTRACT_NO_MODULATION:C9_DIAG_EXTRACT_OK;
  meta->envelope_samples=C9_ENV_SAMPLES;meta->fft_size=C9_ENV_FFT;meta->fft_count=1;
@@ -166,6 +163,18 @@ static int c9_env_extract(const double *x,double shaft,double v[18],c9_diag_extr
  meta->carrier_low_hz=C9_DIAG_CARRIER_LOW_HZ;meta->carrier_high_hz=C9_DIAG_CARRIER_HIGH_HZ;
  meta->carrier_transition_guard_hz=C9_DIAG_CARRIER_TRANSITION_GUARD_HZ;
  meta->envelope_lowpass_hz=900;
+ return 1;
+}
+/* Existing C9F2 order features retain their original speed contract. */
+static int c9_env_extract(const double *x,double shaft,double v[18],c9_diag_extraction *meta) {
+ if(!meta||!v)return 0;
+ memset(meta,0,sizeof(*meta));memset(v,0,18*sizeof(*v));
+ meta->status=C9_DIAG_EXTRACT_BAD_INPUT;
+ if(!c9_env_finite(shaft)||shaft<10||shaft>30||!c9_env_analyze(x,meta))return 0;
+ for(unsigned o=0;o<4;o++)for(unsigned h=1;h<=4;h++)
+  v[4u*o+h-1u]=c9_env_peak(h*bearing6004_orders[o]*shaft);
+ v[16]=c9_env_peak(shaft);v[17]=c9_env_peak(2*shaft);
+ c9_env_normalize(v,meta->carrier_rms);
  return 1;
 }
 #endif

@@ -18,7 +18,7 @@ def main():
  result={'passed':True,'hardware_tested':False,'ps_runtime_measured':False,
   'fixture':'actual CPU1 FFT discovery from synthetic raw9 with no preexisting track; CPU0 negative provenance controls; independent real-window interval coverage simulation',
   'hop_raw_samples':8192,'window_raw_samples':16640,'maximum_feedback_age_samples':31250,
-  'raw_sample_rate_hz':156250,'maximum_catchup_windows':3,'CPU0_FFT':False,
+  'raw_sample_rate_hz':156250,'maximum_catchup_windows':1,'CPU0_FFT':False,
   'guards':['actual_per_candidate_support_intervals','three_fresh_observations','no_duplicate_support',
    'session_epoch_generation_geometry_calibration_binding','expired_input_rejected','unobserved_gaps_preserved',
    'full_diagnostic_span_required','primary_priority_spherical_NMS','independent_aux_ID_namespace'],

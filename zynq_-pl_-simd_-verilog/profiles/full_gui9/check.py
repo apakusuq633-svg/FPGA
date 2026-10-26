@@ -15,13 +15,14 @@ def run(name,args,env=None):
 for name in ['health','api']:
  exe=O/(name+'_test.exe')
  run(name+'_compile',[GCC,'-std=c11','-Wall','-Wextra','-Werror','-Wno-misleading-indentation','-O2','-I'+str(R),P/'tests'/(name+'_test.c'),'-o',exe])
- run(name,[exe])
+ run(name,[exe,O/'synthetic_snapshot.bin'] if name=='api' else [exe])
 run('page_compile',[GCC,'-std=c11','-I'+str(R/'sw'),'-I'+str(R/'sw/cstub'),P/'tests/page_dump.c','-o',O/'page_dump.exe'])
 run('page_extract',[O/'page_dump.exe',O/'compiled_gui.html'])
 html=(O/'compiled_gui.html').read_text(encoding='utf-8')
 assert len(html.encode())<60000 and 'id="archive_load"' in html and 'id="pair_run"' in html
 (P/'tests/full_gui.html').write_text(html,encoding='utf-8',newline='\n')
-run('browser_dom',[NODE,P/'tests/gui_test.js'])
+gui_env=dict(os.environ,C9_GUI_BINARY_PACKET=str(O/'synthetic_snapshot.bin'))
+run('browser_dom',[NODE,P/'tests/gui_test.js'],gui_env)
 env=dict(os.environ,PYTHONPATH=str(P))
 run('archive',[sys.executable,P/'tests/archive_test.py'],env)
 run('diagnosis_compile',[GCC,'-std=c11','-Wall','-Wextra','-Wno-missing-field-initializers','-O2','-I'+str(R/'sw'),R/'sw/circular9_diagnosis_test.c',R/'sw/circular9_diagnosis.c','-lm','-o',O/'diagnosis_test.exe'])

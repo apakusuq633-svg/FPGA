@@ -68,8 +68,18 @@ static int c9_candidates_json(char *out,size_t cap){
   n=ui_append(out,(int)cap,n,"]}");
  }
  else n=ui_append(out,(int)cap,n,"]");
+ n=ui_append(out,(int)cap,n,",\"snapshot_debug\":{\"revision\":\"snapshot-stage7-independent-20261026\",\"now_sample\":%u,\"aux_interval_raw\":%u,\"aux_interval_max_raw\":%u,\"aux_age_raw\":%u,\"aux_age_max_raw\":%u,\"last_reject_track\":%u,\"last_reject_reason\":%u,\"reasons\":[",end,c9_aux_interval_raw,c9_aux_interval_max_raw,c9_aux_age_raw,c9_aux_age_max_raw,c9_schedule_last_reject_track,c9_schedule_last_reject_reason);
+ for(unsigned k=0;k<8;k++)n=ui_append(out,(int)cap,n,"%s%u",k?",":"",c9_schedule_reasons[k]);
+ n=ui_append(out,(int)cap,n,"],\"tracks\":[");
+ for(unsigned i=0;i<merged_count;i++){
+  const c9_track *t=merged[i];uint32_t missing=0,tail=0;
+  uint32_t why=c9_track_coverage_reason(t,end-C9_SNAPSHOT_FRAMES,end,&missing,&tail);
+  n=ui_append(out,(int)cap,n,"%s{\"id\":%u,\"state\":%u,\"observations\":%u,\"fresh\":%u,\"first\":%u,\"coverage_first\":%u,\"last\":%u,\"gap_count\":%u,\"gap_open\":%u,\"missing_raw\":%u,\"tail_raw\":%u,\"reason\":%u}",i?",":"",t->id,t->state,t->observations,t->fresh_observations,t->first_sample,t->coverage_first,t->last_sample,t->gap_count,t->gap_open,missing,tail,why);
+ }
+ n=ui_append(out,(int)cap,n,"]}");
+ n=ui_append(out,(int)cap,n,",\"diagnostic_eligibility\":{\"nonobserved_skipped\":%u,\"ineligible_skipped\":%u,\"unresolved_directions\":%u}",c9_schedule_nonobserved_skipped,c9_schedule_ineligible_skipped,r?r->unresolved_tracks:0u);
  const c9_cpu1_metrics *metrics=&c9_tasks_shared.data.metrics;
- n=ui_append(out,(int)cap,n,",\"diagnostic_scheduler\":{\"hop_raw_samples\":%u,\"hop_ms\":512,\"latest_only\":true,"
+ n=ui_append(out,(int)cap,n,",\"diagnostic_scheduler\":{\"hop_raw_samples\":%u,\"hop_ms\":512,\"deadline_ms\":3000,\"result_age_limit_ms\":3000,\"latest_only\":true,"
   "\"history_frames\":%u,\"history_bytes\":%u,\"skipped_hops\":%u,\"pending_replaced\":%u,\"coverage_rejected\":%u,"
   "\"cpu1_started\":%u,\"cpu1_completed\":%u,\"deadline_misses\":%u,\"snapshot_rejected\":%u,\"worker_coverage_rejected\":%u,\"no_output_slot\":%u,"
   "\"processing_us_max\":%u,\"queue_wait_us_max\":%u,\"total_elapsed_us_max\":%u,\"queue_age_samples_max\":%u,\"result_age_samples_max\":%u,"

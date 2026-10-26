@@ -185,3 +185,5 @@
 | [022](../archive/issues/022-tb-own-nbout-fsm-bug.md) | TB 自己的 NBOUT 采样 bug | 已修 | 采样 FSM 与 1024 拍帧相位锁定，把补料全屏蔽 ⇒ FIFO 抽干、X 毒死核 |
 | [023](../archive/issues/023-anc-coefficient-pipeline-timing.md) | ANC 系数运算没流水 | 已修 | ρ→r→b→MAC 串了 3 级乘法全组合；40 MHz WNS −5.799 → 加 8 拍预算相位 |
 | [026](../archive/issues/026-notch-replaced-by-projection.md) | 陷波链换成投影相减 | **部分复核** | 6 级双二阶整个撤掉，4 槽投影 `α=2·LP{x·sin}`；**有符号移位被拼接收编成逻辑移位**是本次最值钱的坑 |
+
+- [130：九麦诊断快照恢复与证据](130-circular9-snapshot-evidence-and-scheduling.md)：实板流水线已恢复；分类/多电机未验收。

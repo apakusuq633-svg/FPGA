@@ -468,6 +468,37 @@ int c9_search_feedback_current(const c9_search_feedback *f,uint32_t now,uint32_t
  }
  return 1;
 }
+#ifndef C9_REFERENCE_SEARCH_INTERPOLATION
+/* Geometry and /4 analysis produce exact multiples of 1/64. Cache the same
+ * cubic interpolation, retaining double precision and all search gates. */
+static uint16_t search_delay_codes[1024][36];
+static double search_cubic_weights[64][4];
+static uint32_t search_delay_lut[9*1024],search_delay_ready;
+static int search_prepare_delays(const uint32_t *lut){
+ if(search_delay_ready&&!memcmp(lut,search_delay_lut,sizeof(search_delay_lut)))return 1;
+ for(unsigned f=0;f<64;f++){
+  double t=f/64.0,t2=t*t,t3=t2*t;
+  search_cubic_weights[f][0]=-.5*t3+t2-.5*t;
+  search_cubic_weights[f][1]=1-2.5*t2+1.5*t3;
+  search_cubic_weights[f][2]=.5*t+2*t2-1.5*t3;
+  search_cubic_weights[f][3]=-.5*t2+.5*t3;
+ }
+ for(unsigned g=0;g<1024;g++){
+  int q[9];for(unsigned ch=0;ch<9;ch++){q[ch]=(int)(lut[ch*1024+g]&16383u);if(q[ch]&8192)q[ch]-=16384;}
+  unsigned pair=0;
+  for(unsigned i=0;i<8;i++)for(unsigned j=i+1;j<9;j++){
+   int numerator=q[j]-q[i],l=numerator/64;if(l*64>numerator)l--;
+   if(l< -31||l>29){search_delay_ready=0;return 0;}
+   search_delay_codes[g][pair++]=(uint16_t)((l+31)*64+numerator-l*64);
+  }
+ }
+ memcpy(search_delay_lut,lut,sizeof(search_delay_lut));search_delay_ready=1;return 1;
+}
+static inline double search_interpolated(const double p[64],uint16_t code){
+ unsigned i=code>>6;const double *w=search_cubic_weights[code&63u];
+ return p[i]*w[0]+p[i+1]*w[1]+p[i+2]*w[2]+p[i+3]*w[3];
+}
+#endif
 int c9_candidates_search(const int16_t (*raw)[9],uint32_t raw_frames,const uint32_t *lut,
  c9_separation_workspace *w,const c9_search_context *ctx,c9_search_feedback *r){
  if(!r)return 0;
@@ -501,6 +532,7 @@ int c9_candidates_search(const int16_t (*raw)[9],uint32_t raw_frames,const uint3
    if(p>peak_power*.001&&p>1e-12){used[b][k]=1;r->band_bins[b]++;}
   }
   if(r->band_bins[b]<4u)continue;
+#ifdef C9_REFERENCE_SEARCH_IFFT
   unsigned pair=0;
   for(unsigned i=0;i<8;i++)for(unsigned j=i+1;j<9;j++){
    memset(w->transform,0,sizeof(w->transform));
@@ -514,8 +546,38 @@ int c9_candidates_search(const int16_t (*raw)[9],uint32_t raw_frames,const uint3
    for(int lag=-32;lag<32;lag++)w->search_lags[pair][lag+32]=w->transform[(lag+C9_SEPARATION_FFT)%C9_SEPARATION_FFT].re;
    pair++;
   }
+#else
+  /* Two Hermitian spectra X,Y yield two real correlations in one complex
+   * inverse FFT: IFFT(X+iY)=x+i*y. No bins, bands or delays are dropped. */
+  unsigned pi[36],pj[36],pair=0;
+  for(unsigned i=0;i<8;i++)for(unsigned j=i+1;j<9;j++){pi[pair]=i;pj[pair++]=j;}
+  double roots[9][202];
+  for(unsigned ch=0;ch<9;ch++)for(unsigned k=16;k<=209;k++)if(used[b][k])roots[ch][k-8]=square_root(w->covariance[k-8][ch][ch].re);
+  for(pair=0;pair<36;pair+=2){
+   memset(w->transform,0,sizeof(w->transform));
+   for(unsigned k=16;k<=209;k++)if(used[b][k]){
+    c9_complex v[2];
+    for(unsigned t=0;t<2;t++){
+     unsigned i=pi[pair+t],j=pj[pair+t];v[t]=w->covariance[k-8][i][j];
+     double den=roots[i][k-8]*roots[j][k-8];
+     if(den>1e-18){v[t].re/=den;v[t].im/=den;}else v[t]=(c9_complex){0,0};
+    }
+    w->transform[k]=(c9_complex){v[0].re-v[1].im,v[0].im+v[1].re};
+    w->transform[C9_SEPARATION_FFT-k]=(c9_complex){v[0].re+v[1].im,-v[0].im+v[1].re};
+   }
+   fft(w->transform,w->twiddle,1);
+   for(int lag=-32;lag<32;lag++){
+    c9_complex v=w->transform[(lag+C9_SEPARATION_FFT)%C9_SEPARATION_FFT];
+    w->search_lags[pair][lag+32]=v.re;w->search_lags[pair+1][lag+32]=v.im;
+   }
+  }
+#endif
+#ifndef C9_REFERENCE_SEARCH_INTERPOLATION
+  if(!search_prepare_delays(lut)){r->invalid_input=0x20000000u;return 0;}
+#endif
   double scale=1000000.0*C9_SEPARATION_FFT/(72.0*r->band_bins[b]);
   for(unsigned g=0;g<1024;g++){
+#ifdef C9_REFERENCE_SEARCH_INTERPOLATION
    int q[9];for(unsigned ch=0;ch<9;ch++){q[ch]=(int)(lut[ch*1024+g]&16383u);if(q[ch]&8192)q[ch]-=16384;}
    double sum=0;pair=0;
    for(unsigned i=0;i<8;i++)for(unsigned j=i+1;j<9;j++){
@@ -527,6 +589,10 @@ int c9_candidates_search(const int16_t (*raw)[9],uint32_t raw_frames,const uint3
     double p2=w->search_lags[pair][l+33],p3=w->search_lags[pair][l+34];
     sum+=(((-.5*p0+1.5*p1-1.5*p2+.5*p3)*t+(p0-2.5*p1+2*p2-.5*p3))*t+.5*(p2-p0))*t+p1;pair++;
    }
+#else
+   double sum=0;
+   for(unsigned pair=0;pair<36;pair++)sum+=search_interpolated(w->search_lags[pair],search_delay_codes[g][pair]);
+#endif
    double score=sum*scale;if(score>2000000000)score=2000000000;if(score< -2000000000)score= -2000000000;
    w->search_scores[b][g]=(int32_t)score;
   }

@@ -167,13 +167,19 @@ static inline void c9_tracks_update_intervals(c9_tracker *s,const c9_candidate *
     (uint32_t)(ends[i]-firsts[i])>C9_SNAPSHOT_FRAMES||(int32_t)(publication_end-ends[i])<0)return;
  c9_tracks_update_mode(s,c,n,publication_end,publication_end,epoch,session,1,firsts,ends);
 }
-static inline int c9_track_covers_range(const c9_track *t,uint32_t first,uint32_t end){
- if(!t->id||t->state!=C9_TRACK_OBSERVED||t->fresh_observations<C9_TRACK_FRESH_OBSERVATIONS||
-    t->observations<C9_TRACK_FRESH_OBSERVATIONS||t->gap_open||
-    (int32_t)(first-t->first_sample)<0||(int32_t)(first-t->coverage_first)<0||
-    (int32_t)(t->last_sample-first)<0||(int32_t)(end-first)<=0)return 0;
- uint32_t span=end-first;uint64_t missing=0;
- if((int32_t)(end-t->last_sample)>0)missing=end-t->last_sample;
+enum {C9_COVER_NO_ID=1u,C9_COVER_STATE=2u,C9_COVER_OBSERVATIONS=4u,
+ C9_COVER_OPEN_GAP=8u,C9_COVER_ORIGIN=16u,C9_COVER_RANGE=32u,C9_COVER_MISSING=64u};
+/* Same acceptance contract; expose why a real interval cannot qualify. */
+static inline uint32_t c9_track_coverage_reason(const c9_track *t,uint32_t first,uint32_t end,
+ uint32_t *missing_out,uint32_t *tail_out){
+ uint32_t reason=0;uint64_t missing=0;uint32_t tail=0;
+ if(!t->id)reason|=C9_COVER_NO_ID;
+ if(t->state!=C9_TRACK_OBSERVED)reason|=C9_COVER_STATE;
+ if(t->fresh_observations<C9_TRACK_FRESH_OBSERVATIONS||t->observations<C9_TRACK_FRESH_OBSERVATIONS)reason|=C9_COVER_OBSERVATIONS;
+ if(t->gap_open)reason|=C9_COVER_OPEN_GAP;
+ if((int32_t)(first-t->first_sample)<0||(int32_t)(first-t->coverage_first)<0)reason|=C9_COVER_ORIGIN;
+ if((int32_t)(t->last_sample-first)<0||(int32_t)(end-first)<=0)reason|=C9_COVER_RANGE;
+ if((int32_t)(end-t->last_sample)>0)missing=tail=end-t->last_sample;
  for(unsigned i=0;i<t->gap_count;i++){
   const c9_track_gap *g=&t->gaps[i];
   if((int32_t)(g->end-first)<=0)continue;
@@ -181,7 +187,13 @@ static inline int c9_track_covers_range(const c9_track *t,uint32_t first,uint32_
   uint32_t gap_end=(int32_t)(g->end-end)>0?end:g->end;
   if((int32_t)(gap_end-start)>0)missing+=gap_end-start;
  }
- return missing*100u<=(uint64_t)span*(100u-C9_TRACK_SUPPORT_PERCENT);
+ if(!(reason&C9_COVER_RANGE)&&missing*100u>(uint64_t)(end-first)*(100u-C9_TRACK_SUPPORT_PERCENT))reason|=C9_COVER_MISSING;
+ if(missing_out)*missing_out=missing>UINT32_MAX?UINT32_MAX:(uint32_t)missing;
+ if(tail_out)*tail_out=tail;
+ return reason;
+}
+static inline int c9_track_covers_range(const c9_track *t,uint32_t first,uint32_t end){
+ return c9_track_coverage_reason(t,first,end,NULL,NULL)==0;
 }
 static inline int c9_track_covers(const c9_track *t,uint32_t first){
  return c9_track_covers_range(t,first,t->last_sample);
