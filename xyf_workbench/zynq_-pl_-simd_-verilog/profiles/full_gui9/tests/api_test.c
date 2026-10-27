@@ -20,9 +20,10 @@ static struct {struct {c9_diagnostic_result results[2];} data;} c9_tasks_shared;
 static unsigned c9_shaft_confirmed=1,c9_shaft_millihz=25000;
 static int c9_result_current(const c9_diag_report *d,unsigned session,unsigned generation){(void)d;(void)session;(void)generation;return 1;}
 static struct {int history;} c9_history_shared;
-static int c9_history_info(const int *h,uint32_t *end,uint32_t *count,uint32_t *epoch,uint32_t *session){(void)h;*end=2048;*count=2048;*epoch=3;*session=4;return 1;}
+static unsigned hist_end=2048,hist_count=2048,hist_epoch=3,hist_session=4,hist_fail_call,hist_copy_calls,hist_change_call;
+static int c9_history_info(const int *h,uint32_t *end,uint32_t *count,uint32_t *epoch,uint32_t *session){(void)h;if(end)*end=hist_end;if(count)*count=hist_count;if(epoch)*epoch=hist_epoch;if(session)*session=hist_session;return 1;}
 static int c9_history_copy(const int *h,int16_t (*r)[9],uint32_t count,uint32_t end,uint32_t *first,uint32_t *epoch,uint32_t *session){
- (void)h;*first=end-count;*epoch=3;*session=4;for(unsigned i=0;i<count;i++)for(unsigned j=0;j<9;j++)r[i][j]=(int16_t)(*first+i+j);return 1;
+ (void)h;hist_copy_calls++;if(hist_copy_calls==hist_fail_call)return 0;if(hist_copy_calls==hist_change_call)hist_epoch++;*first=end-count;*epoch=hist_epoch;*session=hist_session;for(unsigned i=0;i<count;i++)for(unsigned j=0;j<9;j++)r[i][j]=(int16_t)(*first+i+j);return 1;
 }
 static unsigned checkpoints;
 static void c9_realtime_checkpoint(void){checkpoints++;}
@@ -75,5 +76,40 @@ int main(int argc,char **argv){
  request("GET /api/gui/snapshot?sequence=1&index=1 HTTP/1.1",409);
  request("GET /api/gui/snapshot?sequence=1&index=0XYZ HTTP/1.1",400);
  assert(c9_gui_route("GET /api/gui/snapshot?sequence=1&index=0 HTTP/1.1",&r,out,64)&&r.code==500&&r.len==0);
+
+#if C9_WINDOW_EXPORT
+ assert(!c9_export.enabled&&!c9_export.valid);
+ request("GET /api/debug/window?frames=16640 HTTP/1.1",403);
+ struct ui_reply ignored;assert(!c9_window_route("GET /api/debug/window/enable HTTP/1.1",&ignored,out,sizeof(out))&&!c9_export.enabled);
+ request("POST /api/debug/window/enable HTTP/1.1",200);assert(c9_export.enabled&&!c9_export.valid);
+ request("GET /api/debug/window?frames=16640 HTTP/1.1",409);
+ hist_end=hist_count=200000;hist_copy_calls=0;
+ request("GET /api/debug/window?frames=160256 HTTP/1.1",200);assert(c9_export.valid&&c9_export.first==39744u&&c9_export.frames==160256u);
+ unsigned token=c9_export.token;char query[160];
+ for(unsigned offset=0;offset<160256;offset+=1024){
+  unsigned n=160256-offset;if(n>1024)n=1024;
+  snprintf(query,sizeof(query),"GET /api/debug/window?token=%u&offset=%u&count=%u HTTP/1.1",token,offset,n);r=request(query,200);assert(r.len==(int)(48+18*n));
+  uint32_t header[12];memcpy(header,out,48);assert(header[0]==0x43395732&&header[2]==token&&header[5]==160256&&header[6]==offset&&header[7]==n&&header[8]==39744&&header[9]==3&&header[10]==4&&header[11]==9);
+  for(unsigned i=0;i<n;i++)for(unsigned ch=0;ch<9;ch++){int16_t x;memcpy(&x,out+48+18*i+2*ch,2);assert(x==(int16_t)(39744+offset+i+ch));}
+ }
+ /* Frozen cache survives producer advancement; it never joins new windows. */
+ hist_end+=100000;hist_epoch++;snprintf(query,sizeof(query),"GET /api/debug/window?token=%u&offset=0&count=1 HTTP/1.1",token);request(query,200);
+ request("GET /api/debug/window?frames=16640 HTTP/1.1",200);assert(c9_export.token!=token);request(query,409);
+ const char *bad[]={"frames=-1","frames=4294967297","frames=0","frames=160257","frames=16640&x=1","token=1&offset=0&count=0","token=1&offset=0&count=1025","token=4294967297&offset=0&count=1","token=1&offset=-1&count=1"};
+ for(unsigned i=0;i<sizeof(bad)/sizeof(bad[0]);i++){snprintf(query,sizeof(query),"GET /api/debug/window?%s HTTP/1.1",bad[i]);request(query,400);}
+ snprintf(query,sizeof(query),"GET /api/debug/window?token=%u&offset=16640&count=1 HTTP/1.1",c9_export.token);request(query,400);
+ hist_copy_calls=0;hist_fail_call=2;request("GET /api/debug/window?frames=16640 HTTP/1.1",409);assert(!c9_export.valid);hist_fail_call=0;
+ hist_copy_calls=0;hist_change_call=2;request("GET /api/debug/window?frames=16640 HTTP/1.1",409);assert(!c9_export.valid);hist_change_call=0;
+ request("GET /api/debug/window?frames=16640 HTTP/1.1",200);
+ snprintf(query,sizeof(query),"GET /api/debug/window?token=%u&offset=0&count=1024 HTTP/1.1",c9_export.token);
+ assert(c9_gui_route(query,&r,out,48)&&r.code==500&&r.len==0);
+ request("POST /api/debug/window/disable HTTP/1.1",200);assert(!c9_export.enabled&&!c9_export.valid);request(query,403);
+ request("POST /api/debug/window/enable HTTP/1.1",200);request(query,409);request("POST /api/debug/window/disable HTTP/1.1",200);
+ puts("C9_WINDOW_EXPORT_PASS default_off=1 explicit_POST=1 full_window=160256 chunks=157 era_change_rejected=1 failure_invalidates=1 disable_revokes=1");
+#else
+ request("POST /api/debug/window/enable HTTP/1.1",503);
+ request("GET /api/debug/window?frames=16640 HTTP/1.1",503);
+ puts("C9_WINDOW_EXPORT_COMPILED_OUT_PASS");
+#endif
  puts("C9_GUI_API_PASS");return 0;
 }

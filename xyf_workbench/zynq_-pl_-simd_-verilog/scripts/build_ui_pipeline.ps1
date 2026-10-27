@@ -7,6 +7,7 @@ param(
     [switch]$MatchingPlWindow,
     [switch]$DynamicReplay,
     [switch]$FstfExperimental,
+    [switch]$DisableWindowExport,
     [switch]$Localization16,
     [switch]$FixedDas16,
     [ValidateSet(4,8,9,12,16)][int]$ActiveChannels = 8,
@@ -60,6 +61,7 @@ New-Item -ItemType Directory -Force -Path $out | Out-Null
 $obj = Join-Path $out 'ui.o'
 $elf = Join-Path $out 'ui.elf'
 $defs = @("-DUI_SHAFT_MILLIHZ=$ShaftMilliHz")
+if ($DisableWindowExport) { $defs += "-DC9_WINDOW_EXPORT=0" }
 $defs += "-DUI_DAS_ACTIVE_CHANNELS=$ActiveChannels"
 if ($FstfExperimental) {
  if (-not $Live -or $ActiveChannels -ne 9) { throw 'FSTF experiment requires live circular9 build' }

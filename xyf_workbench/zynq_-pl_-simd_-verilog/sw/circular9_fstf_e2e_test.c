@@ -10,6 +10,7 @@ int main(int argc,char **argv){
  FILE *f=fopen(argv[1],"rb");assert(f&&fread(pcm,sizeof(*pcm),total,f)==total);fclose(f);
  c9_tasks_init();c9_tracks=(c9_tracker){0};c9_aux_tracks=(c9_tracker){.next_id=0x40000000u};
  c9_schedule=(c9_diagnostic_schedule){0};c9_latest_slot=-1;c9_shaft_confirmed=1;c9_shaft_millihz=30000;
+ const char *replay_rpm=getenv("C9_REPLAY_SHAFT_MILLIHZ");if(replay_rpm){c9_shaft_millihz=(uint32_t)strtoul(replay_rpm,0,10);c9_shaft_confirmed=c9_shaft_millihz>=10000u&&c9_shaft_millihz<=30000u;}
  char tracepath[1024];snprintf(tracepath,sizeof(tracepath),"%s.trace.jsonl",argv[3]);FILE *trace=fopen(tracepath,"wb");assert(trace);
  unsigned searches=0,written=0;uint32_t end=0,available=0,epoch=0,session=0;struct ipc_page ipc={0};
  for(unsigned finish=C9_SEARCH_RAW_FRAMES;finish<=total;finish+=8192u){
@@ -38,9 +39,10 @@ int main(int argc,char **argv){
   }
   fprintf(trace,"],\"tracks\":[");
   for(unsigned k=0;k<3;k++){const c9_track *t=&c9_aux_tracks.tracks[k];int32_t az,el;c9_candidate c=c9_track_candidate(t);c9_candidate_angles(&c,&az,&el);fprintf(trace,"%s{\"id\":%u,\"az\":%d,\"el\":%d,\"state\":%u,\"obs\":%u,\"first\":%u,\"last\":%u,\"gaps\":%u}",k?",":"",t->id,az,el,t->state,t->observations,t->first_sample,t->last_sample,t->gap_count);}
-  fprintf(trace,"]}\n");
   c9_aux_last_tick=dia_gtimer_now();c9_tasks_shared.data.auxiliary.job.state=2u;
   c9_tasks_schedule();run_cpu1_pending(&ipc);c9_tasks_receive();
+  unsigned fresh=0,count=0;if(c9_latest_slot>=0){const c9_diagnostic_result *r=&c9_tasks_shared.data.results[c9_latest_slot];count=r->count;for(unsigned i=0;i<count;i++)fresh+=c9_result_current(&r->diagnosis[i],r->session,r->shaft_generation)!=0;}
+  fprintf(trace,"],\"snapshot_sequence\":%u,\"snapshot_count\":%u,\"fresh_snapshot_count\":%u,\"diagnostic_started\":%u}\n",c9_latest_sequence,count,fresh,c9_tasks_shared.data.metrics.started);
  }
  for(unsigned n=written;n<total;n++){
   uint32_t words[16];packet(words,n,7);memset(words+8,0,5*sizeof(uint32_t));
@@ -60,15 +62,15 @@ int main(int argc,char **argv){
  if(argc==5){
   /* Isolated downstream control only: truth directions never enter the automatic job above. */
   c9_candidate known[3];unsigned count=0;char *next=argv[4];
-  while(*next&&count<3){char *tail;double az=strtod(next,&tail);assert(tail!=next&&az>=-90&&az<=90);unsigned col=(unsigned)((az+90)*32/180);if(col>31)col=31;
-   known[count++]=(c9_candidate){.grid=16u*32u+col,.score=1000,.azimuth_mdeg=(int32_t)(az*1000),.elevation_mdeg=0,.flags=C9_CANDIDATE_REFINED,.uncertainty_mdeg=3000};
+  while(*next&&count<3){char *tail;double az=strtod(next,&tail);assert(tail!=next&&az>=-90&&az<=90);double el=0;if(*tail==':'){next=tail+1;el=strtod(next,&tail);assert(tail!=next&&el>=-90&&el<=90);}unsigned row=(unsigned)((el+90)*32/180);if(row>31)row=31;unsigned col=(unsigned)((az+90)*32/180);if(col>31)col=31;
+   known[count++]=(c9_candidate){.grid=row*32u+col,.score=1000,.azimuth_mdeg=(int32_t)(az*1000),.elevation_mdeg=(int32_t)(el*1000),.flags=C9_CANDIDATE_REFINED,.uncertainty_mdeg=3000};
    next=*tail==','?tail+1:tail;
   }
   c9_separation_report sep={0};int separated=c9_candidates_separate(pcm+total-C9_SNAPSHOT_FRAMES,known,count,acoustic_steer_lut,&c9_separator,c9_separated,&sep);
   char path[1024];snprintf(path,sizeof(path),"%s.known_direction_control.json",argv[3]);f=fopen(path,"wb");assert(f);
   fprintf(f,"{\"known_direction_control_only\":true,\"automatic_pipeline_success\":false,\"separated\":%d,\"ready_mask\":%u,\"outputs\":[",separated,sep.ready_mask);
   for(unsigned i=0;i<count;i++){
-   c9_diag_binding bind={.track_id=i+1,.grid=known[i].grid,.epoch=7,.first_sample=total-C9_SNAPSHOT_FRAMES,.sample_count=40000,.flags=C9_DIAG_BIND_REQUIRED,.azimuth_mdeg=known[i].azimuth_mdeg,.separation_contract=C9_DIAG_SEPARATION_CONTRACT};
+   c9_diag_binding bind={.track_id=i+1,.grid=known[i].grid,.epoch=7,.first_sample=total-C9_SNAPSHOT_FRAMES,.sample_count=40000,.flags=C9_DIAG_BIND_REQUIRED,.azimuth_mdeg=known[i].azimuth_mdeg,.elevation_mdeg=known[i].elevation_mdeg,.separation_contract=C9_DIAG_SEPARATION_CONTRACT};
    memcpy(bind.usable_mask,sep.usable_mask,sizeof(bind.usable_mask));c9_diag_report d={0};
    if(sep.ready_mask&(1u<<i))c9_diagnose(c9_separated[i],30,&bind,&d);
    fprintf(f,"%s{\"azimuth_mdeg\":%d,\"ready\":%u,\"experimental_available\":%u,\"experimental_label\":\"%s\",\"trusted_label\":%u}",i?",":"",known[i].azimuth_mdeg,!!(sep.ready_mask&(1u<<i)),d.fstf_available,c9_fstf_class_name(d.fstf_available?d.fstf_class:6u),d.label);

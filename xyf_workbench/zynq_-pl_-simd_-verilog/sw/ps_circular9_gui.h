@@ -25,7 +25,9 @@ static int c9h_record_json(char *out,size_t cap,int n,const c9h_record *r){
   (unsigned)r->first,(unsigned)r->samples,(unsigned)r->label,(unsigned)r->reason,(unsigned)r->valid,(unsigned)r->state,
   (unsigned)r->model,(int)r->azimuth,(int)r->elevation,r->rms,r->shaft);
 }
+#include "circular9_window_export.h"
 static int c9_gui_route(const char *req,struct ui_reply *rep,char *body,size_t cap){
+ if(c9_window_route(req,rep,body,cap))return 1;
  int n=0;unsigned after=0,limit=16;char tail;
  if(strncmp(req,"GET /api/recording/on ",22)==0||strncmp(req,"GET /api/recording/off ",23)==0){
   c9_recording=strncmp(req,"GET /api/recording/on ",22)==0;
