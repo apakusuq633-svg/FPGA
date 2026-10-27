@@ -274,8 +274,8 @@ def geometry(c):
         raise ValueError('Array dimensions outside supported circular9 board envelope')
     if not 300 <= c['sound_speed_m_s'] <= 380:
         raise ValueError('Sound speed outside supported air calibration range')
-    # The user reports a30-mm sound-hole ring; equality with the historical
-    # nominal PCB radius does not establish package/edge clearance.
+    # Validate explicit acoustic centers against the PCB outline; the board
+    # radius is not a sound-hole radius and outer centers need not be circular.
     if any(math.hypot(p[0], p[1]) > c['pcb_radius_m']+GEOMETRY_TOLERANCE_M for p in xyz):
         raise ValueError('Measured acoustic center lies outside board envelope/tolerance')
     if max(abs(p[2]) for p in xyz) > GEOMETRY_TOLERANCE_M or max(p[2] for p in xyz)-min(p[2] for p in xyz) > GEOMETRY_TOLERANCE_M:

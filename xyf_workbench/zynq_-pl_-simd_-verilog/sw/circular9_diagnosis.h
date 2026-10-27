@@ -66,6 +66,9 @@ typedef struct {
  c9_diag_binding binding;
  uint32_t feature_contract, model_version, model_kind, model_validated;
  uint32_t label, provisional_label, reason, fault_direction_valid, clipped_samples;
+ /* Independent six-class experiment; never used as a trusted fault label. */
+ uint32_t fstf_available,fstf_class,fstf_version;
+ double fstf_distance,fstf_margin;
  double shaft_hz, rms, features[C9_DIAG_FEATURES], distance[3], margin;
  c9_diag_extraction extraction;
 } c9_diag_report;
@@ -83,4 +86,6 @@ void c9_diag_score_features(const double features[C9_DIAG_FEATURES], double rms,
 const c9_diag_model *c9_diag_configured_model(void);
 const char *c9_diag_label_name(uint32_t label);
 const char *c9_diag_reason_name(uint32_t reason);
+unsigned c9_fstf_experiment_enabled(void);
+const char *c9_fstf_class_name(unsigned value);
 #endif

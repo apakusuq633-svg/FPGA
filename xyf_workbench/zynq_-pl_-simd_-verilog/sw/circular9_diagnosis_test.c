@@ -78,6 +78,18 @@ int main(void) {
  c9_diagnose(audio,25,&b,&r);assert(r.reason==C9_DIAG_NO_MODEL);
  assert(r.extraction.status==C9_DIAG_EXTRACT_NO_MODULATION);
  assert(fabs(r.rms-.1/sqrt(2))<1e-5);
+
+ c9_diagnose_with_model(audio,0,&b,&m,&r);
+ assert(r.reason==C9_DIAG_BAD_INPUT&&r.label==C9_DIAG_UNKNOWN&&!r.fault_direction_valid&&r.shaft_hz==0);
+ assert(r.extraction.fft_count==1&&r.extraction.envelope_samples==2500&&r.rms>0);
+ for(unsigned i=0;i<18;i++)assert(r.features[i]==0);
+ uint16_t display_bins[128];c9_diag_export_envelope(display_bins);
+ for(unsigned i=0;i<128;i++)assert(display_bins[i]<=1000);
+ uint16_t confirmed_bins[128];c9_diagnose(audio,25,&b,&r);c9_diag_export_envelope(confirmed_bins);
+ assert(!memcmp(display_bins,confirmed_bins,sizeof(display_bins)));
+ c9_diagnose(audio,0,&b,&r);assert(r.label==C9_DIAG_UNKNOWN&&r.reason==C9_DIAG_BAD_INPUT);
+ audio[0]=NAN;c9_diagnose(audio,0,&b,&r);assert(r.extraction.fft_count==0&&r.reason==C9_DIAG_BAD_INPUT);audio[0]=0;
+
  c9_diagnose(audio,NAN,&b,&r);assert(r.reason==C9_DIAG_BAD_INPUT);
  for(unsigned i=0;i<41;i++)audio[i]=1;
  c9_diagnose(audio,25,&b,&r);

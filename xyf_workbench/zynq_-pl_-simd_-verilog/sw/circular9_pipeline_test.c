@@ -12,7 +12,7 @@
 #define ACOUSTIC_CALIBRATION_VERSION 0x54455354u
 #define UI_SHAFT_MILLIHZ 25000u
 #define RV32_BASE 0u
-#define NORM_NONCACHE 0x54455354u
+#define NORM_WB_CACHE 0x54455354u
 #include "ps_ui_page.h"
 #include "circular9_deadline.h"
 /* Reuse independent geometric multisine generation, never the separation
@@ -25,7 +25,7 @@ typedef intptr_t INTPTR;
 static unsigned cache_flushes,noncache_maps,checkpoints;
 static void (*checkpoint_hook)(void);
 static void Xil_DCacheFlushRange(INTPTR address,size_t length){CHECK(address&&length,"cache flush range");cache_flushes++;}
-static void Xil_SetTlbAttributes(INTPTR address,uint32_t flags){CHECK(address&&flags==NORM_NONCACHE,"noncached shared mapping");noncache_maps++;}
+static void Xil_SetTlbAttributes(INTPTR address,uint32_t flags){CHECK(address&&flags==NORM_WB_CACHE,"noncached shared mapping");noncache_maps++;}
 static uint32_t ticks=100000000u;
 static uint32_t delayed_timer_reads,delayed_timer_ticks;
 static uint32_t dia_gtimer_now(void){ticks+=3333;if(delayed_timer_reads&&!--delayed_timer_reads)ticks+=delayed_timer_ticks;return ticks;}
@@ -300,7 +300,7 @@ static void pipeline_tests(const char *output){
   if(sample+4>recorded){push_pcm(recorded,sample+4);recorded=sample+4;}
   map_publish_mask(&bus,sample,7u&~(1u<<missing));
   c9_tasks_select_fault(&bus);c9_schedule.have=0;c9_tasks_schedule();
-  CHECK(id_at(&c9_tracks,scene[missing].grid)==recovered_id&&!c9_fault_track&&device.command==0xd3000000u&&c9_tasks_shared.data.job.state==0,"coasting source retains ID while blocking fault routing and incomplete common jobs");
+  CHECK(id_at(&c9_tracks,scene[missing].grid)==recovered_id&&!c9_fault_track&&device.command==0xd3000000u&&c9_tasks_shared.data.job.state==1&&c9_tasks_shared.data.job.count==2&&c9_tasks_shared.data.job.unresolved_tracks==1,"coasting source retains ID and blocks fault routing without starving independently covered sources");
  }
  for(uint32_t sample=165625;sample<=171875;sample+=3125){
   push_pcm(recorded,sample+4);recorded=sample+4;map_publish(&bus,sample,3);
@@ -311,8 +311,10 @@ static void pipeline_tests(const char *output){
  c9_schedule.have=0;c9_tasks_schedule();CHECK(c9_tasks_shared.data.job.state==1&&c9_tasks_shared.data.job.count==3,"recovered angular coverage schedules all three candidates from one new snapshot");
  run_cpu1_pending(&ipc);c9_tasks_receive();r=&c9_tasks_shared.data.results[c9_latest_slot];
  CHECK(r->count==3&&r->separation.ready_mask==7&&r->diagnosis[1].label==C9_DIAG_UNKNOWN&&!r->diagnosis[1].fault_direction_valid,"fresh recovery job separates and diagnoses without copying the injected old fault label");
- CHECK(r->diagnosis[1].binding.track_id==recovered_id,"full recovery preserves the diagnosed angular identity");
- inject_fault(&r->diagnosis[1]);c9_tasks_select_fault(&bus);
+ unsigned recovered_index=0;while(recovered_index<r->count&&r->diagnosis[recovered_index].binding.track_id!=recovered_id)recovered_index++;
+ CHECK(recovered_index<r->count,"full recovery preserves angular identity independently of result ordering");
+ if(recovered_index<r->count){CHECK(r->diagnosis[recovered_index].label==C9_DIAG_UNKNOWN&&!r->diagnosis[recovered_index].fault_direction_valid,"recovered identity does not inherit old fault label");inject_fault(&r->diagnosis[recovered_index]);}
+ c9_tasks_select_fault(&bus);
  /* Freeze capture and map publication: sample counters alone cannot make an
   * old result remain current forever. */
  ticks+=100000000u;c9_tasks_select_fault(&bus);
@@ -372,14 +374,15 @@ static void overlap_and_overload_tests(void){
  CHECK(c9_tasks_shared.data.job.state==1&&c9_tasks_shared.data.job.end_sample==end-1000u&&
   c9_jobs_skipped==skipped+2u&&c9_pending_replaced==replaced+1u,"overloaded pending work is replaced by one latest aligned hop without a backlog");
  advance_supported(end,end+C9_DIAGNOSTIC_HOP_RAW);end+=C9_DIAGNOSTIC_HOP_RAW;
- uint32_t misses=c9_tasks_shared.data.metrics.deadline_misses;c9_tasks_cpu1(&ipc);c9_tasks_receive();
- CHECK(c9_tasks_shared.data.metrics.deadline_misses==misses+1u&&
-  !c9_tasks_shared.data.results[c9_latest_slot].count,"a queued snapshot already older than one hop cannot publish a diagnosis");
+ uint32_t rejects=c9_tasks_shared.data.metrics.snapshot_rejected;c9_tasks_cpu1(&ipc);c9_tasks_receive();
+ CHECK(c9_tasks_shared.data.metrics.snapshot_rejected==rejects+1u&&
+  !c9_tasks_shared.data.results[c9_latest_slot].count,"queued input older than512ms still rejected independently of compute budget");
  c9_schedule.have=0;c9_tasks_schedule();CHECK(c9_tasks_shared.data.job.state==1,"fresh complete snapshot is eligible after rejection");
- delayed_timer_reads=2;delayed_timer_ticks=171000000u;c9_tasks_cpu1(&ipc);c9_tasks_receive();
- CHECK(c9_tasks_shared.data.metrics.deadline_misses==misses+2u&&
+ uint32_t misses=c9_tasks_shared.data.metrics.deadline_misses;
+ delayed_timer_reads=2;delayed_timer_ticks=1000000000u;c9_tasks_cpu1(&ipc);c9_tasks_receive();
+ CHECK(c9_tasks_shared.data.metrics.deadline_misses==misses+1u&&
   c9_tasks_shared.data.results[c9_latest_slot].deadline_missed&&!c9_tasks_shared.data.results[c9_latest_slot].count,
-  "actual worker time beyond512ms withholds results even when input is frozen");
+  "worker beyond3s still withheld even with frozen input");
  CHECK(c9_tasks_shared.data.metrics.processing_us_max>=C9_DIAGNOSTIC_DEADLINE_US,"CPU1 deadline statistics retain the measured overrun");
  c9_tasks_shared.data.auxiliary.job.state=0;
  puts("SCHEDULER_PIPELINE_PASS hop_raw=80000 window_raw=160256 history_bytes=33554432 pending_latest_only=1 queued_and_compute_deadline_rejected=1");
@@ -429,7 +432,25 @@ static void auxiliary_feedback_tests(void){
  c9_tracks=(c9_tracker){0};
  for(unsigned i=0;i<3;i++)c9_tracks_update(&c9_tracks,&same,1,end-6250u+3125u*i,epoch,session);
  n=c9_collect_tracks(merged,end,epoch,session);
- CHECK(n>0&&merged[0]->id<0x40000000u,"main map identity has priority over a duplicate auxiliary direction");
+ /* Full coverage must beat a new duplicate regardless of origin namespace. */
+ c9_track *aux=&c9_aux_tracks.tracks[0];
+ aux->state=C9_TRACK_OBSERVED;aux->fresh_observations=3;aux->observations=30;
+ aux->first_sample=end-C9_SNAPSHOT_FRAMES;aux->coverage_first=aux->first_sample;
+ aux->last_sample=end;aux->gap_open=0;aux->gap_count=0;
+ n=c9_collect_tracks(merged,end,epoch,session);
+ CHECK(n>0&&merged[0]->id==auxiliary_id,"covered auxiliary direction beats a new primary duplicate without transferring ID");
+ c9_track *main=&c9_tracks.tracks[0];
+ main->state=C9_TRACK_OBSERVED;main->fresh_observations=3;main->observations=31;
+ main->first_sample=end-C9_SNAPSHOT_FRAMES;main->coverage_first=main->first_sample;
+ main->last_sample=end;main->gap_open=0;main->gap_count=0;
+ n=c9_collect_tracks(merged,end,epoch,session);
+ CHECK(n>0&&merged[0]->id==main->id,"equally covered primary can retain its own better observed identity");
+ aux->candidate=scene[1];aux->grid=scene[1].grid;
+ n=c9_collect_tracks(merged,end,epoch,session);
+ CHECK(n>=2,"independent directions are not collapsed by collection priority");
  printf("AUXILIARY_PIPELINE_PASS actual_FFT_candidates=%u support_frames=%u replay_wrong_era_expired_rejected=7 no_track_bootstrap=1\n",genuine.feedback.count,genuine.feedback.support_frames[0]);
 }
+#ifndef C9_PIPELINE_NO_MAIN
 int main(int argc,char **argv){tracking_tests();pipeline_tests(argc>1?argv[1]:"pipeline_candidates.json");overlap_and_overload_tests();auxiliary_feedback_tests();if(fail)return 1;puts("CIRCULAR9_PIPELINE_PASS");return 0;}
+
+#endif

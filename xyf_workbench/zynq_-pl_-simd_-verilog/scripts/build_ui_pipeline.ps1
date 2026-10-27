@@ -6,6 +6,7 @@ param(
     [switch]$Live,
     [switch]$MatchingPlWindow,
     [switch]$DynamicReplay,
+    [switch]$FstfExperimental,
     [switch]$Localization16,
     [switch]$FixedDas16,
     [ValidateSet(4,8,9,12,16)][int]$ActiveChannels = 8,
@@ -60,6 +61,10 @@ $obj = Join-Path $out 'ui.o'
 $elf = Join-Path $out 'ui.elf'
 $defs = @("-DUI_SHAFT_MILLIHZ=$ShaftMilliHz")
 $defs += "-DUI_DAS_ACTIVE_CHANNELS=$ActiveChannels"
+if ($FstfExperimental) {
+ if (-not $Live -or $ActiveChannels -ne 9) { throw 'FSTF experiment requires live circular9 build' }
+ $defs += '-DC9_FSTF_EXPERIMENTAL=1'
+}
 if ($DiagnosticModel) {
     if (-not $Live -or $ActiveChannels -ne 9) { throw 'DiagnosticModel is supported only by circular9 live mode' }
     $modelPath = (Resolve-Path -LiteralPath $DiagnosticModel).Path.Replace('\','/')
@@ -94,7 +99,8 @@ $objects = @($obj)
 if ($Live -and $ActiveChannels -eq 9) {
     foreach ($unit in @('gsc9','pdm_stream','circular9_stream','circular9_audio','circular9_candidates','circular9_diagnosis')) {
         $unitObj = Join-Path $out "$unit.o"
-        & $gcc -std=c11 -Wall -Wextra -Werror -O2 -g -fstack-usage -c -mcpu=cortex-a9 -mfpu=vfpv3 -mfloat-abi=hard `
+        $unitFpu = if ($unit -eq 'circular9_candidates') { '-mfpu=neon' } else { '-mfpu=vfpv3' }
+        & $gcc -std=c11 -Wall -Wextra -Werror -O2 -g -fstack-usage -c -mcpu=cortex-a9 $unitFpu -mfloat-abi=hard `
             "-I$(Join-Path $BspDir 'bspinclude\include')" "-I$(Join-Path $project 'sw')" @defs `
             -o $unitObj (Join-Path $project "sw\$unit.c")
         if ($LASTEXITCODE -ne 0) { throw "UI ARM compile failed: $unit" }

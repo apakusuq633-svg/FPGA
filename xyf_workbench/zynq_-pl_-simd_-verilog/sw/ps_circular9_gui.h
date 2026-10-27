@@ -34,6 +34,16 @@ static int c9_gui_route(const char *req,struct ui_reply *rep,char *body,size_t c
   *rep=(struct ui_reply){200,"OK","application/json",len};return 1;
  }
 
+ if(strncmp(req,"GET /api/health9/config?",24)==0){
+  unsigned a,b,c;
+  if(sscanf(req+24,"suspect=%u&alarm=%u&recover=%u%c",&a,&b,&c,&tail)!=4||tail!=' '||a<1||b<a||c<1||a>10000||b>10000||c>10000){
+   *rep=(struct ui_reply){400,"Bad Request","application/json",0};return 1;
+  }
+  c9_health.suspect=a;c9_health.alarm=b;c9_health.recover=c;
+  for(unsigned i=0;i<C9H_TRACKS;i++)c9_health.tracks[i].normal=c9_health.tracks[i].abnormal=0;
+  n=snprintf(body,cap,"{\"thresholds\":[%u,%u,%u]}",a,b,c);
+  *rep=(struct ui_reply){200,"OK","application/json",n};return 1;
+ }
  if(strncmp(req,"GET /api/health9/",17)==0){
   if(strncmp(req,"GET /api/health9/session/",25)==0){
    unsigned long long session=0;
@@ -97,6 +107,29 @@ static int c9_gui_route(const char *req,struct ui_reply *rep,char *body,size_t c
    *rep=(struct ui_reply){200,"OK","application/octet-stream",18464};return 1;}
   for(unsigned i=0;i<1024;i++){uint16_t x=(uint16_t)raw[i][a],y=(uint16_t)raw[i][b];body[32+4*i]=(char)x;body[33+4*i]=(char)(x>>8);body[34+4*i]=(char)y;body[35+4*i]=(char)(y>>8);}
   *rep=(struct ui_reply){200,"OK","application/octet-stream",4128};return 1;
+ }else if(strncmp(req,"GET /api/gui/snapshot?",22)==0){
+  unsigned seq,index;const unsigned audio_count=4096u,env_count=128u,bytes=64u+2u*(4096u+128u);
+  if(sscanf(req+22,"sequence=%u&index=%u%c",&seq,&index,&tail)!=3||tail!=' '||index>=3){*rep=(struct ui_reply){400,"Bad Request","application/json",0};return 1;}
+  const c9_diagnostic_result *r=c9_latest_slot<0?NULL:&c9_tasks_shared.data.results[c9_latest_slot];
+  if(!r||r->sequence!=seq||index>=r->count){*rep=(struct ui_reply){409,"Conflict","application/json",0};return 1;}
+  if(cap<bytes){*rep=(struct ui_reply){500,"Internal Server Error","application/json",0};return 1;}
+  const c9_diag_report *d=&r->diagnosis[index];
+  uint32_t h[16]={0x43394732u,1u,seq,d->binding.track_id,index,78125u,2u,audio_count,env_count,
+   r->gui_envelope_valid[index],d->extraction.status,d->binding.first_sample,d->binding.epoch,r->session,
+   d->shaft_hz>=10.0&&d->shaft_hz<=30.0?(uint32_t)(d->shaft_hz*1000.0+.5):0u,
+   d->shaft_hz>=10.0&&d->shaft_hz<=30.0&&d->extraction.fft_count==1u};
+  memcpy(body,h,sizeof(h));
+  /* CPU0 adopts results only in its main loop. HTTP checkpoints service DMA
+   * and localization, never adoption: this pinned result cannot be reused
+   * by CPU1 until this one bounded response has been fully copied. */
+  for(unsigned i=0;i<audio_count;i++){
+   uint16_t v=(uint16_t)r->audio[index][i];body[64+2*i]=(char)v;body[65+2*i]=(char)(v>>8);
+   if((i&255u)==255u)c9_realtime_checkpoint();
+  }
+  for(unsigned i=0;i<env_count;i++){
+   uint16_t v=r->gui_envelope[index][i];body[64+2*audio_count+2*i]=(char)v;body[65+2*audio_count+2*i]=(char)(v>>8);
+  }
+  *rep=(struct ui_reply){200,"OK","application/octet-stream",(int)bytes};return 1;
  }else if(strncmp(req,"GET /api/gui/plots?",19)==0){
   unsigned seq,index;
   if(sscanf(req+19,"sequence=%u&index=%u%c",&seq,&index,&tail)!=3||tail!=' '||index>=3){*rep=(struct ui_reply){400,"Bad Request","application/json",0};return 1;}

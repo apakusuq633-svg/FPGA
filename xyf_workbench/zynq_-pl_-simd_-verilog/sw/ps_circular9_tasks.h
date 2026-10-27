@@ -1,5 +1,6 @@
 /* Bare-metal AMP bridge: CPU0 captures/maps; CPU1 separates then diagnoses.
- * Shared sections have one uncached mapping on BOTH cores. Bulk work never
+ * CPU-only history and atomic task ownership use coherent cached memory.
+ * Both cores share identical section attributes. Bulk work never
  * runs in an HTTP callback or in the DMA/audio service. */
 #ifndef PS_CIRCULAR9_TASKS_H
 #define PS_CIRCULAR9_TASKS_H
@@ -13,11 +14,11 @@ static int c9_apply_target(const das_bus*,const c9_candidate*,uint32_t);
 static void c9_release_target(const das_bus*);
 static int c9_control_route(const char*,struct ui_reply*,char*,size_t);
 typedef struct {
- uint32_t state,sequence,count,epoch,session,map_sample,shaft_millihz,shaft_confirmed,shaft_generation,end_sample,queued_tick;
+ uint32_t state,sequence,count,epoch,session,map_sample,shaft_millihz,shaft_confirmed,shaft_generation,end_sample,queued_tick,unresolved_tracks;
  c9_track tracks[3];
 } c9_diagnostic_job;
 typedef struct {
- uint32_t state,sequence,count,epoch,session,first_sample,processing_ms,shaft_generation;
+ uint32_t state,sequence,count,epoch,session,first_sample,processing_ms,shaft_generation,unresolved_tracks;
  uint32_t processing_us,queue_wait_us,total_elapsed_us,queue_age_samples,result_age_samples,deadline_missed,rejection;
  c9_separation_report separation;
  c9_diag_report diagnosis[3];
@@ -33,6 +34,7 @@ typedef struct {uint32_t state,sequence,generation,processing_us;c9_search_feedb
 typedef struct {
  c9_aux_job job;c9_aux_result results[3];
  uint32_t started,completed,rejected,late,no_output,processing_us_max;
+ uint32_t copy_us,prepare_us,observations_us,search_us,decimator_vector_status;
 } c9_aux_memory;
 typedef struct {c9_diagnostic_job job;c9_diagnostic_result results[2];c9_cpu1_metrics metrics;c9_aux_memory auxiliary;} c9_task_memory;
 static union {c9_history history;uint8_t section[33554432];} c9_history_shared
@@ -45,11 +47,15 @@ static c9_tracker c9_tracks;
 static c9_tracker c9_aux_tracks;
 static c9_proposal_map c9_proposals;
 static uint32_t c9_job_sequence,c9_jobs_started,c9_map_retries;
+/* CPU0 owns this complete committed map; HTTP reuses it, never rereads 1024 MMIO words. */
+static struct {uint32_t seq,frame,sample,reason,accepted,first_tick;int32_t scores[1024];} c9_map_cache;
 static uint32_t c9_map_copies,c9_map_max_us,c9_tracks_last_tick,c9_tracks_last_sequence;
 static uint32_t c9_candidate_service_max_us,c9_candidate_service_overruns;
 static uint32_t c9_latest_tick,c9_latest_sequence;
 static c9_diagnostic_schedule c9_schedule;
 static uint32_t c9_jobs_skipped,c9_pending_replaced,c9_schedule_coverage_rejected;
+static uint32_t c9_schedule_nonobserved_skipped,c9_schedule_ineligible_skipped;
+static uint32_t c9_schedule_reasons[8],c9_schedule_last_reject_track,c9_schedule_last_reject_reason;
 static int c9_latest_slot=-1;
 static uint32_t c9_shaft_millihz=UI_SHAFT_MILLIHZ,c9_shaft_confirmed;
 static uint32_t c9_shaft_generation=1,c9_shaft_first_sample;
@@ -72,8 +78,11 @@ static void c9_tasks_init(void){
  Xil_DCacheFlushRange((INTPTR)&c9_history_shared,sizeof(c9_history_shared));
  Xil_DCacheFlushRange((INTPTR)&c9_tasks_shared,sizeof(c9_tasks_shared));
  for(unsigned off=0;off<sizeof(c9_history_shared);off+=1048576)
-  Xil_SetTlbAttributes((INTPTR)&c9_history_shared+off,NORM_NONCACHE);
- Xil_SetTlbAttributes((INTPTR)&c9_tasks_shared,NORM_NONCACHE);
+  Xil_SetTlbAttributes((INTPTR)&c9_history_shared+off,NORM_WB_CACHE);
+ /* The task protocol uses LDREX/STREX RMW operations. Use Normal WB
+  * shareable memory on BOTH SMP/SCU-enabled cores, not noncached DDR
+  * transactions that can fail exclusive completion and leave state3. */
+ Xil_SetTlbAttributes((INTPTR)&c9_tasks_shared,NORM_WB_CACHE);
  c9_history_init(&c9_history_shared.history);
  memset(&c9_tasks_shared.data,0,sizeof(c9_tasks_shared.data));
  c9_aux_tracks.next_id=0x40000000u;
@@ -100,7 +109,7 @@ static int c9_result_current(const c9_diag_report *d,uint32_t session,uint32_t g
     generation!=c9_shaft_generation||!c9_history_info(&c9_history_shared.history,&end,&count,&epoch,&current_session)||
     session!=current_session||epoch!=d->binding.epoch||!count||
     (uint32_t)(end-d->binding.first_sample)>C9_HISTORY_FRAMES||
-    (uint32_t)(end-(d->binding.first_sample+C9_SNAPSHOT_FRAMES))>C9_DIAGNOSTIC_HOP_RAW)return 0;
+    (uint32_t)(end-(d->binding.first_sample+C9_SNAPSHOT_FRAMES))>C9_DIAGNOSTIC_RESULT_AGE_RAW)return 0;
  const c9_track *tracks[3];unsigned n=c9_collect_tracks(tracks,end,epoch,current_session);
  for(unsigned i=0;i<n;i++){
   const c9_track *t=tracks[i];
@@ -135,7 +144,7 @@ static void c9_tasks_cpu1(volatile struct ipc_page *ipc){
   c9_history_snapshot_at(&c9_history_shared.history,c9_snapshot,job.end_sample,&first,&epoch,&session);
  if(!valid)c9_metric_increment(&metrics->snapshot_rejected);
  valid=valid&&epoch==job.epoch&&session==job.session&&
-  (uint32_t)(first+C9_SNAPSHOT_FRAMES-job.map_sample)<=31250u;
+  c9_snapshot_map_time_valid(first+C9_SNAPSHOT_FRAMES,end_before,job.map_sample);
  c9_candidate candidates[3];
  for(unsigned i=0;i<job.count;i++){
   candidates[i]=c9_track_candidate(&job.tracks[i]);
@@ -144,7 +153,7 @@ static void c9_tasks_cpu1(volatile struct ipc_page *ipc){
  memset(&r->separation,0,sizeof(r->separation));
  r->sequence=job.sequence;r->epoch=epoch;r->session=session;r->first_sample=first;r->count=0;
  r->deadline_missed=0;r->rejection=valid?0u:1u;
- r->shaft_generation=job.shaft_generation;
+ r->shaft_generation=job.shaft_generation;r->unresolved_tracks=job.unresolved_tracks;
  if(valid&&c9_candidates_separate(c9_snapshot,candidates,job.count,acoustic_steer_lut,
                                  &c9_separator,c9_separated,&r->separation)>0){
   r->count=job.count;
@@ -156,7 +165,7 @@ static void c9_tasks_cpu1(volatile struct ipc_page *ipc){
    memcpy(binding.usable_mask,r->separation.usable_mask,sizeof(binding.usable_mask));
    c9_candidate_angles(&candidates[i],&binding.azimuth_mdeg,&binding.elevation_mdeg);
    binding.flags=C9_DIAG_BIND_SNAPSHOT|C9_DIAG_BIND_STABLE;
-   if(ACOUSTIC_GEOMETRY_CONFIRMED&&ACOUSTIC_CALIBRATION_VERSION)binding.flags|=C9_DIAG_BIND_DIRECTION;
+   if(ACOUSTIC_GEOMETRY_CONFIRMED&&ACOUSTIC_CALIBRATION_VERSION&&!job.unresolved_tracks)binding.flags|=C9_DIAG_BIND_DIRECTION;
    if(r->separation.ready_mask&(1u<<i))binding.flags|=C9_DIAG_BIND_SEPARATED;
    /* Without a confirmed RPM the input contract is incomplete. Keep audio
     * export available, but never infer a bearing fault from a guessed speed. */
@@ -183,7 +192,7 @@ static void c9_tasks_cpu1(volatile struct ipc_page *ipc){
  info=c9_history_info(&c9_history_shared.history,&end_after,&available,&now_epoch,&now_session);
  r->result_age_samples=info?end_after-job.end_sample:UINT32_MAX;
  r->deadline_missed=!info||now_epoch!=job.epoch||now_session!=job.session||
-  r->result_age_samples>=C9_DIAGNOSTIC_HOP_RAW||r->total_elapsed_us>=C9_DIAGNOSTIC_DEADLINE_US;
+  r->result_age_samples>=C9_DIAGNOSTIC_RESULT_AGE_RAW||r->total_elapsed_us>=C9_DIAGNOSTIC_DEADLINE_US;
  if(r->deadline_missed){r->count=0;r->rejection=2u;c9_metric_increment(&metrics->deadline_misses);}
  c9_metric_max(&metrics->processing_us_max,r->processing_us);
  c9_metric_max(&metrics->queue_wait_us_max,r->queue_wait_us);
@@ -198,7 +207,7 @@ static void c9_tasks_cpu1(volatile struct ipc_page *ipc){
 /* Incremental, protected map read. Restoring MMIO INDEX every slice lets the
  * location/audio service interleave safely. Changed seqlocks discard maps. */
 static void c9_tasks_map_poll(const das_bus *b){
- static struct {uint32_t seq,ptr,frame,sample,reason,position,start,first_tick;int32_t scores[1024];} m;
+ static struct {uint32_t seq,ptr,frame,sample,reason,accepted,position,start,first_tick;int32_t scores[1024];} m;
  static uint32_t last;
  uint32_t now=dia_gtimer_now();
  if(c9_tracks_last_tick&&(uint32_t)(now-c9_tracks_last_tick)>66666666u){
@@ -209,7 +218,7 @@ static void c9_tasks_map_poll(const das_bus *b){
   uint32_t seq=mic_read_word(b,90);if(!seq||(seq&1u))return;
   if(seq==c9_tracks_last_sequence)return;
   m.ptr=mic_read_word(b,235);m.frame=mic_read_word(b,1);
-  m.sample=mic_read_word(b,93);m.reason=mic_read_word(b,97);
+  m.sample=mic_read_word(b,93);m.reason=mic_read_word(b,97);m.accepted=mic_read_word(b,91);
   m.first_tick=mic_read_word(b,239);
   if((m.ptr&3u)||m.ptr>0x2800u-sizeof(m.scores))return;
   m.seq=seq;m.position=0;m.start=now;
@@ -218,7 +227,7 @@ static void c9_tasks_map_poll(const das_bus *b){
  do {
   if(mic_read_word(b,90)!=m.seq){m.seq=0;c9_map_retries++;return;}
   b->write(b->ctx,0x80,0x80000000u+m.ptr/4u+m.position);
-  for(unsigned k=0;k<32;k++)m.scores[m.position++]=(int32_t)b->read(b->ctx,0x88);
+  for(unsigned k=0;k<128;k++)m.scores[m.position++]=(int32_t)b->read(b->ctx,0x88);
   c9_realtime_checkpoint();
   if(m.position==1024)break;
  }while(c9_ticks_to_us(dia_gtimer_now()-slice_start)<500u);
@@ -228,6 +237,9 @@ static void c9_tasks_map_poll(const das_bus *b){
     (uint32_t)(end-m.sample)>31250u||
     (uint32_t)(b->read(b->ctx,0x3e0)-m.first_tick)>C9_STALE_AFTER_US*C9_PL_TICKS_PER_US){m.seq=0;c9_map_retries++;return;}
  uint32_t duration=c9_ticks_to_us(dia_gtimer_now()-m.start);if(duration>c9_map_max_us)c9_map_max_us=duration;
+ c9_map_cache.seq=m.seq;c9_map_cache.frame=m.frame;c9_map_cache.sample=m.sample;
+ c9_map_cache.reason=m.reason;c9_map_cache.accepted=m.accepted;c9_map_cache.first_tick=m.first_tick;
+ memcpy(c9_map_cache.scores,m.scores,sizeof(m.scores));
  c9_map_copies++;c9_tracks_last_sequence=m.seq;c9_tracks_last_tick=dia_gtimer_now();
  last=now;m.seq=0;
  c9_candidate candidates[3];unsigned n=0;
@@ -264,17 +276,29 @@ static void c9_tasks_schedule(void){
  const c9_track *merged[3];unsigned merged_count=c9_collect_tracks(merged,end,epoch,session);
  for(unsigned i=0;i<merged_count;i++){
   const c9_track *t=merged[i];
-  /* All existing sources participate in null constraints; a newly appearing
-   * source waits for a full common stable window rather than being omitted. */
-  if(!c9_track_covers_range(t,selected-C9_SNAPSHOT_FRAMES,selected)||
-     (uint32_t)(end-t->last_sample)>31250u){c9_schedule_coverage_rejected++;return;}
+  /* Diagnostic outputs are independently eligible. Unobserved/incomplete
+   * neighbours cannot veto a covered source, but unresolved directions
+   * withhold trusted fault attribution in the resulting job. */
+  if(t->state!=C9_TRACK_OBSERVED){c9_schedule_nonobserved_skipped++;continue;}
+  uint32_t why=c9_track_coverage_reason(t,selected-C9_SNAPSHOT_FRAMES,selected,NULL,NULL);
+  if((uint32_t)(end-t->last_sample)>31250u)why|=128u;
+  if(why){c9_schedule_ineligible_skipped++;c9_schedule_last_reject_track=t->id;c9_schedule_last_reject_reason=why;
+   for(unsigned k=0;k<8;k++){if(why&(1u<<k))c9_schedule_reasons[k]++;}
+   continue;}
+  /* The separator rejects an entire job if any pair is closer than25deg.
+   * Keep independently separable tracks; preserve excluded neighbours as
+   * unresolved context so this cannot authorize fault attribution. */
+  unsigned conflict=0;
+  for(unsigned k=0;k<n;k++)if(c9_track_direction_dot(&t->candidate,&tracks[k].candidate)>.90630778703665)conflict=1;
+  if(conflict){c9_schedule_ineligible_skipped++;continue;}
   tracks[n++]=*t;
  }
- if(!n)return;
+ if(!n){if(merged_count)c9_schedule_coverage_rejected++;return;}
  uint32_t expected=state;
  if(!__atomic_compare_exchange_n(&j->state,&expected,3u,0,__ATOMIC_ACQ_REL,__ATOMIC_ACQUIRE))return;
  if(state==1u)c9_pending_replaced++;
  memcpy(j->tracks,tracks,n*sizeof(tracks[0]));j->end_sample=selected;j->queued_tick=now;
+ j->unresolved_tracks=merged_count-n;
  j->sequence=++c9_job_sequence;j->count=n;j->epoch=epoch;j->session=session;
  j->map_sample=j->tracks[0].last_sample;j->shaft_millihz=c9_shaft_millihz;j->shaft_confirmed=c9_shaft_confirmed;
  j->shaft_generation=c9_shaft_generation;

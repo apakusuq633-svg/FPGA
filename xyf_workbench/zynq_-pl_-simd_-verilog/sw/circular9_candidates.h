@@ -12,15 +12,29 @@
 #define C9_SEARCH_RAW_FRAMES 16640u /*256warmup+104.8576ms of evidence. */
 #define C9_SEARCH_MIN_RAW_FRAMES 8448u
 #define C9_SEARCH_BANDS 3u
-#define C9_SEARCH_FEEDBACK_ABI 0x43394231u /* C9B1 */
+#define C9_SEARCH_FEEDBACK_ABI 0x43394232u /* C9B2: exact connected union of supported STFT windows */
 #define C9_SEARCH_MAX_AGE_SAMPLES 31250u /*200ms after evidence end. */
 #define C9_ANALYSIS_FRAMES 8u
 #define C9_ANALYSIS_BINS 202u /* positive bins8..209 */
+/* STFT windows have length1024 and hop512 after /4. Support at frame0
+ * and frame2 has no temporal hole: the two real windows touch. Count at
+ * least three actual witnesses, and never bridge a gap larger than one hop. */
+static inline unsigned c9_support_component(uint32_t mask,unsigned frames,unsigned *first,unsigned *last){
+ unsigned run=0,start=0,previous=0,best=0,best_span=0;*first=*last=0;
+ if(frames>8u||(mask>>frames))return 0;
+ for(unsigned f=0;f<frames;f++)if(mask&(1u<<f)){
+  if(!run||f-previous>C9_SEPARATION_FFT/C9_SEPARATION_HOP){run=1;start=f;}else run++;
+  previous=f;unsigned span=f-start;
+  if(run>best||(run==best&&span>best_span)){best=run;best_span=span;*first=start;*last=f;}
+ }
+ return best;
+}
 typedef struct {uint32_t guard,sequence;int16_t pcm[9];} c9_history_frame;
 typedef struct {
  uint32_t head_guard,end,count,epoch,session;
  c9_history_frame frames[C9_HISTORY_FRAMES];
 } c9_history;
+unsigned c9_candidates_acceleration(void); /* 7: ARM vector self-test passed; 3: fallback. */
 #define C9_CANDIDATE_REFINED 1u
 typedef struct {
  uint32_t grid;int32_t score;
@@ -61,6 +75,11 @@ typedef struct {
  double search_lags[36][64];
  int32_t search_scores[C9_SEARCH_BANDS][1024];
  uint32_t analysis_frames;
+ /* CPU1-private DDR scratch. Its OCM stack is noncached; these arrays are
+  * reused sequentially, never shared with an interrupting search/diagnosis. */
+ double search_roots[9][C9_ANALYSIS_BINS];
+ c9_complex bin_steering[3][5][9],bin_covariance[9][9],bin_inverse[9][9],bin_observed_covariance[9][9];
+ uint32_t search_ticks[3]; /* Preparation, observations, search; ARM timer ticks. */
 } c9_separation_workspace;
 typedef struct {
  uint32_t count,frames,usable_bins,total_bins,invalid_input;

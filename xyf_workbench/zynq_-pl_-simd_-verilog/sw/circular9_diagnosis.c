@@ -9,6 +9,39 @@
 #else
 static const c9_diag_model c9_configured_diag_model = {0};
 #endif
+#ifdef C9_FSTF_EXPERIMENTAL
+#include "fstf_c9f2_experimental_model.h"
+#endif
+unsigned c9_fstf_experiment_enabled(void){
+#ifdef C9_FSTF_EXPERIMENTAL
+ return 1;
+#else
+ return 0;
+#endif
+}
+const char *c9_fstf_class_name(unsigned value){
+ static const char *names[]={"inner","outer","ball","healthy","looseness","combined"};
+ return value<6?names[value]:"unknown";
+}
+static void c9_fstf_experiment(c9_diag_report *r){
+#ifdef C9_FSTF_EXPERIMENTAL
+ const unsigned required=C9_DIAG_BIND_SNAPSHOT|C9_DIAG_BIND_STABLE|C9_DIAG_BIND_SEPARATED;
+ if(!r||r->feature_contract!=C9_DIAG_FEATURE_CONTRACT||!r->binding.track_id||r->binding.grid>=1024u||r->extraction.status!=C9_DIAG_EXTRACT_OK||r->extraction.fft_count!=1u||
+    r->shaft_hz<29.999999||r->shaft_hz>30.000001||r->clipped_samples>40u||
+    r->binding.sample_count!=C9_DIAG_SAMPLES||(r->binding.flags&required)!=required||
+    r->binding.separation_contract!=C9_DIAG_SEPARATION_CONTRACT)return;
+ unsigned any_mask=0;for(unsigned k=0;k<7;k++)any_mask|=r->binding.usable_mask[k];
+ if(!any_mask||r->binding.usable_mask[6]>1023u)return;
+ double distance[6];int best=fstf_predict(r->features,distance);if(best<0)return;
+ unsigned second=best?0u:1u;
+ for(unsigned i=0;i<6;i++)if((int)i!=best&&distance[i]<distance[second])second=i;
+ r->fstf_available=1;r->fstf_class=(unsigned)best;r->fstf_version=1;
+ r->fstf_distance=distance[best];r->fstf_margin=distance[second]/(distance[best]>1e-12?distance[best]:1e-12);
+ /* No writes to label, provisional_label, reason or fault_direction_valid. */
+#else
+ (void)r;
+#endif
+}
 static int finite_number(double x) { return x==x && x<=DBL_MAX && x>=-DBL_MAX; }
 const c9_diag_model *c9_diag_configured_model(void) { return &c9_configured_diag_model; }
 const char *c9_diag_label_name(uint32_t v) {
@@ -100,7 +133,14 @@ void c9_diagnose_with_model(const double x[C9_DIAG_SAMPLES],double hz,
  double v[C9_DIAG_FEATURES]={0},energy=0.0;unsigned clipped=0;
  if(!r)return;
  if(!x || !finite_number(hz) || hz<10.0 || hz>30.0) {
-  c9_diag_score_features(0,0.0,hz,b,m,r);r->extraction.status=C9_DIAG_EXTRACT_BAD_INPUT;return;
+  c9_diag_score_features(0,0.0,hz,b,m,r);r->extraction.status=C9_DIAG_EXTRACT_BAD_INPUT;
+  /* Unknown speed is exactly0 in the task ABI. Display the real envelope,
+   * but leave order features/classification UNKNOWN; never substitute RPM. */
+  if(x&&hz==0.0&&c9_env_analyze(x,&r->extraction)){
+   for(unsigned i=0;i<C9_DIAG_SAMPLES;i++){energy+=x[i]*x[i];if(x[i]>=.999||x[i]<=-.999)clipped++;}
+   r->rms=d_sqrt(energy/C9_DIAG_SAMPLES);r->clipped_samples=clipped;
+  }
+  return;
  }
  for(unsigned i=0;i<C9_DIAG_SAMPLES;i++) {
   if(!finite_number(x[i]) || x[i]>1.0 || x[i]<-1.0) {
@@ -120,6 +160,7 @@ void c9_diagnose_with_model(const double x[C9_DIAG_SAMPLES],double hz,
  }
  r->clipped_samples=clipped;
  if(clipped>40u){r->label=r->provisional_label=C9_DIAG_UNKNOWN;r->fault_direction_valid=0;r->reason=C9_DIAG_CLIPPED;}
+ c9_fstf_experiment(r);
 }
 void c9_diagnose(const double x[C9_DIAG_SAMPLES],double hz,
  const c9_diag_binding *b,c9_diag_report *r) {
