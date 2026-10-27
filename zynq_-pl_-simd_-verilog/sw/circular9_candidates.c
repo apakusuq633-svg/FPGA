@@ -435,15 +435,94 @@ static unsigned candidate_support(c9_separation_workspace *w,const c9_candidate 
    numerator[f]+=zpower(beam)-energy;denominator[f]+=8*energy;
   }
  }
- unsigned run=0,best=0;*mask=0;*run_start=*run_end=0;
+ *mask=0;*run_start=*run_end=0;
  for(unsigned f=0;f<w->analysis_frames;f++){
   int supported=denominator[f]>1e-12&&numerator[f]>.25*denominator[f]&&
    w->band_energy[f][band]>.25*maximum_energy;
-  if(supported){*mask|=1u<<f;run++;}else run=0;
-  if(run>best){best=run;*run_start=f+1u-run;*run_end=f;}
+  if(supported)*mask|=1u<<f;
+ }
+ return c9_support_component(*mask,w->analysis_frames,run_start,run_end);
+}
+/* Secondary directional evidence after removing ONE independently supported
+ * peer. The original SRP/quality gates remain mandatory. This is not used to
+ * synthesize PCM or to declare a physical source. For rank8 residual noise,
+ * (8*projected_target_energy-residual_energy)/(7*residual_energy) has the same
+ * unit-source/zero-noise-coherence convention as the original rank9 statistic. */
+static unsigned candidate_support_residual(c9_separation_workspace *w,const c9_candidate *c,
+ const c9_candidate *peer,const uint32_t *lut,unsigned band,const uint8_t used[210],
+ uint32_t *mask,unsigned *first,unsigned *last){
+ int32_t az,el;c9_candidate_angles(c,&az,&el);double q[9],qp[9];
+ for(unsigned ch=0;ch<9;ch++)q[ch]=delay_q4(lut,ch,az,el);
+ c9_candidate_angles(peer,&az,&el);for(unsigned ch=0;ch<9;ch++)qp[ch]=delay_q4(lut,ch,az,el);
+ double numerator[8]={0},denominator[8]={0},maximum_energy=0;unsigned bins=0;
+ for(unsigned f=0;f<w->analysis_frames;f++)if(w->band_energy[f][band]>maximum_energy)maximum_energy=w->band_energy[f][band];
+ for(unsigned k=16;k<=209;k++)if(used[k]&&analysis_band(k)==band){
+  c9_complex target[9],other[9],cross={0,0};
+  for(unsigned ch=0;ch<9;ch++){
+   double sn,cs;sincos_small(6.2831853071795864769*k*q[ch]/(64.0*C9_SEPARATION_FFT),&sn,&cs);target[ch]=(c9_complex){cs,-sn};
+   sincos_small(6.2831853071795864769*k*qp[ch]/(64.0*C9_SEPARATION_FFT),&sn,&cs);other[ch]=(c9_complex){cs,-sn};
+   cross=zadd(cross,zmul(other[ch],zconj(target[ch])));
+  }
+  double norm=9-zpower(cross)/9;
+  if(norm<.125)continue; /* 1/norm <= existing separation weight-norm limit8. */
+  bins++;
+  for(unsigned f=0;f<w->analysis_frames;f++){
+   c9_complex beam={0,0},interference={0,0};double energy=0;
+   for(unsigned ch=0;ch<9;ch++){c9_complex x=w->observed[f][ch][k-8];beam=zadd(beam,zmul(x,target[ch]));interference=zadd(interference,zmul(x,other[ch]));energy+=zpower(x);}
+   c9_complex removed=zmul(zconj(cross),interference);removed.re/=9;removed.im/=9;beam=zsub(beam,removed);
+   double residual=energy-zpower(interference)/9;if(residual<0)residual=0;
+   numerator[f]+=8*zpower(beam)/norm-residual;denominator[f]+=7*residual;
+  }
+ }
+ *mask=0;*first=*last=0;if(bins<4)return 0;
+ for(unsigned f=0;f<w->analysis_frames;f++)if(denominator[f]>1e-12&&numerator[f]>.25*denominator[f]&&w->band_energy[f][band]>.25*maximum_energy)*mask|=1u<<f;
+ return c9_support_component(*mask,w->analysis_frames,first,last);
+}
+/* Bound all nine per-band peaks before the three-output capacity decision.
+ * Consensus is current-window, spherical and independent of frequency-loop
+ * order. It is not a source-count/physical-truth assertion. */
+typedef struct {
+ c9_candidate candidate;unsigned band,frames,direct_frames;uint32_t quality;
+ int32_t evidence[3],rank_evidence[3];uint32_t bands,mask,first,last;
+} c9_peak_evidence;
+static double c9_peak_dot(const c9_candidate *a,const c9_candidate *b){
+ double u[3],v[3],dot=0;c9_candidate_unit(a,u);c9_candidate_unit(b,v);
+ for(unsigned k=0;k<3;k++)dot+=u[k]*v[k];
+ return dot;
+}
+static int c9_peak_pool_best(const c9_peak_evidence *p,unsigned count,unsigned excluded){
+ int best=-1;int64_t best_sum=-1;unsigned best_frames=0;
+ for(unsigned i=0;i<count;i++)if(!(excluded&(1u<<i))){
+  /* Only independently rechecked evidence at this exact bearing counts.
+   * A nearby peak's band score must not be credited to this representative. */
+  int64_t sum=(int64_t)p[i].rank_evidence[0]+p[i].rank_evidence[1]+p[i].rank_evidence[2];
+  unsigned support=p[i].frames;
+  if(best<0||sum>best_sum||(sum==best_sum&&(support>best_frames||
+     (support==best_frames&&(p[i].candidate.score>p[best].candidate.score||
+      (p[i].candidate.score==p[best].candidate.score&&p[i].candidate.grid<p[best].candidate.grid)))))){
+   best=(int)i;best_sum=sum;best_frames=support;
+  }
  }
  return best;
 }
+static unsigned c9_peak_quality(const int32_t scores[1024],const c9_candidate *c){
+ int32_t score=scores[c->grid],shoulder=0;if(score<150000)return 0;
+ for(unsigned g=0;g<1024;g++){
+  int32_t dot=c9_direction_dot_q30(g,c->grid);
+  if(dot<=1050277989&&dot>=973140576&&scores[g]>shoulder)shoulder=scores[g];
+ }
+ int64_t quality=(int64_t)(score-shoulder)*1000/score;
+ return quality<3?0u:quality>1000?1000u:(unsigned)quality;
+}
+#ifdef C9_CANDIDATES_TEST
+void c9_debug_peak_support(c9_separation_workspace *w,const c9_candidate *c,const uint32_t *lut,unsigned band,unsigned out[3]){
+ uint8_t used[210]={0};double peak=0;
+ for(unsigned k=16;k<=209;k++)if(analysis_band(k)==band){double p=0;for(unsigned ch=0;ch<9;ch++)p+=w->covariance[k-8][ch][ch].re;if(p>peak)peak=p;}
+ for(unsigned k=16;k<=209;k++)if(analysis_band(k)==band){double p=0;for(unsigned ch=0;ch<9;ch++)p+=w->covariance[k-8][ch][ch].re;if(p>peak*.001&&p>1e-12)used[k]=1;}
+ uint32_t mask;unsigned first,last;out[0]=c9_peak_quality(w->search_scores[band],c);out[1]=candidate_support(w,c,lut,band,used,&mask,&first,&last);out[2]=mask;
+}
+#endif
+
 int c9_search_feedback_current(const c9_search_feedback *f,uint32_t now,uint32_t session,
  uint32_t epoch,uint32_t geometry,uint32_t calibration){
  if(!f||f->abi!=C9_SEARCH_FEEDBACK_ABI||f->count>3u||f->invalid_input||f->session!=session||f->epoch!=epoch||
@@ -460,11 +539,11 @@ int c9_search_feedback_current(const c9_search_feedback *f,uint32_t now,uint32_t
      !f->quality_permille[c]||f->quality_permille[c]>1000u||n<3u||n>f->analysis_frames||
      start<256u||start>=end||end>f->end_sample-f->first_sample||
      (start-256u)%(4u*C9_SEPARATION_HOP)||
-     end-start!=4u*(C9_SEPARATION_FFT+(n-1u)*C9_SEPARATION_HOP)||
      now-f->support_end_sample[c]>C9_SEARCH_MAX_AGE_SAMPLES)return 0;
-  unsigned first=(start-256u)/(4u*C9_SEPARATION_HOP);
-  if(first+n>f->analysis_frames||f->support_mask[c]>>f->analysis_frames||
-     (f->support_mask[c]&(((1u<<n)-1u)<<first))!=(((1u<<n)-1u)<<first))return 0;
+  unsigned first,last;
+  unsigned witnesses=c9_support_component(f->support_mask[c],f->analysis_frames,&first,&last);
+  if(witnesses!=n||start!=256u+4u*C9_SEPARATION_HOP*first||
+     end!=256u+4u*(C9_SEPARATION_HOP*last+C9_SEPARATION_FFT))return 0;
  }
  return 1;
 }
@@ -551,7 +630,7 @@ int c9_candidates_search(const int16_t (*raw)[9],uint32_t raw_frames,const uint3
    * inverse FFT: IFFT(X+iY)=x+i*y. No bins, bands or delays are dropped. */
   unsigned pi[36],pj[36],pair=0;
   for(unsigned i=0;i<8;i++)for(unsigned j=i+1;j<9;j++){pi[pair]=i;pj[pair++]=j;}
-  double roots[9][202];
+  double (*roots)[C9_ANALYSIS_BINS]=w->search_roots;
   for(unsigned ch=0;ch<9;ch++)for(unsigned k=16;k<=209;k++)if(used[b][k])roots[ch][k-8]=square_root(w->covariance[k-8][ch][ch].re);
   for(pair=0;pair<36;pair+=2){
    memset(w->transform,0,sizeof(w->transform));
@@ -599,32 +678,74 @@ int c9_candidates_search(const int16_t (*raw)[9],uint32_t raw_frames,const uint3
   counts[b]=c9_candidates_extract(w->search_scores[b],proposals[b]);
   if(counts[b]&&proposals[b][0].score>=150000)r->band_valid_mask|=1u<<b;else counts[b]=0;
  }
- /* Each valid band first gets its strongest temporally supported direction;
-  * only afterwards fill remaining slots with other angularly distinct peaks.
-  * All band scores are coherence-normalized, never ranked by loudness. */
- for(unsigned rank=0;rank<3;rank++)for(unsigned b=0;b<3;b++)if(rank<counts[b]){
-  c9_candidate c=proposals[b][rank];if(c.score<150000)continue;
-  int32_t shoulder=0;
-  for(unsigned g=0;g<1024;g++){
-   int32_t dot=c9_direction_dot_q30(g,c.grid);
-   if(dot<=1050277989&&dot>=973140576&&w->search_scores[b][g]>shoulder)shoulder=w->search_scores[b][g];
+ /* Rank by independently supported peak prominence (score - shoulder),
+  * not broad unresolved-band coherence alone. Keep raw band scores intact.
+  * First retain every eligible peak (at most3x3), then arbitrate globally.
+  * A low-frequency slot can no longer hide a later independent direction. */
+ c9_peak_evidence pool[9];unsigned pool_count=0,excluded=0;
+ for(unsigned b=0;b<3;b++)for(unsigned rank=0;rank<counts[b];rank++){
+  c9_candidate c=proposals[b][rank];unsigned quality=c9_peak_quality(w->search_scores[b],&c);
+  if(!quality)continue;
+  uint32_t mask;unsigned first,last,n=candidate_support(w,&c,lut,b,used[b],&mask,&first,&last);
+  pool[pool_count]=(c9_peak_evidence){.candidate=c,.band=b,.frames=n,.direct_frames=n,.quality=quality,
+   .bands=1u<<b,.mask=mask,.first=ctx->first_sample+4u*w->observed_start[first],
+   .last=ctx->first_sample+4u*(w->observed_start[last]+C9_SEPARATION_FFT)};
+  pool[pool_count].evidence[b]=c.score;
+  pool[pool_count].rank_evidence[b]=(int32_t)((int64_t)c.score*quality/1000);pool_count++;
+ }
+ /* A periodic secondary source can fail a total-mixture energy ratio even
+  * when its spatial peak is genuine. Remove only a clearly distinct peer
+  * with at least3 direct witnesses, then require the SAME .25 statistic and
+  * at least3 actual observations. No threshold relaxation or gap filling. */
+ for(unsigned i=0;i<pool_count;i++){
+  unsigned first,last;c9_support_component(pool[i].mask,w->analysis_frames,&first,&last);
+  if(pool[i].frames>=3&&first==0&&last+1==w->analysis_frames)continue;
+  int peer=-1;int64_t best=-1;
+  for(unsigned j=0;j<pool_count;j++)if(i!=j&&pool[j].band==pool[i].band&&pool[j].direct_frames>=3&&
+      c9_peak_dot(&pool[i].candidate,&pool[j].candidate)<.90630778703665){
+   int64_t score=(int64_t)pool[j].candidate.score*pool[j].quality;
+   if(score>best){best=score;peer=(int)j;}
   }
-  int64_t quality=(int64_t)(c.score-shoulder)*1000/c.score;if(quality<3)continue;if(quality>1000)quality=1000;
-  uint32_t mask;unsigned first,last,n=candidate_support(w,&c,lut,b,used[b],&mask,&first,&last);if(n<3)continue;
-  unsigned slot=r->count;double u[3];c9_candidate_unit(&c,u);
-  for(unsigned j=0;j<r->count;j++){
-   double v[3];c9_candidate_unit(&r->candidates[j],v);
-   if(u[0]*v[0]+u[1]*v[1]+u[2]*v[2]>.9659258262890683){slot=j;break;}
+  if(peer>=0){
+   uint32_t mask;unsigned b=pool[i].band;
+   candidate_support_residual(w,&pool[i].candidate,&pool[peer].candidate,lut,b,used[b],&mask,&first,&last);
+   uint32_t combined=pool[i].mask|mask;unsigned n=c9_support_component(combined,w->analysis_frames,&first,&last);
+   if(n>=3){pool[i].mask=combined;pool[i].frames=n;pool[i].first=ctx->first_sample+4u*w->observed_start[first];pool[i].last=ctx->first_sample+4u*(w->observed_start[last]+C9_SEPARATION_FFT);}
   }
-  if(slot>=3u)continue;
-  if(slot==r->count){r->count++;r->candidates[slot]=c;}
-  r->band_mask[slot]|=1u<<b;r->band_score[slot][b]=c.score;
-  if((uint32_t)quality>r->quality_permille[slot])r->quality_permille[slot]=(uint32_t)quality;
-  if(!r->support_frames[slot]||c.score>=r->candidates[slot].score){
-   r->candidates[slot]=c;r->support_frames[slot]=n;r->support_mask[slot]=mask;
-   r->support_first_sample[slot]=ctx->first_sample+4u*w->observed_start[first];
-   r->support_end_sample[slot]=ctx->first_sample+4u*(w->observed_start[last]+C9_SEPARATION_FFT);
+  if(pool[i].frames<3){pool[i].bands=0;pool[i].evidence[pool[i].band]=0;pool[i].rank_evidence[pool[i].band]=0;pool[i].quality=0;}
+ }
+ /* Bound direct/cross work to9x3 checks, plus at most9 peer projections.
+  * No new FFT/covariance computation.
+  * Recheck every contributing band at each proposed representative before
+  * ranking, so a strong single-band shoulder cannot borrow a neighbor's peak. */
+ for(unsigned i=0;i<pool_count;i++){
+  unsigned matched=0;for(unsigned j=0;j<pool_count;j++)
+   if(c9_peak_dot(&pool[i].candidate,&pool[j].candidate)>.9659258262890683)matched|=1u<<pool[j].band;
+  int32_t interval_score=pool[i].candidate.score;
+  for(unsigned b=0;b<3;b++)if((matched&(1u<<b))&&b!=pool[i].band){
+   unsigned quality=c9_peak_quality(w->search_scores[b],&pool[i].candidate);if(!quality)continue;
+   uint32_t mask;unsigned first,last,n=candidate_support(w,&pool[i].candidate,lut,b,used[b],&mask,&first,&last);
+   if(n<3)continue;
+   int32_t score=w->search_scores[b][pool[i].candidate.grid];
+   pool[i].bands|=1u<<b;pool[i].evidence[b]=score;
+   pool[i].rank_evidence[b]=(int32_t)((int64_t)score*quality/1000);
+   if(quality>pool[i].quality)pool[i].quality=quality;
+   if(n>pool[i].frames||(n==pool[i].frames&&score>interval_score)){
+    interval_score=score;pool[i].frames=n;pool[i].mask=mask;
+    pool[i].first=ctx->first_sample+4u*w->observed_start[first];
+    pool[i].last=ctx->first_sample+4u*(w->observed_start[last]+C9_SEPARATION_FFT);
+   }
   }
+  if(!pool[i].bands)excluded|=1u<<i;
+ }
+ while(r->count<3u){
+  int winner=c9_peak_pool_best(pool,pool_count,excluded);if(winner<0)break;
+  const c9_peak_evidence *p=&pool[winner];unsigned slot=r->count++;
+  r->candidates[slot]=p->candidate;r->band_mask[slot]=p->bands;
+  for(unsigned b=0;b<3;b++)r->band_score[slot][b]=p->evidence[b];
+  r->quality_permille[slot]=p->quality;r->support_frames[slot]=p->frames;
+  r->support_mask[slot]=p->mask;r->support_first_sample[slot]=p->first;r->support_end_sample[slot]=p->last;
+  for(unsigned i=0;i<pool_count;i++)if(c9_peak_dot(&p->candidate,&pool[i].candidate)>.9659258262890683)excluded|=1u<<i;
  }
  w->search_ticks[2]=search_clock()-profile;return 1;
 }
@@ -699,7 +820,8 @@ static int protected_covariance(const c9_separation_workspace *w,unsigned bin,
 }
 static int prepare_bin(c9_separation_workspace *w,const c9_candidate *cand,
  unsigned count,const uint32_t *lut,unsigned bin,c9_separation_report *r,int empirical){
- c9_complex a[3][5][9],cov[9][9],iv[9][9],observed_cov[9][9];
+ c9_complex (*a)[5][9]=w->bin_steering;
+ c9_complex (*cov)[9]=w->bin_covariance,(*iv)[9]=w->bin_inverse,(*observed_cov)[9]=w->bin_observed_covariance;
  for(unsigned c=0;c<count;c++)steering_sector(&cand[c],lut,bin,a[c]);
  int usable=1,used_covariance=0;unsigned protected_min=9,protected_max=0;
  double report_norm=0,report_null=0,report_error=0,sector_min=1,sector_max=1,sector_leak=0;
@@ -715,9 +837,9 @@ static int prepare_bin(c9_separation_workspace *w,const c9_candidate *cand,
    if(count==1){
     /* One known candidate has no spatial competitor to null. Ordinary DAS
      * is the exact minimum-white-noise solution and needs no matrix solve. */
-    memset(iv,0,sizeof(iv));for(unsigned ch=0;ch<9;ch++)iv[ch][ch].re=1;
+    memset(iv,0,sizeof(w->bin_inverse));for(unsigned ch=0;ch<9;ch++)iv[ch][ch].re=1;
    }else{
-    memset(cov,0,sizeof(cov));for(unsigned ch=0;ch<9;ch++)cov[ch][ch].re=1;
+    memset(cov,0,sizeof(w->bin_covariance));for(unsigned ch=0;ch<9;ch++)cov[ch][ch].re=1;
     for(unsigned other=0;other<count;other++)for(unsigned s=0;s<5;s++){
      double scale=(other==c?1000:loading[attempt])/5;
      for(unsigned i=0;i<9;i++)for(unsigned j=0;j<9;j++){

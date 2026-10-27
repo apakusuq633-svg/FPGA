@@ -49,7 +49,7 @@ def main():
         'history_frames':1048576,'history_reserved_bytes':32*1024*1024,
         'multiband_hz':[[600,2200],[2200,4600],[4600,8000]],
         'spectral_feedback':{'raw_frames':16640,'validity_after_end_samples':31250,
-                             'minimum_consecutive_supported_stft_frames':3,
+                             'minimum_real_supported_stft_frames_in_connected_window_union':3,
                              'physical_fault_classification':False},
         'empirical_covariance':{'stft_observations':8,'target_subspace_max_rank':5,
                                 'shrinkage':.25,'minimum_residual_to_total_power':.001,

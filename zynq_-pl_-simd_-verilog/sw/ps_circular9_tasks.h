@@ -144,7 +144,7 @@ static void c9_tasks_cpu1(volatile struct ipc_page *ipc){
   c9_history_snapshot_at(&c9_history_shared.history,c9_snapshot,job.end_sample,&first,&epoch,&session);
  if(!valid)c9_metric_increment(&metrics->snapshot_rejected);
  valid=valid&&epoch==job.epoch&&session==job.session&&
-  (uint32_t)(first+C9_SNAPSHOT_FRAMES-job.map_sample)<=31250u;
+  c9_snapshot_map_time_valid(first+C9_SNAPSHOT_FRAMES,end_before,job.map_sample);
  c9_candidate candidates[3];
  for(unsigned i=0;i<job.count;i++){
   candidates[i]=c9_track_candidate(&job.tracks[i]);
@@ -285,6 +285,12 @@ static void c9_tasks_schedule(void){
   if(why){c9_schedule_ineligible_skipped++;c9_schedule_last_reject_track=t->id;c9_schedule_last_reject_reason=why;
    for(unsigned k=0;k<8;k++){if(why&(1u<<k))c9_schedule_reasons[k]++;}
    continue;}
+  /* The separator rejects an entire job if any pair is closer than25deg.
+   * Keep independently separable tracks; preserve excluded neighbours as
+   * unresolved context so this cannot authorize fault attribution. */
+  unsigned conflict=0;
+  for(unsigned k=0;k<n;k++)if(c9_track_direction_dot(&t->candidate,&tracks[k].candidate)>.90630778703665)conflict=1;
+  if(conflict){c9_schedule_ineligible_skipped++;continue;}
   tracks[n++]=*t;
  }
  if(!n){if(merged_count)c9_schedule_coverage_rejected++;return;}

@@ -48,8 +48,8 @@ def main():
             assert -1/16-1e-12 <= q/16-truth <= 1e-12, (g, m)
             comparisons += 1
     assert all(d == 0 for d in plane_wave_delays(c, 0, 0))
-    assert plane_wave_delays(c, 45, 0)[0] < plane_wave_delays(c, 45, 0)[4]
-    assert plane_wave_delays(c, 0, 45)[2] < plane_wave_delays(c, 0, 45)[6]
+    assert plane_wave_delays(c, 45, 0)[5] < plane_wave_delays(c, 45, 0)[2]
+    assert plane_wave_delays(c, 0, 45)[7] < plane_wave_delays(c, 0, 45)[0]
     # A flat array has exactly identical delays for mirror directions across
     # its board plane; the frontend hemisphere is an installation constraint.
     for u in vectors[::31]:

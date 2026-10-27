@@ -311,8 +311,10 @@ static void pipeline_tests(const char *output){
  c9_schedule.have=0;c9_tasks_schedule();CHECK(c9_tasks_shared.data.job.state==1&&c9_tasks_shared.data.job.count==3,"recovered angular coverage schedules all three candidates from one new snapshot");
  run_cpu1_pending(&ipc);c9_tasks_receive();r=&c9_tasks_shared.data.results[c9_latest_slot];
  CHECK(r->count==3&&r->separation.ready_mask==7&&r->diagnosis[1].label==C9_DIAG_UNKNOWN&&!r->diagnosis[1].fault_direction_valid,"fresh recovery job separates and diagnoses without copying the injected old fault label");
- CHECK(r->diagnosis[1].binding.track_id==recovered_id,"full recovery preserves the diagnosed angular identity");
- inject_fault(&r->diagnosis[1]);c9_tasks_select_fault(&bus);
+ unsigned recovered_index=0;while(recovered_index<r->count&&r->diagnosis[recovered_index].binding.track_id!=recovered_id)recovered_index++;
+ CHECK(recovered_index<r->count,"full recovery preserves angular identity independently of result ordering");
+ if(recovered_index<r->count){CHECK(r->diagnosis[recovered_index].label==C9_DIAG_UNKNOWN&&!r->diagnosis[recovered_index].fault_direction_valid,"recovered identity does not inherit old fault label");inject_fault(&r->diagnosis[recovered_index]);}
+ c9_tasks_select_fault(&bus);
  /* Freeze capture and map publication: sample counters alone cannot make an
   * old result remain current forever. */
  ticks+=100000000u;c9_tasks_select_fault(&bus);
@@ -430,7 +432,22 @@ static void auxiliary_feedback_tests(void){
  c9_tracks=(c9_tracker){0};
  for(unsigned i=0;i<3;i++)c9_tracks_update(&c9_tracks,&same,1,end-6250u+3125u*i,epoch,session);
  n=c9_collect_tracks(merged,end,epoch,session);
- CHECK(n>0&&merged[0]->id<0x40000000u,"main map identity has priority over a duplicate auxiliary direction");
+ /* Full coverage must beat a new duplicate regardless of origin namespace. */
+ c9_track *aux=&c9_aux_tracks.tracks[0];
+ aux->state=C9_TRACK_OBSERVED;aux->fresh_observations=3;aux->observations=30;
+ aux->first_sample=end-C9_SNAPSHOT_FRAMES;aux->coverage_first=aux->first_sample;
+ aux->last_sample=end;aux->gap_open=0;aux->gap_count=0;
+ n=c9_collect_tracks(merged,end,epoch,session);
+ CHECK(n>0&&merged[0]->id==auxiliary_id,"covered auxiliary direction beats a new primary duplicate without transferring ID");
+ c9_track *main=&c9_tracks.tracks[0];
+ main->state=C9_TRACK_OBSERVED;main->fresh_observations=3;main->observations=31;
+ main->first_sample=end-C9_SNAPSHOT_FRAMES;main->coverage_first=main->first_sample;
+ main->last_sample=end;main->gap_open=0;main->gap_count=0;
+ n=c9_collect_tracks(merged,end,epoch,session);
+ CHECK(n>0&&merged[0]->id==main->id,"equally covered primary can retain its own better observed identity");
+ aux->candidate=scene[1];aux->grid=scene[1].grid;
+ n=c9_collect_tracks(merged,end,epoch,session);
+ CHECK(n>=2,"independent directions are not collapsed by collection priority");
  printf("AUXILIARY_PIPELINE_PASS actual_FFT_candidates=%u support_frames=%u replay_wrong_era_expired_rejected=7 no_track_bootstrap=1\n",genuine.feedback.count,genuine.feedback.support_frames[0]);
 }
 #ifndef C9_PIPELINE_NO_MAIN

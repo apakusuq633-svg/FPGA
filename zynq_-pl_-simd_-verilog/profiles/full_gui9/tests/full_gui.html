@@ -20,10 +20,10 @@ select,input{background:#101820;color:#e5edf4;padding:7px;border:1px solid #5266
 <h1>声学故障定位与设备健康监测</h1><p class="muted">九麦方向定位 · 多候选分离 · 诊断与事件管理</p>
 <div class="bar"><strong id="state">连接中</strong><p id="source"></p><p id="connection">等待首次响应</p><button id="pause">暂停显示</button> <button id="save">保存系统快照</button><p id="err" role="status"></p></div>
 <div class="layout"><section class="card"><h2>声源方向与热力图</h2><label><input type="checkbox" id="map_smooth" checked>热图显示平滑（250ms）</label> <label><input type="checkbox" id="show_proposals" checked>显示未确认候选与留痕</label><p id="location_detail" class="muted"></p><canvas id="direction_map" width="410" height="390"></canvas><p id="map_note" class="muted"></p><p class="muted">水平角/俯仰角，无距离扫描。白色为候选，红色仅用于已验证故障方向。点击网格可申请定向。</p></section>
-<section class="card"><h2>诊断结果</h2><label>查看轨迹 <select id="candidate_select"></select></label><table id="diagnosis"></table><p id="model_note" class="muted"></p><div id="candidates"></div></section>
+<section class="card"><h2>诊断结果</h2><label>查看轨迹 <select id="candidate_select"></select></label><table id="diagnosis"></table><p id="model_note" class="muted"></p><h3>已完成诊断的轨迹（快照方向）</h3><div id="candidates"></div><h3>实时方向提议（尚非故障结论）</h3><p id="proposal_note" class="muted"></p><div id="live_proposals"></div></section>
 <section class="card"><h2>选中轨迹的分离音频频谱</h2><canvas id="spectrum_plot" width="560" height="250"></canvas><p id="spectrum_note" class="muted">等待候选音频；不要求模型已验证。</p></section>
 <section class="card"><h2>同快照包络谱</h2><canvas id="envelope_plot" width="560" height="250"></canvas><p id="envelope_note" class="muted">Hz包络不依赖转速；阶次与分类仍需有效转速。</p><p class="muted">C9F2载频2200–4600Hz；包络横轴为调制频率。1.024秒观察，补零不提高真实分辨率。</p></section></div>
-<section class="card"><button id="preview">获取同快照波形</button> <label><input id="auto_preview" type="checkbox" checked>自动更新诊断双谱（最多每5秒）</label><p id="plot_note" class="muted">默认最多每5秒读取一次同快照音频；可关闭自动更新。历史曲线明确标记快照号；未计算的包络说明原因。</p><details><summary>18维诊断特征</summary><table id="features"></table></details></section>
+<section class="card"><button id="preview">获取同快照波形</button> <label><input id="auto_preview" type="checkbox" checked>自动更新诊断双谱（新快照最快每1秒）</label><p id="plot_note" class="muted">有新快照时最快每1秒读取一次同快照音频；无新结果不重复读取，可关闭自动更新。历史曲线明确标记快照号；未计算的包络说明原因。</p><details><summary>18维诊断特征</summary><table id="features"></table></details></section>
 <div class="layout"><section class="card"><h2>音频电平与载频指标</h2><table id="levels"></table></section><section class="card"><h2>系统运行状态</h2><table id="runtime"></table></section></div>
 <section class="card"><h2>九路麦克风输入</h2><div class="table-scroll"><table class="data-table mic-table"><thead><tr><th>通道 / DIN</th><th>RMS (%FS)</th><th>峰值 (%FS)</th><th>均值 (%FS)</th><th>削顶</th></tr></thead><tbody id="mics"></tbody></table></div><p class="muted">独立定位快照电平；通道映射、幅相及实物几何仍须验收，不将PDM活动当作独立麦克风验证。</p></section>
 <section class="card"><h2>双麦同帧PCM与GCC调试</h2><select id="pair_a"></select> / <select id="pair_b"></select> <button id="pair_capture">抓取一帧</button> <button id="pair_save">导出PCM与GCC</button><button id="pair_run">&#36830;&#32493;&#37319;&#38598;10&#24103;</button> <button id="raw_download">&#19979;&#36733;&#20061;&#36335;&#21516;&#27493;&#24555;&#29031;</button><canvas id="pair_plot" width="1000" height="300"></canvas><table id="pair_result"></table><p id="pair_note" class="muted">读连续原始历史，不暂停PL；原始PCM时间轴保留时延。正峰、负谷、绝对峰只用于调试。</p></section>
@@ -71,7 +71,7 @@ function gccAnalyze(samples,fs,positions){
 }
 function gccEstimateText(p){if(!p)return '无有效峰';return (p.candidate_usable?'候选 '+p.samples.toFixed(3)+' 点 / '+p.microseconds.toFixed(2)+' us':'无有效时延候选\n诊断极值 '+p.samples.toFixed(3)+' 点')+'\n值 '+p.value.toFixed(5)+(p.rejection_reasons.length?' ['+p.rejection_reasons.join(' / ')+']':'\n尚未验证为声学时延');}
 
-var c9ChannelPositions=[[-0.0,-0.03,0],[-0.0212132034355964,-0.0212132034355964,0],[-0.03,0.0,0],[-0.0212132034355964,0.0212132034355964,0],[0.0212132034355964,-0.0212132034355964,0],[0.03,0.0,0],[0.0212132034355964,0.0212132034355964,0],[0.0,0.03,0],[0,0,0]];
+var c9ChannelPositions=[[0,-0.0255,0],[-0.01626345596729059,-0.01626345596729059,0],[-0.022,0,0],[-0.01626345596729059,0.01626345596729059,0],[0.01626345596729059,-0.01626345596729059,0],[0.022,0,0],[0.01626345596729059,0.01626345596729059,0],[0,0.0255,0],[0,0,0]];
 'use strict';
 // Browser-only display/analysis. No classifier, feature extractor or PL control
 // algorithm is replaced by this file. All inputs carry snapshot/track identity.
@@ -113,12 +113,23 @@ function renderCandidates(s){c9state=s;guiLastCandidate=Date.now();
   let d=c.diagnosis||{},p=document.createElement('p');p.className=validFault(c,s)?'alarm':'muted';p.textContent='轨迹 '+c.track_id+'：水平角 '+angle(c.azimuth_mdeg)+'，俯仰角 '+angle(c.elevation_mdeg)+'；'+(c.stale?'已过期':c.stable?'稳定':'待稳定')+'；'+(d.label||'unknown')+'；'+(reasonNames[d.reason]||d.reason||'等待诊断');let b=document.createElement('button');b.textContent='拾取此方向';b.disabled=!!c.stale;b.onclick=()=>control('/api/target?grid='+c.grid);p.appendChild(b);$('candidates').appendChild(p);
  });
  if((s.candidates||[]).length)$('candidate_select').value=(s.candidates.some(c=>c.track_id===chosen)?chosen:s.candidates[0].track_id);
- text('model_note','模型版本 '+s.model_version+'；'+(s.model_validated?'已验证':'未验证/未配置，保持未知')+'；'+(s.shaft_confirmed?'已确认转速 '+num(s.shaft_millihz*.06,0)+' rpm':'转速未确认')+'；快照 #'+s.sequence+'，年龄 '+s.result_age_ms+' ms');
- if(!(s.candidates||[]).length){text('candidates','尚无可读取的候选诊断快照；请结合调度状态查看覆盖、分离或期限原因。下列仅为方向提议。');(s.proposals||[]).forEach(p=>{let el=document.createElement('p');el.className='muted';el.textContent='提议轨迹 '+p.track_id+'：水平角 '+angle(p.azimuth_mdeg)+'，俯仰角 '+angle(p.elevation_mdeg)+'；观察次数 '+p.observations;$('candidates').appendChild(el);});}
+ text('model_note',(s.fstf_experiment_enabled?'FSTF六类实验已启用（未验证，仅1800rpm）；原判决':'')+'模型版本 '+s.model_version+'；'+(s.model_validated?'已验证':'未验证/未配置，保持未知')+'；'+(s.shaft_confirmed?'已确认转速 '+num(s.shaft_millihz*.06,0)+' rpm':'转速未确认')+'；快照 #'+s.sequence+'，年龄 '+s.result_age_ms+' ms');
+ if(!(s.candidates||[]).length)text('candidates','尚无可读取的候选诊断快照；下方实时提议独立更新，不代表已完成诊断。');
+ $('live_proposals').textContent='';
+ const proposals=s.proposals||[];
+ text('proposal_note','已完整显示本次接口返回的 '+proposals.length+' 条提议；后台仍有质量筛选、方向合并及最多3条限制，不是全部原始峰。方向状态约每250ms读取；上方诊断快照另有计算与观察窗延迟。');
+ proposals.forEach(p=>{let el=document.createElement('p');el.className='muted';el.textContent='实时提议轨迹 '+p.track_id+'：水平角 '+angle(p.azimuth_mdeg)+'，俯仰角 '+angle(p.elevation_mdeg)+'；观察次数 '+p.observations+'；'+({1:'已观测',2:'短时保持（历史方向）',3:'恢复观察'}[p.track_state]||'状态未知');$('live_proposals').appendChild(el);});
+ if(!proposals.length)text('live_proposals','当前没有满足后台条件的实时方向提议；不表示没有声源。');
  const c=(s.candidates||[]).find(c=>c.track_id===Number($('candidate_select').value));renderDiagnosis(c,s);
 }
 function renderDiagnosis(c,s){if(!c){rows('diagnosis',[['状态','等待候选诊断']]);rows('levels',[]);rows('features',[]);if(!guiDisplayedPlot){plot('spectrum_plot',null,8,'频率(kHz)');plot('envelope_plot',null,900,'频率(Hz)');}else text('plot_note','当前无候选；保留历史快照 #'+guiDisplayedPlot.sequence+'，轨迹 '+guiDisplayedPlot.track+'，不是最新结果。');return;}let d=c.diagnosis||{};
  rows('diagnosis',[['轨迹',c.track_id],['方向',angle(c.azimuth_mdeg)+' / '+angle(c.elevation_mdeg)],['类别',c.stale?'过期结果（仅供回看）':({normal:'正常',fault:'故障',interference:'干扰',anomaly:'异常',unknown:'未知'}[d.label]||'未知')],['有效性',reasonNames[d.reason]||d.reason],['模型距离间隔（非概率）',num(d.margin,4)],['故障方向确认',validFault(c,s)?'已确认':'未确认']]);
+ const experiment=d.fstf_experimental;
+ if(experiment&&experiment.enabled){
+  const names={inner:'内圈',outer:'外圈',ball:'滚动体',healthy:'正常',looseness:'松动',combined:'复合'};
+  line($('diagnosis'),'FSTF实验细类',experiment.available?(names[experiment.label]||'未知')+'（未验证'+(c.stale?'；历史快照':'')+'）':'等待1800rpm、有效分离及特征');
+  if(experiment.available)line($('diagnosis'),'实验模型距离 / 间隔',num(experiment.distance,4)+' / '+num(experiment.margin,3)+'；非概率，不参与报警或故障定向');
+ }
  const analyzed=!!(d.extraction&&d.extraction.fft_count===1);
  rows('levels',[['分离音频RMS',analyzed?num(d.rms*100,4)+' %FS':'未计算'],['载频带RMS',analyzed?num(d.extraction.carrier_rms*100,4)+' %FS':'未计算'],['调制RMS',analyzed?num(d.extraction.modulation_rms*100,4)+' %FS':'未计算'],['削顶点数',analyzed?d.clipped_samples:'未统计'],['载频带','2200–4600 Hz（C9F2）']]);
  $('features').textContent='';if(!analyzed||!(d.shaft_hz>=10&&d.shaft_hz<=30))line($('features'),'阶次特征','未计算：缺少有效转速或包络');else (d.features||[]).forEach((v,i)=>line($('features'),'特征 '+(i+1),num(v,5)));
@@ -227,8 +238,8 @@ async function preview(){
  }finally{guiPlotBusy=false;$('preview').disabled=false;}
 }
 
-async function pair(){ window.guiPair=null;$('pair_capture').disabled=true;try{let a=Number($('pair_a').value),b=Number($('pair_b').value),buf=await get('/api/debug/pair?a='+a+'&b='+b,true),v=new DataView(buf);if(v.getUint32(0,true)!==0x43395031||buf.byteLength!==4128)throw Error('快照格式错误');let fs=v.getUint32(4,true),x=[],y=[];for(let i=0;i<1024;i++){x.push(v.getInt16(32+4*i,true));y.push(v.getInt16(34+4*i,true));}let mx=x.reduce((a,b)=>a+b)/1024,my=y.reduce((a,b)=>a+b)/1024,xx=x.map(a=>a-mx),yy=y.map(a=>a-my),xy=0,sx=0,sy=0;xx.forEach((a,i)=>{xy+=a*yy[i];sx+=a*a;sy+=yy[i]*yy[i];});let positions=c9ChannelPositions,r=gccAnalyze([x,y],fs,[positions[a],positions[b]])[0];let peak=Math.max(...xx.map(Math.abs),...yy.map(Math.abs),1);plot('pair_plot',xx.map(a=>a/peak),1023/fs*1000,'时间(ms)','共享幅值轴（AC PCM）',true);let g=$('pair_plot').getContext('2d'),L=62,R=$('pair_plot').width-18,T=25,B=$('pair_plot').height-42;g.strokeStyle='#ffb454';g.beginPath();yy.forEach((v,i)=>{let px=L+i*(R-L)/1023,py=(T+B)/2-v/peak*(B-T)/2;i?g.lineTo(px,py):g.moveTo(px,py);});g.stroke();rows('pair_result',[['同帧原始PCM','CH'+a+' / CH'+b+'；'+fs+' Hz；起点 '+v.getUint32(20,true)],['AC相关系数',sx&&sy?num(xy/Math.sqrt(sx*sy),6):'无有效能量'],['正峰',gccEstimateText(r.positive)],['负谷',gccEstimateText(r.negative)],['绝对峰',gccEstimateText(r.absolute)]]);text('pair_note','保留原始时间轴，无移位、无极性翻转；GCC仅浏览器调试。几何按已确认通道顺序的30mm圆环，幅相标定及声学准确性仍待验收。');window.guiPair={a,b,fs,first:v.getUint32(20,true),epoch:v.getUint32(24,true),session:v.getUint32(28,true),x,y,gcc:r};}catch(e){text('pair_note',String(e));}finally{$('pair_capture').disabled=false;}}
-async function tick(){if(paused||c9busy)return;c9busy=true;try{if(Date.now()-guiLastCandidate>=500){renderStatus(await get('/api/status'));let s=await get('/api/candidates');renderCandidates(s);}renderMap(await get('/api/heatmap'));if(Date.now()-guiLastHealth>1000){await fetchHealth();renderPerformance(await get('/api/gsc'));guiLastHealth=Date.now();}text('err','');}catch(e){text('err','通信/数据不可用：'+String(e)+'；保留报警，等待恢复。');}finally{c9busy=false;}}
+async function pair(){ window.guiPair=null;$('pair_capture').disabled=true;try{let a=Number($('pair_a').value),b=Number($('pair_b').value),buf=await get('/api/debug/pair?a='+a+'&b='+b,true),v=new DataView(buf);if(v.getUint32(0,true)!==0x43395031||buf.byteLength!==4128)throw Error('快照格式错误');let fs=v.getUint32(4,true),x=[],y=[];for(let i=0;i<1024;i++){x.push(v.getInt16(32+4*i,true));y.push(v.getInt16(34+4*i,true));}let mx=x.reduce((a,b)=>a+b)/1024,my=y.reduce((a,b)=>a+b)/1024,xx=x.map(a=>a-mx),yy=y.map(a=>a-my),xy=0,sx=0,sy=0;xx.forEach((a,i)=>{xy+=a*yy[i];sx+=a*a;sy+=yy[i]*yy[i];});let positions=c9ChannelPositions,r=gccAnalyze([x,y],fs,[positions[a],positions[b]])[0];let peak=Math.max(...xx.map(Math.abs),...yy.map(Math.abs),1);plot('pair_plot',xx.map(a=>a/peak),1023/fs*1000,'时间(ms)','共享幅值轴（AC PCM）',true);let g=$('pair_plot').getContext('2d'),L=62,R=$('pair_plot').width-18,T=25,B=$('pair_plot').height-42;g.strokeStyle='#ffb454';g.beginPath();yy.forEach((v,i)=>{let px=L+i*(R-L)/1023,py=(T+B)/2-v/peak*(B-T)/2;i?g.lineTo(px,py):g.moveTo(px,py);});g.stroke();rows('pair_result',[['同帧原始PCM','CH'+a+' / CH'+b+'；'+fs+' Hz；起点 '+v.getUint32(20,true)],['AC相关系数',sx&&sy?num(xy/Math.sqrt(sx*sy),6):'无有效能量'],['正峰',gccEstimateText(r.positive)],['负谷',gccEstimateText(r.negative)],['绝对峰',gccEstimateText(r.absolute)]]);text('pair_note','保留原始时间轴，无移位、无极性翻转；GCC仅浏览器调试。声孔半径：左右22mm、上下25.5mm、斜向23mm（暂按45°）；幅相标定及声学准确性仍待验收。');window.guiPair={a,b,fs,first:v.getUint32(20,true),epoch:v.getUint32(24,true),session:v.getUint32(28,true),x,y,gcc:r};}catch(e){text('pair_note',String(e));}finally{$('pair_capture').disabled=false;}}
+async function tick(){if(paused||c9busy)return;c9busy=true;try{if(Date.now()-guiLastCandidate>=250){renderStatus(await get('/api/status'));let s=await get('/api/candidates');renderCandidates(s);}renderMap(await get('/api/heatmap'));if(Date.now()-guiLastHealth>1000){await fetchHealth();renderPerformance(await get('/api/gsc'));guiLastHealth=Date.now();}text('err','');}catch(e){text('err','通信/数据不可用：'+String(e)+'；保留报警，等待恢复。');}finally{c9busy=false;}}
 $('pause').onclick=()=>{paused=!paused;text('pause',paused?'继续显示':'暂停显示');};
 $('save').onclick=()=>download('acoustic_snapshot.json',JSON.stringify({captured_utc:new Date().toISOString(),status:latest,candidates:c9state,health:c9health},null,2));
 $('preview').onclick=preview;$('pair_capture').onclick=pair;$('pair_save').onclick=()=>window.guiPair&&download('pair_pcm_gcc.json',JSON.stringify(window.guiPair));
@@ -276,9 +287,9 @@ var automaticPlotBusy=false,automaticPlotKey='',automaticPlotAt=0;
 function plotRequestKey(){let c=selectedPlotCandidate(c9state);return c?[c9state.snapshot_session||0,c9state.snapshot_epoch||0,c9state.snapshot_first_sample||0,c9state.sequence,c.track_id].join('/'):'';}
 async function automaticPreview(){
  if(paused||automaticPlotBusy||guiPlotBusy||!$('auto_preview').checked||!c9state||!(c9state.candidates||[]).length||Date.now()-guiLastCandidate>3000)return;
- let key=plotRequestKey();if(!key||key===automaticPlotKey||Date.now()-automaticPlotAt<5000)return;
+ let key=plotRequestKey();if(!key||key===automaticPlotKey||Date.now()-automaticPlotAt<1000)return;
  automaticPlotBusy=true;automaticPlotAt=Date.now();try{if(await preview())automaticPlotKey=key;}finally{automaticPlotBusy=false;}
 }
-setInterval(automaticPreview,1000);
+setInterval(automaticPreview,250);
 
 </script></main></body></html>

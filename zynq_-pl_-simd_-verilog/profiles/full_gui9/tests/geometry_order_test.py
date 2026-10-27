@@ -6,7 +6,8 @@ c=json.loads((R/'configs/circular9_array.json').read_text(encoding='utf-8'))
 order=[5,6,7,3,2,1,0,4]
 assert c['ring_channel_order_ccw_from_right']==order
 for angle,ch in enumerate(order):
- expected=[.03*math.cos(angle*math.pi/4),.03*math.sin(angle*math.pi/4),0]
+ radius=.022 if angle in (0,4) else .0255 if angle in (2,6) else .023
+ expected=[radius*math.cos(angle*math.pi/4),radius*math.sin(angle*math.pi/4),0]
  assert all(abs(a-b)<1e-12 for a,b in zip(c['channel_positions_m'][ch],expected)),ch
 assert c['channel_positions_m'][8]==[0,0,0]
 html=(R/'build/gui9_checks/compiled_gui.html').read_text(encoding='utf-8')

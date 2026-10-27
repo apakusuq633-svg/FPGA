@@ -40,7 +40,27 @@ async function run(){await new Promise(resolve=>setImmediate(resolve));assert(pa
 
 
  const plotCandidate={track_id:7,grid:528,azimuth_mdeg:0,elevation_mdeg:0,stable:1,stale:1,separation_ready:1,diagnosis:{shaft_hz:0,label:'unknown',reason:'bad_input',binding:{track_id:7},features:[]}};
+ const experimentalCandidate={...plotCandidate,diagnosis:{...plotCandidate.diagnosis,fstf_experimental:{enabled:1,available:1,label:'inner',version:1,validated:0,distance:1,margin:2}}};
+ context.renderCandidates({...candidate,candidates:[experimentalCandidate]});
+ assert(nodes.get('diagnosis').children.some(row=>row.children.some(cell=>cell.textContent.includes('未验证'))),'experimental subtype clearly unvalidated');
+ assert(!context.validFault(experimentalCandidate,candidate),'experimental subtype never becomes trusted fault');
+ if(process.env.C9_FSTF_API_JSON){
+  const actual=JSON.parse(fs.readFileSync(process.env.C9_FSTF_API_JSON,'utf8'));
+  assert(actual._evidence_source==='HOST_FSTF_PLANE_WAVE_SIMULATION');context.renderCandidates(actual);
+  assert(nodes.get('model_note').textContent.includes('六类实验已启用'));
+  assert(nodes.get('diagnosis').children.some(row=>row.children.some(cell=>cell.textContent.includes('内圈'))),'actual C serialized experiment reaches GUI');
+  assert(actual.candidates.every(c=>!context.validFault(c,actual)),'no experimental record authorizes fault routing');
+ }
  const plotState={...candidate,sequence:77,candidates:[plotCandidate],snapshot_session:4,snapshot_epoch:3,snapshot_first_sample:123456};
+ const liveProposals=[{track_id:99,azimuth_mdeg:87188,elevation_mdeg:0,observations:8,track_state:1},{track_id:100,azimuth_mdeg:65000,elevation_mdeg:0,observations:4,track_state:3},{track_id:101,azimuth_mdeg:0,elevation_mdeg:3000,observations:3,track_state:2}];
+ context.renderCandidates({...plotState,proposals:liveProposals});
+ assert(nodes.get('candidate_select').children.length===1);
+ assert(nodes.get('live_proposals').children.length===3,'all returned proposals visible alongside diagnosis');
+ assert(nodes.get('live_proposals').children[0].textContent.includes('99'));
+ assert(nodes.get('live_proposals').children[2].textContent.includes('历史方向'));
+ context.renderCandidates({...plotState,candidates:[],proposals:liveProposals});
+ assert(nodes.get('live_proposals').children.length===3,'proposals remain visible without snapshot');
+ context.renderCandidates({...plotState,proposals:[]});assert(nodes.get('live_proposals').textContent.includes('没有满足'));
  function packet(seq,track=7,env=1,status=1){let b=new ArrayBuffer(8512),v=new DataView(b);[0x43394732,1,seq,track,0,78125,2,4096,128,env,status,123456,3,4,0,0].forEach((x,i)=>v.setUint32(i*4,x,true));for(let i=0;i<4096;i++)v.setInt16(64+i*2,Math.round(1000*Math.sin(i*.2)),true);for(let i=0;i<128;i++)v.setUint16(8256+i*2,i*7,true);return b;}
  function show(seq){context.renderCandidates({...plotState,sequence:seq});nodes.get('candidate_select').value='7';}
  let plotRequests=[];context.fetch=async path=>{plotRequests.push(path);return {ok:true,status:200,arrayBuffer:async()=>packet(77)};};show(77);
@@ -72,6 +92,10 @@ async function run(){await new Promise(resolve=>setImmediate(resolve));assert(pa
  context.renderCandidates({...plotState,sequence:84,candidates:[]});assert(context.guiDisplayedPlot.sequence===83);
  nodes.get('auto_preview').checked=true;context.c9state={...plotState,sequence:85};nodes.get('candidate_select').value='7';context.guiLastCandidate=Date.now();context.automaticPlotAt=0;
  context.fetch=async()=>({ok:true,status:200,arrayBuffer:async()=>packet(85)});await context.automaticPreview();assert(context.guiDisplayedPlot.sequence===85);
+ let duplicateReads=0;context.fetch=async()=>{duplicateReads++;return {ok:true,status:200,arrayBuffer:async()=>packet(85)};};
+ context.automaticPlotAt=Date.now()-1500;await context.automaticPreview();assert(duplicateReads===0,'same successful snapshot is not downloaded again');
+ context.c9state={...plotState,sequence:86};context.automaticPlotAt=Date.now()-500;await context.automaticPreview();assert(duplicateReads===0,'one-second request rate bound');
+ context.automaticPlotAt=Date.now()-1500;context.fetch=async()=>{duplicateReads++;return {ok:true,status:200,arrayBuffer:async()=>packet(86)};};await context.automaticPreview();assert(duplicateReads===1&&context.guiDisplayedPlot.sequence===86,'new snapshot can refresh before old five-second limit');
  context.c9state={...plotState,sequence:85,snapshot_session:5};assert(context.plotRequestKey().startsWith('5/'),'auto refresh identity includes capture session');
 
  if(process.env.C9_GUI_BINARY_PACKET){

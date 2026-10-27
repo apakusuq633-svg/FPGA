@@ -9,21 +9,35 @@ static uint32_t c9_aux_last_tick,c9_aux_issued_end,c9_aux_issued_session,c9_aux_
 static uint32_t c9_aux_sequence,c9_aux_skipped,c9_aux_replaced,c9_aux_accepted,c9_aux_rejected,c9_aux_replayed,c9_aux_receive_us_max;
 static uint32_t c9_aux_interval_raw,c9_aux_interval_max_raw,c9_aux_age_raw,c9_aux_age_max_raw;
 static uint32_t c9_aux_received_end,c9_aux_received_session,c9_aux_received_epoch,c9_aux_received_have;
+static int c9_track_collection_better(const c9_track *a,const c9_track *b,uint32_t end){
+ unsigned pa=a->state==C9_TRACK_OBSERVED?3:a->state==C9_TRACK_RECOVERING?2:1;
+ unsigned pb=b->state==C9_TRACK_OBSERVED?3:b->state==C9_TRACK_RECOVERING?2:1;
+ if(pa!=pb)return pa>pb;
+ int ca=c9_track_covers_range(a,end-C9_SNAPSHOT_FRAMES,end);
+ int cb=c9_track_covers_range(b,end-C9_SNAPSHOT_FRAMES,end);
+ if(ca!=cb)return ca>cb;
+ /* Source namespace is a tie-break, not evidence quality. A newly observed
+  * primary duplicate must not erase an already covered auxiliary direction. */
+ if(a->observations!=b->observations)return a->observations>b->observations;
+ if(end-a->last_sample!=end-b->last_sample)return end-a->last_sample<end-b->last_sample;
+ return a->id<b->id;
+}
 static unsigned c9_collect_tracks(const c9_track *out[3],uint32_t end,uint32_t epoch,uint32_t session){
- unsigned n=0;
- /* Fresh observed sources come first (main before auxiliary), then recovery,
-  * then held identities. A coasting main slot cannot hide genuine new FFT
-  * evidence. IDs are never transferred or replaced by score/loudness. */
- const uint32_t states[3]={C9_TRACK_OBSERVED,C9_TRACK_RECOVERING,C9_TRACK_COASTING};
- for(unsigned priority=0;priority<3&&n<3;priority++)for(unsigned origin=0;origin<2&&n<3;origin++){
+ const c9_track *pool[6];unsigned count=0,n=0;
+ for(unsigned origin=0;origin<2;origin++){
   const c9_tracker *tracker=origin?&c9_aux_tracks:&c9_tracks;
   if(!tracker->have||tracker->epoch!=epoch||tracker->session!=session)continue;
-  for(unsigned i=0;i<3&&n<3;i++){
+  for(unsigned i=0;i<3;i++){
    const c9_track *t=&tracker->tracks[i];
-   if(!t->id||t->state!=states[priority]||(uint32_t)(end-t->last_sample)>C9_SEARCH_MAX_AGE_SAMPLES)continue;
-   unsigned duplicate=0;for(unsigned j=0;j<n;j++)if(c9_track_direction_dot(&t->candidate,&out[j]->candidate)>=.9781476007338057)duplicate=1;
-   if(!duplicate)out[n++]=t;
+   if(!t->id||t->state==C9_TRACK_EXPIRED||(uint32_t)(end-t->last_sample)>C9_SEARCH_MAX_AGE_SAMPLES)continue;
+   unsigned pos=count;
+   while(pos&&c9_track_collection_better(t,pool[pos-1],end)){pool[pos]=pool[pos-1];pos--;}
+   pool[pos]=t;count++;
   }
+ }
+ for(unsigned i=0;i<count&&n<3;i++){
+  unsigned duplicate=0;for(unsigned j=0;j<n;j++)if(c9_track_direction_dot(&pool[i]->candidate,&out[j]->candidate)>=.9781476007338057)duplicate=1;
+  if(!duplicate)out[n++]=pool[i];
  }
  return n;
 }
@@ -57,6 +71,7 @@ static int c9_aux_feedback_current(const c9_aux_result *result,uint32_t end,uint
     f->valid_until_sample!=f->end_sample+C9_SEARCH_MAX_AGE_SAMPLES||
     (uint32_t)(end-f->end_sample)>C9_SEARCH_MAX_AGE_SAMPLES||
     f->analysis_frames<3||f->analysis_frames>8||(f->band_valid_mask&~7u)||(!f->band_valid_mask&&f->count))return 0;
+ if(!c9_search_feedback_current(f,end,session,epoch,ACOUSTIC_GEOMETRY_VERSION,ACOUSTIC_CALIBRATION_VERSION))return 0;
  for(unsigned i=0;i<f->count;i++){
   unsigned bits=0;for(unsigned k=0;k<8;k++)bits+=(f->support_mask[i]>>k)&1u;
   if(f->candidates[i].grid>=1024||f->candidates[i].score<=0||(f->candidates[i].flags&~C9_CANDIDATE_REFINED)||

@@ -27,8 +27,8 @@
   "capture_words_per_frame": 5,
   "capture_bytes_per_bank": 10240,
   "pcb_radius_m": 0.03,
-  "ring_radius_m": 0.03,
-  "ring_radius_source": "user_confirmed_2026-10-25: eight microphones on radius 30 mm and one at center",
+  "ring_radius_m": 0.023,
+  "ring_radius_source": "nominal reference only; nonuniform user-reported acoustic radii: horizontal22mm vertical25.5mm diagonal23mm (2026-10-26)",
   "pcb_clearance_status": "unverified; pcb_radius_m remains the earlier nominal board outline",
   "schematic_h1_status": "user_confirmed_label_error_only_actual_data_lines_correct_2026-10-25",
   "microphone_vendor": "Infineon",
@@ -38,7 +38,7 @@
   "supply_voltage_v": 3.3,
   "electrical_contract_reviewed": true,
   "electrical_contract_basis": "user-reported 3.3 V and IM73D122; datasheet 1.62..3.6 V and high-performance clock 2.0..2.6 MHz; physical waveforms unmeasured",
-  "geometry_status": "channel_order_confirmed_unmeasured_calibration",
+  "geometry_status": "user_reported_nonuniform_soundhole_radii_diagonal_angles_assumed_45deg",
   "physical_mapping_confirmed": true,
   "board_tested": false,
   "hardware_available": true,
@@ -77,43 +77,43 @@
   ],
   "channel_positions_m": [
     [
-      -0.0,
-      -0.03,
+      0,
+      -0.0255,
       0
     ],
     [
-      -0.0212132034355964,
-      -0.0212132034355964,
+      -0.01626345596729059,
+      -0.01626345596729059,
       0
     ],
     [
-      -0.03,
-      0.0,
+      -0.022,
+      0,
       0
     ],
     [
-      -0.0212132034355964,
-      0.0212132034355964,
+      -0.01626345596729059,
+      0.01626345596729059,
       0
     ],
     [
-      0.0212132034355964,
-      -0.0212132034355964,
+      0.01626345596729059,
+      -0.01626345596729059,
       0
     ],
     [
-      0.03,
-      0.0,
+      0.022,
+      0,
       0
     ],
     [
-      0.0212132034355964,
-      0.0212132034355964,
+      0.01626345596729059,
+      0.01626345596729059,
       0
     ],
     [
-      0.0,
-      0.03,
+      0,
+      0.0255,
       0
     ],
     [
@@ -133,5 +133,14 @@
     0,
     4
   ],
-  "channel_position_source": "user_confirmed_2026-10-26: front view, from rightmost CH5 counterclockwise CH5 CH6 CH7 CH3 CH2 CH1 CH0 CH4; center CH8 retained"
+  "channel_position_source": "user_confirmed_2026-10-26: front view, from rightmost CH5 counterclockwise CH5 CH6 CH7 CH3 CH2 CH1 CH0 CH4; center CH8 retained",
+  "soundhole_geometry": {
+    "source": "user_reported_2026-10-26",
+    "horizontal_radius_mm": 22,
+    "vertical_radius_mm": 25.5,
+    "diagonal_radius_mm": 23,
+    "diagonal_angle_assumption_deg": 45,
+    "diagonal_xy_measured": false,
+    "physical_board_validated": false
+  }
 }

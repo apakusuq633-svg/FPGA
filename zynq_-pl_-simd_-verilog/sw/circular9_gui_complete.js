@@ -28,7 +28,7 @@ var automaticPlotBusy=false,automaticPlotKey='',automaticPlotAt=0;
 function plotRequestKey(){let c=selectedPlotCandidate(c9state);return c?[c9state.snapshot_session||0,c9state.snapshot_epoch||0,c9state.snapshot_first_sample||0,c9state.sequence,c.track_id].join('/'):'';}
 async function automaticPreview(){
  if(paused||automaticPlotBusy||guiPlotBusy||!$('auto_preview').checked||!c9state||!(c9state.candidates||[]).length||Date.now()-guiLastCandidate>3000)return;
- let key=plotRequestKey();if(!key||key===automaticPlotKey||Date.now()-automaticPlotAt<5000)return;
+ let key=plotRequestKey();if(!key||key===automaticPlotKey||Date.now()-automaticPlotAt<1000)return;
  automaticPlotBusy=true;automaticPlotAt=Date.now();try{if(await preview())automaticPlotKey=key;}finally{automaticPlotBusy=false;}
 }
-setInterval(automaticPreview,1000);
+setInterval(automaticPreview,250);

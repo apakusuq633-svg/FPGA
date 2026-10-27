@@ -21,7 +21,7 @@ def main():
   'raw_sample_rate_hz':156250,'maximum_catchup_windows':1,'CPU0_FFT':False,
   'guards':['actual_per_candidate_support_intervals','three_fresh_observations','no_duplicate_support',
    'session_epoch_generation_geometry_calibration_binding','expired_input_rejected','unobserved_gaps_preserved',
-   'full_diagnostic_span_required','primary_priority_spherical_NMS','independent_aux_ID_namespace'],
+   'full_diagnostic_span_required','coverage_first_origin_neutral_spherical_NMS','independent_aux_ID_namespace'],
   'sources':sources}
  out=ROOT/'build/circular9_aux_checks';out.mkdir(parents=True,exist_ok=True)
  (out/'results.json').write_text(json.dumps(result,indent=2)+'\n',encoding='utf-8')

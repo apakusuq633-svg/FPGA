@@ -15,5 +15,24 @@ int main(void){
  c9_schedule.have=0;c9_tracks.tracks[0].gap_count=1;c9_tracks.tracks[0].gaps[0]=(c9_track_gap){50000,90000};
  c9_tasks_schedule();CHECK(c9_tasks_shared.data.job.state==0,"more than10percent missing evidence still rejects every incomplete track");
  c9_tracks.tracks[0]=stable;c9_schedule.have=0;c9_tasks_schedule();CHECK(c9_tasks_shared.data.job.count==1,"covered source can resume without changing thresholds");
+ CHECK(c9_snapshot_map_time_valid(100000,100004,100004),"newer real map does not underflow hop-aligned snapshot age");
+ CHECK(!c9_snapshot_map_time_valid(100000,100004,100005),"map from future uncollected PCM rejected");
+ CHECK(c9_snapshot_map_time_valid(100000,100004,68750),"200ms observation boundary accepted");
+ CHECK(!c9_snapshot_map_time_valid(100000,100004,68749),"older observation still rejected");
+ CHECK(c9_snapshot_map_time_valid(16,20,0xfffffff0u),"map age handles uint32 sample wrap");
+ CHECK(!c9_snapshot_map_time_valid(16,20,21),"wrapped future map rejected");
+ /* A close pair must not make the separator discard an independent source. */
+ c9_tasks_shared.data.job.state=0;c9_schedule.have=0;c9_aux_tracks=(c9_tracker){0};
+ c9_tracks=(c9_tracker){.have=1,.epoch=7,.session=1};
+ const int angles[3]={0,20000,-50000};
+ for(unsigned i=0;i<3;i++){
+  c9_tracks.tracks[i]=stable;c9_tracks.tracks[i].id=10+i;
+  unsigned x=(unsigned)((angles[i]+90000)*32/180000);
+  c9_tracks.tracks[i].candidate=(c9_candidate){.grid=16*32+x,.score=1000,.azimuth_mdeg=angles[i],.elevation_mdeg=0,.flags=C9_CANDIDATE_REFINED};
+  c9_tracks.tracks[i].grid=c9_tracks.tracks[i].candidate.grid;
+ }
+ c9_tasks_schedule();CHECK(c9_tasks_shared.data.job.state==1&&c9_tasks_shared.data.job.count==2,"close angular neighbour cannot starve a separable independent source");
+ CHECK(c9_tasks_shared.data.job.unresolved_tracks==1,"close neighbour remains unresolved for fault guards");
+ CHECK(c9_track_direction_dot(&c9_tasks_shared.data.job.tracks[0].candidate,&c9_tasks_shared.data.job.tracks[1].candidate)<=.90630778703665,"submitted job satisfies separator angular contract");
  CHECK(!fail,"snapshot scheduling regressions");puts("SNAPSHOT_SCHEDULE_PASS synthetic_only=1 independent_candidates=1 unresolved_fault_withheld=1 ninety_percent_retained=1");return fail?1:0;
 }

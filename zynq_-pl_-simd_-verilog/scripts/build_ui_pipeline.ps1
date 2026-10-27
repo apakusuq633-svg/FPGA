@@ -6,6 +6,7 @@ param(
     [switch]$Live,
     [switch]$MatchingPlWindow,
     [switch]$DynamicReplay,
+    [switch]$FstfExperimental,
     [switch]$Localization16,
     [switch]$FixedDas16,
     [ValidateSet(4,8,9,12,16)][int]$ActiveChannels = 8,
@@ -60,6 +61,10 @@ $obj = Join-Path $out 'ui.o'
 $elf = Join-Path $out 'ui.elf'
 $defs = @("-DUI_SHAFT_MILLIHZ=$ShaftMilliHz")
 $defs += "-DUI_DAS_ACTIVE_CHANNELS=$ActiveChannels"
+if ($FstfExperimental) {
+ if (-not $Live -or $ActiveChannels -ne 9) { throw 'FSTF experiment requires live circular9 build' }
+ $defs += '-DC9_FSTF_EXPERIMENTAL=1'
+}
 if ($DiagnosticModel) {
     if (-not $Live -or $ActiveChannels -ne 9) { throw 'DiagnosticModel is supported only by circular9 live mode' }
     $modelPath = (Resolve-Path -LiteralPath $DiagnosticModel).Path.Replace('\','/')
