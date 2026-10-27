@@ -192,3 +192,5 @@
 - [133：多峰竞争离线修复](133-multipeak-arbitration-offline.md)：联合频带仲裁与覆盖优先；未上板。
 - [134：FSTF六类实验接入](134-fstf-experiment-and-real-audio-simulation.md)：实验细类可显示；自动多源应用验收未通过。
 - [135：多源离线证据与边界](135-offline-multisource-evidence-and-limits.md)：支持窗口并集与私有工作区；仿真2/3双源，未上板。
+- [136：离线补充审查、CPU占用模型及传播鲁棒性](136-offline-timing-and-robustness-followup.md)：球面一对一评价、20组传播/几何场景、24组事件模型；失败分层，未上板。
+- [137：九麦离线工作收口与上板准备](137-offline-closure-and-board-readiness.md)：连续PCM导出默认关闭、异步/生命周期测试、本地回放；上板证据顺序，未上板。

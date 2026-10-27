@@ -1,4 +1,6 @@
-> 最新本地入口：`program_latest.ps1 -Program -OpenPage`（2026-10-27多源离线修复与未验证FSTF六类实验包，待上板验收）。每次交付须附最新加载指令；以下旧入口保留作历史版本。
+> 最新本地入口：`program_latest.ps1 -Program -OpenPage`（2026-10-27离线收口包 `build/gui_offline_ready_20261027`：连续PCM导出默认关闭，FSTF六类实验仍未验证，待上板验收）。每次交付须附最新加载指令；以下旧入口保留作历史版本。
+
+> 2026-10-27多源离线包：`build/gui_multisource_offline_20261027`（多源峰仲裁与FSTF实验显示），保留作历史版本。
 
 > 2026-10-26诊断快照修复：新入口 `program_snapshot_repaired.ps1`，独立发布包，不覆盖下文旧包。实板流水线已恢复，分类/多电机未验收。详见 [修复记录](../../docs/issues/130-circular9-snapshot-evidence-and-scheduling.md)。
 

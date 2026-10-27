@@ -8,8 +8,11 @@
 /* A named simulation fixture: production geometry remains unconfirmed. */
 #undef ACOUSTIC_GEOMETRY_CONFIRMED
 #undef ACOUSTIC_CALIBRATION_VERSION
-#define ACOUSTIC_GEOMETRY_CONFIRMED 1u
-#define ACOUSTIC_CALIBRATION_VERSION 0x54455354u
+#ifndef C9_NATIVE_GEOMETRY_CONFIRMED
+#define C9_NATIVE_GEOMETRY_CONFIRMED 1u
+#endif
+#define ACOUSTIC_GEOMETRY_CONFIRMED C9_NATIVE_GEOMETRY_CONFIRMED
+#define ACOUSTIC_CALIBRATION_VERSION (C9_NATIVE_GEOMETRY_CONFIRMED?0x54455354u:0u)
 #define UI_SHAFT_MILLIHZ 25000u
 #define RV32_BASE 0u
 #define NORM_WB_CACHE 0x54455354u
@@ -28,7 +31,12 @@ static void Xil_DCacheFlushRange(INTPTR address,size_t length){CHECK(address&&le
 static void Xil_SetTlbAttributes(INTPTR address,uint32_t flags){CHECK(address&&flags==NORM_WB_CACHE,"noncached shared mapping");noncache_maps++;}
 static uint32_t ticks=100000000u;
 static uint32_t delayed_timer_reads,delayed_timer_ticks;
+#ifdef C9_ASYNC_TEST
+static uint32_t c9_async_now(void);
+static uint32_t dia_gtimer_now(void){return c9_async_now();}
+#else
 static uint32_t dia_gtimer_now(void){ticks+=3333;if(delayed_timer_reads&&!--delayed_timer_reads)ticks+=delayed_timer_ticks;return ticks;}
+#endif
 static uint32_t dia_ticks_to_ms(uint32_t delta){return delta/333333u;}
 static uint32_t c9_ticks_to_us(uint32_t delta){return delta/333u;}
 static void c9_realtime_checkpoint(void){checkpoints++;ticks+=333;if(checkpoint_hook)checkpoint_hook();}
