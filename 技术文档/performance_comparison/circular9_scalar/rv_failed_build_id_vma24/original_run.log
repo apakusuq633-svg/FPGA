@@ -1,0 +1,25 @@
+$ C:\Users\lenovo\Desktop\FPGA_PDM\performance_comparison\circular9_scalar\rv_model\Vtb_c9_scalar.exe +FW=C:/Users/lenovo/Desktop/FPGA_PDM/performance_comparison/circular9_scalar/rv_plain +DUMP=C:/Users/lenovo/Desktop/FPGA_PDM/performance_comparison/circular9_scalar/rv_plain/dump +SCRATCH=C:/Users/lenovo/Desktop/FPGA_PDM/performance_comparison/circular9_scalar/scratch_input.hex
+C9_SCALAR_RV_PROGRESS tick=1000000 pc=000009a0
+C9_SCALAR_RV_PROGRESS tick=2000000 pc=00000cfc
+C9_SCALAR_RV_PROGRESS tick=3000000 pc=000009ac
+C9_SCALAR_RV_PROGRESS tick=4000000 pc=000009b0
+C9_SCALAR_RV_PROGRESS tick=5000000 pc=0000072c
+C9_SCALAR_RV_PROGRESS tick=6000000 pc=00000984
+C9_SCALAR_RV_PROGRESS tick=7000000 pc=000005c0
+C9_SCALAR_RV_PROGRESS tick=8000000 pc=000009c0
+C9_SCALAR_RV_PROGRESS tick=9000000 pc=00000958
+C9_SCALAR_RV_RESULT index=0 value=1127830339
+C9_SCALAR_RV_RESULT index=1 value=9810888
+C9_SCALAR_RV_RESULT index=2 value=4136
+C9_SCALAR_RV_RESULT index=3 value=658
+C9_SCALAR_RV_RESULT index=4 value=34303
+C9_SCALAR_RV_RESULT index=5 value=6712
+C9_SCALAR_RV_RESULT index=6 value=0
+C9_SCALAR_RV_RESULT index=7 value=0
+C9_SCALAR_RV_RESULT index=8 value=0
+C9_SCALAR_RV_RESULT index=9 value=0
+C9_SCALAR_RV_PASS tick=9832440 custom_instructions=0
+- C:\Users\lenovo\Desktop\FPGA_PDM\performance_comparison\circular9_scalar\tb_c9_scalar.sv:26: Verilog $finish
+- S i m u l a t i o n   R e p o r t: Verilator 5.050 2026-07-01
+- Verilator: $finish at 246ms; walltime 45.612 s; speed 5.389 ms/s
+- Verilator: cpu 0.000 s on 1 threads; allocated 6 MB

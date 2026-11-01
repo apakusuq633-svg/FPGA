@@ -1,0 +1,4 @@
+$ C:\msys64\ucrt64\bin\python.exe C:\Users\lenovo\Desktop\FPGA_PDM\performance_comparison\pl_rtl\source\scripts\build_circular9.py --compiler-prefix D:/AMDDesignTools/2025.2/gnu/riscv/nt/bin/riscv64-unknown-elf-
+   text	   data	    bss	    dec	    hex	filename
+   2768	      0	   9436	  12204	   2fac	C:\Users\lenovo\Desktop\FPGA_PDM\performance_comparison\pl_rtl\source\build\circular9\fw\fw_circular9.elf
+CIRCULAR9_BUILD_PASS channels=9 slots=10 pairs=36 board_tested=0

@@ -1,0 +1,54 @@
+{
+  "pass": true,
+  "kind": "current nine-mic full scalar pipeline on RV32 SoC RTL,not board",
+  "clock_hz": 40000000,
+  "tb_clock_period_ns": 25,
+  "profile_enabled": false,
+  "scalar_call_cycles": 9806381,
+  "scalar_call_ms_at40MHz": 245.159525,
+  "best_grid": 659,
+  "best_score": 40734,
+  "workspace_bytes": 6712,
+  "phase_cycles": {
+    "statistics_and_scaling_parameters": 0,
+    "Hann_nine_FFT_cache": 0,
+    "36_XSPEC_PHAT_IFFT_ring": 0,
+    "36_by1024_SRP": 0
+  },
+  "checks_vs_host": {
+    "statistics": {
+      "bytes": 180,
+      "mismatched_bytes": 0,
+      "sha256": "191fc7c8d7752d3f8210840fd7a21476cbdd4fb7b9e059e4a382fbe6aa556b7e"
+    },
+    "spectrum": {
+      "bytes": 2304,
+      "mismatched_bytes": 0,
+      "sha256": "d7e65947815ad39a07de5680001a385de42cb5484cc6f737cdff6c0353c7be93"
+    },
+    "correlation": {
+      "bytes": 4608,
+      "mismatched_bytes": 0,
+      "sha256": "572466b1b09a6c1be8336f532422dc7b86ccdcf94ffc1ddb4aee5524c122bd36"
+    },
+    "scores": {
+      "bytes": 4096,
+      "mismatched_bytes": 0,
+      "sha256": "aeb9c750fb4d96a200cd6756a99356b9b66be1c0ae02b09b1824d5eaf5a3b2eb"
+    }
+  },
+  "timing_boundary": "input raw1024x9 and packed delay LUT resident in scratch; c9s_locate call through all1024 scores written; excludes preload,peak/quality/tracking/publication; includes CSR timing wrapper overhead. Profile totals include inserted per-phase timestamps; plain run is primary.",
+  "input_sha256": "4f0dfc58c9fe1041e30bbf218c33fc64b5004f7752c5d9f3c134cdee222b8bdf",
+  "lut_packed_sha256": "95cc626dedd0852ec997856cace8809fc14abbf3bc21af5c2322c03ff8888969",
+  "elf_sha256": "ebc88be18277276b749cf557ae40f94f73949ef7eb0aefb1dc49868692ff3d62",
+  "source_sha256": {
+    "C:\\Users\\lenovo\\Desktop\\FPGA_PDM\\performance_comparison\\pl_rtl\\source\\sw\\fw\\start.S": "9506552d33efb2ee9c58924a628ecd3f0c86c2c7ac00ae0250ce27ffe9213851",
+    "rv_main.c": "e44a4a4224d79e02b5721535f13a15def84b46033449b12bf3868884dc3f36d8",
+    "c9_scalar.c": "4fdd94806b09cf3271fa4f145b7642c1dde97c159032b518491e34fdbdcec7fa",
+    "third_party\\fw_fft.c": "15b5505352e1d9d42c219d4f734561b5f6da57ca498d38ad8779c9015fecaaab",
+    "third_party\\fw_tables.c": "3eed4a31600da6d910334f2dc23af5095b7c653e1752613990dc1867ba0acd69",
+    "rv_link.ld": "33a73cd12bffb0abf92de1d98f2ff0c14a244d0b0609a7b867e4236bd9a9937a",
+    "tb_c9_scalar.sv": "49c0780ccf87bdfa4a1cdd853d625c76299f87123b9b8e9322bda9464c3d7d71",
+    "run_rv.py": "6d13354f32ba4abb4244470218d201a58694f4c95a2e611caa03a1ed0dcf73d3"
+  }
+}

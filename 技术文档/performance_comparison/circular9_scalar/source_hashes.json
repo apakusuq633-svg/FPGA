@@ -1,0 +1,18 @@
+{
+  "sw/fw/fw_fft.c": "15b5505352e1d9d42c219d4f734561b5f6da57ca498d38ad8779c9015fecaaab",
+  "sw/fw/fw_fft.h": "eb26ac4f7ff2f36090bd61bf79398e533b0ad69ddcbb6db7ed9fe8a23b31c79c",
+  "sw/fw/fw_tables.c": "3eed4a31600da6d910334f2dc23af5095b7c653e1752613990dc1867ba0acd69",
+  "sw/fw/fw_tables.h": "20a25da8af7e8bc7bbad17906da75392c1c42d9945324fb316c0d834ffb46958",
+  "sw/fw/fw_plat.h": "bc632632c0c7e262af3580415d166bd48ddb03aff31aeb9f11e361bb59c09fc4",
+  "sw/fw/fw_cycle_profile.h": "24053dd3afb36971524d2281275ee590770a5fce633228c8f08aa1825819ad3e",
+  "rtl/array/rv32_overlap_localizer.v": "900e7bb236ee0ad01f1477b64fca2be705f8435face1d6160406f4434edef9bd",
+  "rtl/acoustic/rv32_acoustic_ext.v": "56f833ce92a46505e72a8fce25acf9d63e60e9c35155868701cbb7f7a8cd7709",
+  "rtl/srp/rv32_srp_scan.v": "117693a46be46e4d786c771fbf636ed931b335951fe8aceec914e5bfd4521ded",
+  "rtl/rom/pdm_hann_q14.hex": "7081291fc50ad6e85b114d1e1cd7a764b27aa156c9d6104d5dbd41cfb34437a2",
+  "configs/circular9_array.json": "47b7f9f3215b82c1f2a71a4d67bd4124b4009f4aaa5634c32476530320dc60cc",
+  "experiment/c9_scalar.c": "4fdd94806b09cf3271fa4f145b7642c1dde97c159032b518491e34fdbdcec7fa",
+  "experiment/c9_scalar.h": "5f7f6e1bd4e04c2cc584c538193deae1a999ad38668c3307b0905c85d1ab0493",
+  "experiment/host_bench.c": "faf23e7d917f9d61f941e6c14694a9e2d6b8ecf14695132eb103577040d4d9df",
+  "experiment/hann_q14.h": "e1205b10b6cb6dd0d46e41fca2fe021fadf61891ad3cfcad1875685f1ccbcf0d",
+  "experiment/run_scalar.py": "e64bfb4f9c17a0e2cd47916f09eb171be8f0a5771551850ea0cd3fc3c7d55cbc"
+}

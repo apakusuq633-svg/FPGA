@@ -1,0 +1,4 @@
+﻿"variant","FAST_SCAN","cycles","ms_at_production_40MHz_analytical","speedup_vs_serial_same_testbench"
+"serial","0","147458","3.68645","1.0"
+"single_pair_pipeline","1","37153","0.928825","3.9689392512044788"
+"four_pair_banked_pipeline","4","9307","0.232675","15.843773503814333"

@@ -1,0 +1,154 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="1560" height="900" viewBox="0 0 1560 900" role="img" aria-labelledby="flowTitle flowDescription">
+  <title id="flowTitle">九麦声学故障定位与诊断系统工作流程</title>
+  <desc id="flowDescription">九麦PDM经PL同步采集、抽取和校正后分为三个并行通路。快速定位使用自研RISC-V及FFT、GCC-PHAT、SRP，送CPU0形成方向观测和轨迹。DMA送CPU0历史，CPU1由历史进行多频带搜索并把辅助候选送CPU0；CPU0形成同窗任务，CPU1分离和进行包络阶次诊断，CPU0再复核结论。连续DAS和FIR独立逐样点运行，送可选CPU0 GSC；GSC另从CPU0接收通路取得九路PCM参考，再输出定向音频。CPU0选择复核通过且唯一的可信故障目标，并向PL提交完整九路版本化延迟向量；PL原子接纳后控制DAS。虚线表示可信目标转向，最强方向峰不直接生成故障目标。</desc>
+  <defs>
+    <marker id="arrow" markerWidth="10" markerHeight="10" refX="9" refY="5" orient="auto" markerUnits="userSpaceOnUse"><path d="M0,0 L10,5 L0,10 Z" fill="#475569"/></marker>
+    <marker id="controlArrow" markerWidth="10" markerHeight="10" refX="9" refY="5" orient="auto" markerUnits="userSpaceOnUse"><path d="M0,0 L10,5 L0,10 Z" fill="#b45309"/></marker>
+  </defs>
+  <style>
+    text {font-family:"Microsoft YaHei","Noto Sans CJK SC","PingFang SC",sans-serif;fill:#172b4d;}
+    .regionTitle {font-size:21px;font-weight:700;}
+    .role {font-size:15px;fill:#526479;}
+    .main {font-size:19px;font-weight:650;}
+    .sub {font-size:14px;fill:#526479;}
+    .edgeLabel {font-size:13px;fill:#475569;}
+    .edge {fill:none;stroke:#475569;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round;marker-end:url(#arrow);}
+    .feedback {fill:none;stroke:#b45309;stroke-width:2.6;stroke-linecap:round;stroke-linejoin:round;stroke-dasharray:9 6;marker-end:url(#controlArrow);}
+    .plNode {fill:#ffffff;stroke:#5d84af;stroke-width:1.8;}
+    .cpu0Node {fill:#ffffff;stroke:#c19247;stroke-width:1.8;}
+    .cpu1Node {fill:#ffffff;stroke:#3f9589;stroke-width:1.8;}
+    .outNode {fill:#ffffff;stroke:#8895a7;stroke-width:1.8;}
+  </style>
+  <rect width="1560" height="900" fill="#ffffff"/>
+  <text x="34" y="45" font-size="29" font-weight="750">九麦声学故障定位与诊断系统工作流程</text>
+  <text x="34" y="77" font-size="16" fill="#526479">快速发现方向、同窗分析故障、持续定向拾音；三条通路共享同步采样并行工作</text>
+
+  <rect x="220" y="118" width="480" height="739" rx="16" fill="#eef4fb" stroke="#c7d7e9" stroke-width="1.3"/>
+  <text class="regionTitle" x="242" y="154">PL：持续采集与声学计算</text>
+  <text class="role" x="242" y="181">自研处理器调度计算，RTL推进数据流</text>
+
+  <rect x="725" y="118" width="285" height="739" rx="16" fill="#fff8ed" stroke="#ead8b7" stroke-width="1.3"/>
+  <text class="regionTitle" x="747" y="154">PS · CPU0</text>
+  <text class="role" x="747" y="181">收发、历史、轨迹、控制与界面</text>
+
+  <rect x="1030" y="118" width="300" height="607" rx="16" fill="#eef8f5" stroke="#bdded5" stroke-width="1.3"/>
+  <text class="regionTitle" x="1052" y="154">PS · CPU1</text>
+  <text class="role" x="1052" y="181">多频带搜索、保真分离与故障诊断</text>
+
+  <!-- Parallel acquisition fan-out. -->
+  <path class="edge" d="M195,452 L245,452"/>
+  <path class="edge" d="M400,425 L420,425 L420,285 L450,285"/>
+  <path class="edge" d="M400,452 L420,452 L420,475 L450,475"/>
+  <path class="edge" d="M400,479 L420,479 L420,795 L450,795"/>
+  <circle cx="420" cy="425" r="3.5" fill="#475569"/>
+  <circle cx="420" cy="479" r="3.5" fill="#475569"/>
+
+  <!-- Fast spatial observations and CPU1 auxiliary discovery. -->
+  <path class="edge" d="M670,285 L755,285"/>
+  <path class="edge" d="M1060,272 L985,272"/>
+  <text class="edgeLabel" x="1023" y="252" text-anchor="middle">辅助候选</text>
+  <path class="edge" d="M985,450 L1019,450 L1019,302 L1060,302"/>
+  <text class="edgeLabel" x="1005" y="397" text-anchor="middle" transform="rotate(-90 1005 397)">历史快照</text>
+  <path class="edge" d="M870,330 L870,365 L1180,365 L1180,430"/>
+  <text class="edgeLabel" x="1120" y="354" text-anchor="middle">轨迹候选 · 同窗任务</text>
+
+  <!-- Raw data to the owned snapshot and diagnosis. -->
+  <path class="edge" d="M670,475 L755,475"/>
+  <path class="edge" d="M985,490 L1060,490"/>
+  <text class="edgeLabel" x="1023" y="478" text-anchor="middle">同窗PCM</text>
+  <path class="edge" d="M1180,520 L1180,610"/>
+  <text class="edgeLabel" x="1194" y="570">候选音频</text>
+  <path class="edge" d="M1060,655 L985,655"/>
+  <text class="edgeLabel" x="1023" y="639" text-anchor="middle">诊断结果</text>
+
+  <!-- Trusted control is separated from acoustic peak proposals. -->
+  <path class="feedback" d="M755,655 L670,655"/>
+  <text x="712.5" y="637" font-size="12.5" fill="#92400e" text-anchor="middle">唯一可信目标</text>
+  <path class="feedback" d="M560,695 L560,755"/>
+  <text x="574" y="727" font-size="13" fill="#b45309">控制反馈</text>
+
+  <!-- Continuous audio remains active while windowed analysis runs. -->
+  <path class="edge" d="M670,795 L755,795"/>
+  <path class="edge" d="M985,795 L1370,795"/>
+  <text class="edgeLabel" x="1176" y="782" text-anchor="middle">连续定向音频</text>
+
+  <!-- CPU0 owns user-facing state and interaction. -->
+  <path class="edge" d="M870,700 L870,739 L1348,739 L1348,460 L1370,460"/>
+  <text class="edgeLabel" x="1147" y="760" text-anchor="middle">方向、双谱、诊断与告警状态</text>
+
+  <!-- A second GSC input carries the synchronous multichannel references.
+       A pale under-stroke separates line crossings without a junction dot. -->
+  <path d="M870,520 L870,550 L998,550 L998,747 L965,747 L965,755" fill="none" stroke="#fff8ed" stroke-width="7" stroke-linejoin="round"/>
+  <path class="edge" d="M870,520 L870,550 L998,550 L998,747 L965,747 L965,755"/>
+  <text class="edgeLabel" x="935" y="540" text-anchor="middle">九路PCM参考</text>
+
+  <rect x="35" y="390" width="160" height="125" rx="13" fill="#f1f5f9" stroke="#8797aa" stroke-width="1.8"/>
+  <text class="main" x="115" y="435" text-anchor="middle">九麦PDM阵列</text>
+  <text class="sub" x="115" y="466" text-anchor="middle">外围八麦＋中心一麦</text>
+  <text class="sub" x="115" y="491" text-anchor="middle">共用采样时钟</text>
+
+  <rect class="plNode" x="245" y="390" width="155" height="125" rx="12"/>
+  <text class="main" x="322.5" y="429" text-anchor="middle">同步采集</text>
+  <text class="main" x="322.5" y="458" text-anchor="middle">抽取与校正</text>
+  <text class="sub" x="322.5" y="490" text-anchor="middle">九路同步PCM</text>
+
+  <rect class="plNode" x="450" y="240" width="220" height="90" rx="12"/>
+  <text class="main" x="560" y="269" text-anchor="middle">自研RV32声学处理器</text>
+  <text class="sub" x="560" y="294" text-anchor="middle">FFT · GCC-PHAT · SRP</text>
+  <text class="sub" x="560" y="316" text-anchor="middle">快速定位与方向评分</text>
+
+  <rect class="plNode" x="450" y="430" width="220" height="90" rx="12"/>
+  <text class="main" x="560" y="466" text-anchor="middle">非阻塞DMA</text>
+  <text class="sub" x="560" y="494" text-anchor="middle">九路PCM与采样身份</text>
+
+  <rect x="450" y="615" width="220" height="80" rx="12" fill="#fff4e5" stroke="#b45309" stroke-width="2"/>
+  <text class="main" x="560" y="645" text-anchor="middle">九路版本化原子转向</text>
+  <text x="560" y="672" text-anchor="middle" font-size="14" fill="#92400e">完整延迟向量一次提交</text>
+
+  <rect class="plNode" x="450" y="755" width="220" height="80" rx="12"/>
+  <text class="main" x="560" y="786" text-anchor="middle">连续DAS / FIR</text>
+  <text class="sub" x="560" y="813" text-anchor="middle">逐样点处理 · 共享SIMD</text>
+
+  <rect class="cpu0Node" x="755" y="240" width="230" height="90" rx="12"/>
+  <text class="main" x="870" y="277" text-anchor="middle">方向观测与轨迹管理</text>
+  <text class="sub" x="870" y="305" text-anchor="middle">声学候选，不直接判定故障</text>
+
+  <rect class="cpu0Node" x="755" y="430" width="230" height="90" rx="12"/>
+  <text class="main" x="870" y="466" text-anchor="middle">连续接收与历史缓存</text>
+  <text class="sub" x="870" y="495" text-anchor="middle">按真实采样窗向CPU1供数</text>
+
+  <rect class="cpu0Node" x="755" y="610" width="230" height="90" rx="12"/>
+  <text class="main" x="870" y="646" text-anchor="middle">结果复核与目标选择</text>
+  <text class="sub" x="870" y="674" text-anchor="middle">时效 · 轨迹 · 转速 · 模型</text>
+
+  <rect class="cpu0Node" x="755" y="755" width="230" height="80" rx="12"/>
+  <text class="main" x="870" y="786" text-anchor="middle">可选连续GSC</text>
+  <text class="sub" x="870" y="813" text-anchor="middle">九路参考 · 泄漏保护与回退</text>
+
+  <rect class="cpu1Node" x="1060" y="240" width="240" height="90" rx="12"/>
+  <text class="main" x="1180" y="277" text-anchor="middle">多频带声源发现</text>
+  <text class="sub" x="1180" y="305" text-anchor="middle">从九路PCM提出辅助候选</text>
+
+  <rect class="cpu1Node" x="1060" y="430" width="240" height="90" rx="12"/>
+  <text class="main" x="1180" y="467" text-anchor="middle">同窗候选保真分离</text>
+  <text class="sub" x="1180" y="495" text-anchor="middle">保护目标 · 抑制其他方向</text>
+
+  <rect class="cpu1Node" x="1060" y="610" width="240" height="90" rx="12"/>
+  <text class="main" x="1180" y="647" text-anchor="middle">包络与机械阶次诊断</text>
+  <text class="sub" x="1180" y="675" text-anchor="middle">故障特征 · 正常基线 · 拒识</text>
+
+  <rect class="outNode" x="1370" y="410" width="155" height="100" rx="12"/>
+  <text class="main" x="1447.5" y="450" text-anchor="middle">监测界面</text>
+  <text class="sub" x="1447.5" y="479" text-anchor="middle">显示、交互与归档</text>
+
+  <rect class="outNode" x="1370" y="755" width="155" height="80" rx="12"/>
+  <text class="main" x="1447.5" y="787" text-anchor="middle">定向音频</text>
+  <text class="sub" x="1447.5" y="814" text-anchor="middle">拾音、试听与记录</text>
+
+  <line x1="35" y1="878" x2="92" y2="878" stroke="#475569" stroke-width="2.2" marker-end="url(#arrow)"/>
+  <text x="104" y="883" font-size="14">数据与任务流</text>
+  <line x1="266" y1="878" x2="323" y2="878" stroke="#b45309" stroke-width="2.6" stroke-dasharray="9 6" marker-end="url(#controlArrow)"/>
+  <text x="335" y="883" font-size="14">可信目标控制</text>
+  <text x="570" y="883" font-size="14" fill="#526479">三路并行：快速方向观测、长窗故障分析、连续定向音频</text>
+</svg>

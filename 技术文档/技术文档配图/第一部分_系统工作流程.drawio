@@ -1,0 +1,148 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mxGraphModel pageWidth="1800" pageHeight="1250" page="1" grid="0" background="#ffffff" adaptiveColors="auto">
+  <root>
+    <mxCell id="0" />
+    <mxCell id="1" parent="0" />
+    <mxCell id="title" value="&lt;b&gt;九麦声学故障定位与诊断系统工作流程&lt;/b&gt;" style="html=1;fontFamily=Microsoft YaHei;fontColor=#172b4d;whiteSpace=wrap;text;align=left;fontSize=32;strokeColor=none;fillColor=none;" vertex="1" parent="1">
+      <mxGeometry y="20" width="1700" as="geometry" height="55" x="40" />
+    </mxCell>
+    <mxCell id="subtitle" value="读图顺序：先看统一采集，再从左向右看三条并行通路；诊断通过复核后，才更新拾音方向。" style="html=1;fontFamily=Microsoft YaHei;fontColor=#172b4d;whiteSpace=wrap;text;align=left;fontSize=20;strokeColor=none;fillColor=none;" vertex="1" parent="1">
+      <mxGeometry y="80" width="1700" as="geometry" height="35" x="40" />
+    </mxCell>
+    <mxCell id="array" value="&lt;b style='font-size:23px'&gt;九麦阵列&lt;/b&gt;&lt;br&gt;&lt;font style='font-size:17px'&gt;外围八麦＋中心一麦&lt;/font&gt;" style="html=1;fontFamily=Microsoft YaHei;fontColor=#172b4d;whiteSpace=wrap;rounded=1;fillColor=#f1f5f9;strokeColor=#94a3b8;strokeWidth=1.6;spacing=12;" vertex="1" parent="1">
+      <mxGeometry y="140" width="250" as="geometry" height="90" x="60" />
+    </mxCell>
+    <mxCell id="acquire" value="&lt;b style='font-size:23px'&gt;统一同步采集&lt;/b&gt;&lt;br&gt;&lt;font style='font-size:17px'&gt;PDM抽取、去直流与增益校正&lt;/font&gt;" style="html=1;fontFamily=Microsoft YaHei;fontColor=#172b4d;whiteSpace=wrap;rounded=1;fillColor=#eaf2ff;strokeColor=#7298c9;strokeWidth=1.6;spacing=12;" vertex="1" parent="1">
+      <mxGeometry y="140" width="360" as="geometry" height="90" x="440" />
+    </mxCell>
+    <mxCell id="shared" value="&lt;b style='font-size:23px'&gt;九路同步PCM&lt;/b&gt;&lt;br&gt;&lt;font style='font-size:17px'&gt;以下三条通路使用同一组采样数据，持续并行&lt;/font&gt;" style="html=1;fontFamily=Microsoft YaHei;fontColor=#172b4d;whiteSpace=wrap;rounded=1;fillColor=#f1f5f9;strokeColor=#94a3b8;strokeWidth=1.6;spacing=12;" vertex="1" parent="1">
+      <mxGeometry y="140" width="760" as="geometry" height="90" x="930" />
+    </mxCell>
+    <mxCell id="input" source="array" value="" edge="1" parent="1" target="acquire" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=block;endFill=1;strokeWidth=1.8;fontSize=13;fontFamily=Microsoft YaHei;fontColor=#475569;labelBackgroundColor=#ffffff;defaultLabelBackgroundColor=page;spacing=5;strokeColor=#475569;">
+      <mxGeometry relative="1" as="geometry" />
+    </mxCell>
+    <mxCell id="sharedinput" source="acquire" value="" edge="1" parent="1" target="shared" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=block;endFill=1;strokeWidth=1.8;fontSize=13;fontFamily=Microsoft YaHei;fontColor=#475569;labelBackgroundColor=#ffffff;defaultLabelBackgroundColor=page;spacing=5;strokeColor=#475569;">
+      <mxGeometry relative="1" as="geometry" />
+    </mxCell>
+    <mxCell id="fast" value="" style="html=1;fontFamily=Microsoft YaHei;fontColor=#172b4d;whiteSpace=wrap;rounded=1;fillColor=#f8fafc;strokeColor=#dce5ef;" vertex="1" parent="1">
+      <mxGeometry y="280" width="1700" as="geometry" height="200" x="35" />
+    </mxCell>
+    <mxCell id="fasttitle" value="&lt;b&gt;①  找方向：声音从哪里来？&lt;/b&gt;" style="html=1;fontFamily=Microsoft YaHei;fontColor=#172b4d;whiteSpace=wrap;text;align=left;fontSize=22;strokeColor=none;fillColor=none;" vertex="1" parent="1">
+      <mxGeometry y="290" width="1500" as="geometry" height="35" x="55" />
+    </mxCell>
+    <mxCell id="diagnosis" value="" style="html=1;fontFamily=Microsoft YaHei;fontColor=#172b4d;whiteSpace=wrap;rounded=1;fillColor=#f8fafc;strokeColor=#dce5ef;" vertex="1" parent="1">
+      <mxGeometry y="510" width="1700" as="geometry" height="200" x="35" />
+    </mxCell>
+    <mxCell id="diagnosistitle" value="&lt;b&gt;②  做诊断：目标声音有什么故障特征？&lt;/b&gt;" style="html=1;fontFamily=Microsoft YaHei;fontColor=#172b4d;whiteSpace=wrap;text;align=left;fontSize=22;strokeColor=none;fillColor=none;" vertex="1" parent="1">
+      <mxGeometry y="520" width="1500" as="geometry" height="35" x="55" />
+    </mxCell>
+    <mxCell id="listen" value="" style="html=1;fontFamily=Microsoft YaHei;fontColor=#172b4d;whiteSpace=wrap;rounded=1;fillColor=#f8fafc;strokeColor=#dce5ef;" vertex="1" parent="1">
+      <mxGeometry y="950" width="1700" as="geometry" height="210" x="35" />
+    </mxCell>
+    <mxCell id="listentitle" value="&lt;b&gt;③  定向拾音：持续听取选定方向的声音&lt;/b&gt;" style="html=1;fontFamily=Microsoft YaHei;fontColor=#172b4d;whiteSpace=wrap;text;align=left;fontSize=22;strokeColor=none;fillColor=none;" vertex="1" parent="1">
+      <mxGeometry y="960" width="1500" as="geometry" height="35" x="55" />
+    </mxCell>
+    <mxCell id="pcmfast" value="&lt;b style='font-size:23px'&gt;九路同步PCM&lt;/b&gt;&lt;br&gt;&lt;font style='font-size:17px'&gt;来自统一采集&lt;/font&gt;" style="html=1;fontFamily=Microsoft YaHei;fontColor=#172b4d;whiteSpace=wrap;rounded=1;fillColor=#f1f5f9;strokeColor=#94a3b8;strokeWidth=1.6;spacing=12;" vertex="1" parent="1">
+      <mxGeometry y="345" width="210" as="geometry" height="110" x="60" />
+    </mxCell>
+    <mxCell id="discover" value="&lt;b style='font-size:23px'&gt;发现声源方向&lt;/b&gt;&lt;br&gt;&lt;font style='font-size:17px'&gt;PL：快速定位&lt;br&gt;CPU1：历史窗多频带搜索&lt;/font&gt;" style="html=1;fontFamily=Microsoft YaHei;fontColor=#172b4d;whiteSpace=wrap;rounded=1;fillColor=#eef0fc;strokeColor=#919cce;strokeWidth=1.6;spacing=12;" vertex="1" parent="1">
+      <mxGeometry y="345" width="290" as="geometry" height="110" x="350" />
+    </mxCell>
+    <mxCell id="track" value="&lt;b style='font-size:23px'&gt;管理候选与轨迹&lt;/b&gt;&lt;br&gt;&lt;font style='font-size:17px'&gt;CPU0：融合方向候选&lt;br&gt;形成同窗分析任务&lt;/font&gt;" style="html=1;fontFamily=Microsoft YaHei;fontColor=#172b4d;whiteSpace=wrap;rounded=1;fillColor=#fff4e5;strokeColor=#d6a35c;strokeWidth=1.6;spacing=12;" vertex="1" parent="1">
+      <mxGeometry y="345" width="290" as="geometry" height="110" x="750" />
+    </mxCell>
+    <mxCell id="fastnote" value="方向只是候选，&lt;br&gt;还不能据此认定故障。" style="html=1;fontFamily=Microsoft YaHei;fontColor=#172b4d;whiteSpace=wrap;text;align=left;fontSize=21;strokeColor=none;fillColor=none;" vertex="1" parent="1">
+      <mxGeometry y="365" width="510" as="geometry" height="65" x="1150" />
+    </mxCell>
+    <mxCell id="f1" source="pcmfast" value="" edge="1" parent="1" target="discover" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=block;endFill=1;strokeWidth=1.8;fontSize=13;fontFamily=Microsoft YaHei;fontColor=#475569;labelBackgroundColor=#ffffff;defaultLabelBackgroundColor=page;spacing=5;strokeColor=#475569;">
+      <mxGeometry relative="1" as="geometry" />
+    </mxCell>
+    <mxCell id="f2" source="discover" value="" edge="1" parent="1" target="track" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=block;endFill=1;strokeWidth=1.8;fontSize=13;fontFamily=Microsoft YaHei;fontColor=#475569;labelBackgroundColor=#ffffff;defaultLabelBackgroundColor=page;spacing=5;strokeColor=#475569;">
+      <mxGeometry relative="1" as="geometry" />
+    </mxCell>
+    <mxCell id="pcmdiag" value="&lt;b style='font-size:23px'&gt;九路同步PCM&lt;/b&gt;&lt;br&gt;&lt;font style='font-size:17px'&gt;来自统一采集&lt;/font&gt;" style="html=1;fontFamily=Microsoft YaHei;fontColor=#172b4d;whiteSpace=wrap;rounded=1;fillColor=#f1f5f9;strokeColor=#94a3b8;strokeWidth=1.6;spacing=12;" vertex="1" parent="1">
+      <mxGeometry y="575" width="210" as="geometry" height="110" x="60" />
+    </mxCell>
+    <mxCell id="history" value="&lt;b style='font-size:23px'&gt;接收与历史缓存&lt;/b&gt;&lt;br&gt;&lt;font style='font-size:17px'&gt;CPU0：非阻塞DMA接收&lt;br&gt;按真实采样窗提供九路数据&lt;/font&gt;" style="html=1;fontFamily=Microsoft YaHei;fontColor=#172b4d;whiteSpace=wrap;rounded=1;fillColor=#fff4e5;strokeColor=#d6a35c;strokeWidth=1.6;spacing=12;" vertex="1" parent="1">
+      <mxGeometry y="575" width="290" as="geometry" height="110" x="350" />
+    </mxCell>
+    <mxCell id="separate" value="&lt;b style='font-size:23px'&gt;分离目标声音&lt;/b&gt;&lt;br&gt;&lt;font style='font-size:17px'&gt;CPU1：同窗候选保真分离&lt;br&gt;保护目标，抑制其他方向&lt;/font&gt;" style="html=1;fontFamily=Microsoft YaHei;fontColor=#172b4d;whiteSpace=wrap;rounded=1;fillColor=#e8f6f1;strokeColor=#67ac9a;strokeWidth=1.6;spacing=12;" vertex="1" parent="1">
+      <mxGeometry y="575" width="290" as="geometry" height="110" x="750" />
+    </mxCell>
+    <mxCell id="diagnose" value="&lt;b style='font-size:23px'&gt;提取故障特征&lt;/b&gt;&lt;br&gt;&lt;font style='font-size:17px'&gt;CPU1：包络与机械阶次分析&lt;br&gt;对照正常基线，保留未知&lt;/font&gt;" style="html=1;fontFamily=Microsoft YaHei;fontColor=#172b4d;whiteSpace=wrap;rounded=1;fillColor=#e8f6f1;strokeColor=#67ac9a;strokeWidth=1.6;spacing=12;" vertex="1" parent="1">
+      <mxGeometry y="575" width="290" as="geometry" height="110" x="1110" />
+    </mxCell>
+    <mxCell id="review" value="&lt;b style='font-size:23px'&gt;复核诊断结果&lt;/b&gt;&lt;br&gt;&lt;font style='font-size:17px'&gt;CPU0：检查时效、轨迹与模型&lt;br&gt;选择唯一可信故障目标&lt;/font&gt;" style="html=1;fontFamily=Microsoft YaHei;fontColor=#172b4d;whiteSpace=wrap;rounded=1;fillColor=#fff4e5;strokeColor=#d6a35c;strokeWidth=1.6;spacing=12;" vertex="1" parent="1">
+      <mxGeometry y="575" width="250" as="geometry" height="110" x="1460" />
+    </mxCell>
+    <mxCell id="d1" source="pcmdiag" value="" edge="1" parent="1" target="history" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=block;endFill=1;strokeWidth=1.8;fontSize=13;fontFamily=Microsoft YaHei;fontColor=#475569;labelBackgroundColor=#ffffff;defaultLabelBackgroundColor=page;spacing=5;strokeColor=#475569;">
+      <mxGeometry relative="1" as="geometry" />
+    </mxCell>
+    <mxCell id="d2" source="history" value="" edge="1" parent="1" target="separate" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=block;endFill=1;strokeWidth=1.8;fontSize=13;fontFamily=Microsoft YaHei;fontColor=#475569;labelBackgroundColor=#ffffff;defaultLabelBackgroundColor=page;spacing=5;strokeColor=#475569;">
+      <mxGeometry relative="1" as="geometry" />
+    </mxCell>
+    <mxCell id="d3" source="separate" value="" edge="1" parent="1" target="diagnose" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=block;endFill=1;strokeWidth=1.8;fontSize=13;fontFamily=Microsoft YaHei;fontColor=#475569;labelBackgroundColor=#ffffff;defaultLabelBackgroundColor=page;spacing=5;strokeColor=#475569;">
+      <mxGeometry relative="1" as="geometry" />
+    </mxCell>
+    <mxCell id="d4" source="diagnose" value="" edge="1" parent="1" target="review" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=block;endFill=1;strokeWidth=1.8;fontSize=13;fontFamily=Microsoft YaHei;fontColor=#475569;labelBackgroundColor=#ffffff;defaultLabelBackgroundColor=page;spacing=5;strokeColor=#475569;">
+      <mxGeometry relative="1" as="geometry" />
+    </mxCell>
+    <mxCell id="candidate" source="track" value="候选方向＋同窗任务" edge="1" parent="1" target="separate" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=block;endFill=1;strokeWidth=1.8;fontSize=13;fontFamily=Microsoft YaHei;fontColor=#475569;labelBackgroundColor=#ffffff;defaultLabelBackgroundColor=page;spacing=5;strokeColor=#475569;">
+      <mxGeometry relative="1" as="geometry">
+        <mxPoint x="110" y="-17" as="offset" />
+      </mxGeometry>
+    </mxCell>
+    <mxCell id="steering" value="&lt;b style='font-size:23px'&gt;统一更新拾音方向&lt;/b&gt;&lt;br&gt;&lt;font style='font-size:17px'&gt;PL：九路延迟向量一次提交&lt;br&gt;只接受复核通过的可信目标&lt;/font&gt;" style="html=1;fontFamily=Microsoft YaHei;fontColor=#172b4d;whiteSpace=wrap;rounded=1;fillColor=#eaf2ff;strokeColor=#7298c9;strokeWidth=1.6;spacing=12;" vertex="1" parent="1">
+      <mxGeometry y="800" width="290" as="geometry" height="110" x="750" />
+    </mxCell>
+    <mxCell id="display" value="&lt;b style='font-size:23px'&gt;界面显示与归档&lt;/b&gt;&lt;br&gt;&lt;font style='font-size:17px'&gt;方向、音频谱、诊断与告警&lt;br&gt;证据不足时显示未知&lt;/font&gt;" style="html=1;fontFamily=Microsoft YaHei;fontColor=#172b4d;whiteSpace=wrap;rounded=1;fillColor=#f1f5f9;strokeColor=#94a3b8;strokeWidth=1.6;spacing=12;" vertex="1" parent="1">
+      <mxGeometry y="800" width="250" as="geometry" height="110" x="1460" />
+    </mxCell>
+    <mxCell id="show" source="review" value="诊断与状态" edge="1" parent="1" target="display" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=block;endFill=1;strokeWidth=1.8;fontSize=13;fontFamily=Microsoft YaHei;fontColor=#475569;labelBackgroundColor=#ffffff;defaultLabelBackgroundColor=page;spacing=5;strokeColor=#475569;">
+      <mxGeometry relative="1" as="geometry" />
+    </mxCell>
+    <mxCell id="trusted" source="review" value="复核通过：提交可信目标" edge="1" parent="1" target="steering" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=block;endFill=1;strokeWidth=1.8;fontSize=13;fontFamily=Microsoft YaHei;fontColor=#475569;labelBackgroundColor=#ffffff;defaultLabelBackgroundColor=page;spacing=5;strokeColor=#b45309;dashed=1;dashPattern=8 5;exitX=0;exitY=0.75;entryX=1;entryY=0.5;exitPerimeter=0;entryPerimeter=0;">
+      <mxGeometry relative="1" as="geometry">
+        <Array as="points">
+          <mxPoint x="1430" y="657.5" />
+          <mxPoint x="1430" y="855" />
+        </Array>
+      </mxGeometry>
+    </mxCell>
+    <mxCell id="pcmaudio" value="&lt;b style='font-size:23px'&gt;九路同步PCM&lt;/b&gt;&lt;br&gt;&lt;font style='font-size:17px'&gt;来自统一采集&lt;/font&gt;" style="html=1;fontFamily=Microsoft YaHei;fontColor=#172b4d;whiteSpace=wrap;rounded=1;fillColor=#f1f5f9;strokeColor=#94a3b8;strokeWidth=1.6;spacing=12;" vertex="1" parent="1">
+      <mxGeometry y="1020" width="210" as="geometry" height="110" x="60" />
+    </mxCell>
+    <mxCell id="das" value="&lt;b style='font-size:23px'&gt;持续定向拾音&lt;/b&gt;&lt;br&gt;&lt;font style='font-size:17px'&gt;PL：连续DAS / FIR&lt;br&gt;逐样点处理，不等待诊断&lt;/font&gt;" style="html=1;fontFamily=Microsoft YaHei;fontColor=#172b4d;whiteSpace=wrap;rounded=1;fillColor=#eaf2ff;strokeColor=#7298c9;strokeWidth=1.6;spacing=12;" vertex="1" parent="1">
+      <mxGeometry y="1020" width="290" as="geometry" height="110" x="350" />
+    </mxCell>
+    <mxCell id="gsc" value="&lt;b style='font-size:23px'&gt;可选干扰抵消&lt;/b&gt;&lt;br&gt;&lt;font style='font-size:17px'&gt;CPU0：连续GSC&lt;br&gt;九路缓存参考、泄漏保护与回退&lt;/font&gt;" style="html=1;fontFamily=Microsoft YaHei;fontColor=#172b4d;whiteSpace=wrap;rounded=1;fillColor=#fff4e5;strokeColor=#d6a35c;strokeWidth=1.6;spacing=12;" vertex="1" parent="1">
+      <mxGeometry y="1020" width="290" as="geometry" height="110" x="750" />
+    </mxCell>
+    <mxCell id="audio" value="&lt;b style='font-size:23px'&gt;定向音频输出&lt;/b&gt;&lt;br&gt;&lt;font style='font-size:17px'&gt;目标方向拾音、试听与记录&lt;/font&gt;" style="html=1;fontFamily=Microsoft YaHei;fontColor=#172b4d;whiteSpace=wrap;rounded=1;fillColor=#f1f5f9;strokeColor=#94a3b8;strokeWidth=1.6;spacing=12;" vertex="1" parent="1">
+      <mxGeometry y="1020" width="290" as="geometry" height="110" x="1110" />
+    </mxCell>
+    <mxCell id="a1" source="pcmaudio" value="" edge="1" parent="1" target="das" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=block;endFill=1;strokeWidth=1.8;fontSize=13;fontFamily=Microsoft YaHei;fontColor=#475569;labelBackgroundColor=#ffffff;defaultLabelBackgroundColor=page;spacing=5;strokeColor=#475569;">
+      <mxGeometry relative="1" as="geometry" />
+    </mxCell>
+    <mxCell id="a2" source="das" value="" edge="1" parent="1" target="gsc" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=block;endFill=1;strokeWidth=1.8;fontSize=13;fontFamily=Microsoft YaHei;fontColor=#475569;labelBackgroundColor=#ffffff;defaultLabelBackgroundColor=page;spacing=5;strokeColor=#475569;">
+      <mxGeometry relative="1" as="geometry" />
+    </mxCell>
+    <mxCell id="a3" source="gsc" value="" edge="1" parent="1" target="audio" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=block;endFill=1;strokeWidth=1.8;fontSize=13;fontFamily=Microsoft YaHei;fontColor=#475569;labelBackgroundColor=#ffffff;defaultLabelBackgroundColor=page;spacing=5;strokeColor=#475569;">
+      <mxGeometry relative="1" as="geometry" />
+    </mxCell>
+    <mxCell id="steer" source="steering" value="更新延迟参数" edge="1" parent="1" target="das" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=block;endFill=1;strokeWidth=1.8;fontSize=13;fontFamily=Microsoft YaHei;fontColor=#475569;labelBackgroundColor=#ffffff;defaultLabelBackgroundColor=page;spacing=5;strokeColor=#b45309;dashed=1;dashPattern=8 5;exitX=0;exitY=0.5;entryX=0.5;entryY=0;exitPerimeter=0;entryPerimeter=0;">
+      <mxGeometry relative="1" as="geometry">
+        <Array as="points">
+          <mxPoint x="495" y="855" />
+          <mxPoint x="495" y="980" />
+        </Array>
+      </mxGeometry>
+    </mxCell>
+    <mxCell id="note" value="实线箭头：声音数据、候选任务与结果　　橙色虚线：复核通过后的拾音控制" style="html=1;fontFamily=Microsoft YaHei;fontColor=#172b4d;whiteSpace=wrap;text;align=left;fontSize=18;strokeColor=none;fillColor=none;" vertex="1" parent="1">
+      <mxGeometry y="1180" width="1680" as="geometry" height="30" x="55" />
+    </mxCell>
+    <mxCell id="detail" value="功能流程说明：声源发现合并展示PL快速定位与CPU1历史窗搜索；历史缓存同时为多频带搜索和可选GSC提供数据。" style="html=1;fontFamily=Microsoft YaHei;fontColor=#172b4d;whiteSpace=wrap;text;align=left;fontSize=17;strokeColor=none;fillColor=none;" vertex="1" parent="1">
+      <mxGeometry y="1215" width="1680" as="geometry" height="30" x="55" />
+    </mxCell>
+  </root>
+</mxGraphModel>

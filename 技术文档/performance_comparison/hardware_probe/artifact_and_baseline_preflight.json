@@ -1,0 +1,79 @@
+{
+  "observed_utc": "2026-10-28T05:12:33.912544+00:00",
+  "workspace_matching_nine_mic_release_present": false,
+  "current_program_entry": "profiles/full_gui9/program_latest.ps1 -> build/gui_offline_ready_20261027/program.ps1 (missing)",
+  "artifacts": [
+    {
+      "path": "D:\\Vitis\\PS-PL\\hw\\ps_pl_wrapper.bit",
+      "bytes": 4045673,
+      "sha256": "e4413751362ce0870d028f6212746eae3d0cd034641cf5ae8339af97ddc897a3",
+      "last_modified_utc": "2026-10-03T17:59:37.883462+00:00"
+    },
+    {
+      "path": "D:\\Vitis\\PS-PL\\hw\\ps_pl_wrapper.xsa",
+      "bytes": 802522,
+      "sha256": "983a0c29c457ad246ad328ae933ccbcf9e8c7541276001c8a2c3be7001e195bc",
+      "last_modified_utc": "2026-10-03T17:59:10.617795+00:00",
+      "embedded_bitfiles": [
+        {
+          "name": "ps_pl_wrapper.bit",
+          "sha256": "e4413751362ce0870d028f6212746eae3d0cd034641cf5ae8339af97ddc897a3"
+        }
+      ]
+    },
+    {
+      "path": "D:\\Vitis\\PS-PL\\hw\\ps7_init.tcl",
+      "bytes": 26573,
+      "sha256": "2974229fc9054b9984e4d7291671c099076492181e4824c2223e9a23a2083963",
+      "last_modified_utc": "2026-10-04T10:56:38.734355+00:00"
+    },
+    {
+      "path": "D:\\Vitis\\rv32_app\\Debug\\rv32_app.elf",
+      "bytes": 214588,
+      "sha256": "1a7383ba81e16b85c677608f05e9c00b04c64fbea74fb9580c19b1347ca15d3d",
+      "last_modified_utc": "2026-10-03T18:00:39.178725+00:00",
+      "ELF_class": 1,
+      "ELF_machine": 40
+    },
+    {
+      "path": "C:\\Users\\lenovo\\Desktop\\FPGA_PDM\\FPGA\\xyf_workbench\\zynq_-pl_-simd_-verilog\\sw\\fw\\fw.elf",
+      "bytes": 16944,
+      "sha256": "254a9c449c0c438592ff512ec43b75ea45e3a50fac06aeaf4d17dae692f54f17",
+      "last_modified_utc": "2026-10-24T07:44:56.118977+00:00",
+      "ELF_class": 1,
+      "ELF_machine": 243
+    },
+    {
+      "path": "C:\\Users\\lenovo\\Desktop\\FPGA_PDM\\FPGA\\xyf_workbench\\zynq_-pl_-simd_-verilog\\sw\\fw\\fw_live.elf",
+      "bytes": 16052,
+      "sha256": "062e107158c69fde32d316d384ee38515f949c3ce4a44aca1a30651b13f4d171",
+      "last_modified_utc": "2026-10-24T07:44:56.127827+00:00",
+      "ELF_class": 1,
+      "ELF_machine": 243
+    }
+  ],
+  "legacy_compile_prerequisites_present": true,
+  "compile_performed_in_this_probe": false,
+  "legacy_workload": {
+    "source": "sw/fw/fw_main.c",
+    "srp_pairs": 4,
+    "srp_grid": "16x16=256",
+    "DAS_channels": 8,
+    "geometry": "legacy plane coordinates",
+    "scalar_switch": "FW_ACCEL=0",
+    "accelerated_switch": "FW_ACCEL=1; FFT/IFFT and FIR",
+    "PS_ONLY": "same fw_main included, FW_ACCEL=0; steering step stubbed/omitted"
+  },
+  "nine_mic_adaptation": {
+    "production_source": "sw/fw/fw_planar8.c with FW_ARRAY_CHANNELS=9",
+    "production_custom_compute_dispatch_unconditional": true,
+    "FW_ACCEL_zero_not_a_nine_mic_scalar_baseline": true,
+    "needed": [
+      "Freeze nine-channel input,36 pairs,1024 direction LUT,band and fixed-point rules",
+      "Provide shared nine-mic scalar work function for A9 and RV32; legacy4-pair/256-grid benchmark is insufficient",
+      "Match sample loading/readback and omitted steering scope on every path",
+      "Add complete output checks and common timing anchors; report A9 calibrated cycles and PL clocks separately"
+    ],
+    "assessment": "Requires a common nine-mic benchmark entry and memory/transport adaptation, not only setting channel count or FW_ACCEL."
+  }
+}
