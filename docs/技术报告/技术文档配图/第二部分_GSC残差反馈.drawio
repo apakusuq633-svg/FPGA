@@ -1,0 +1,81 @@
+<mxGraphModel adaptiveColors="auto" page="1" pageWidth="1200" pageHeight="1160" grid="1" gridSize="10">
+  <root>
+    <mxCell id="0" />
+    <mxCell id="1" parent="0" />
+    <mxCell id="title" value="固定目标GSC残差反馈与保护回退" style="text;html=1;whiteSpace=wrap;align=left;verticalAlign=middle;fontFamily=Microsoft YaHei;fontSize=32;fontColor=#20384e;strokeColor=none;fillColor=none;fontStyle=1;" vertex="1" parent="1">
+      <mxGeometry x="50" y="24" width="1100" height="48" as="geometry" />
+    </mxCell>
+    <mxCell id="subtitle" value="手动目标，19531.25 Hz音频；PS自建DAS，不接入正式故障诊断。" style="text;html=1;whiteSpace=wrap;align=left;verticalAlign=middle;fontFamily=Microsoft YaHei;fontSize=21;fontColor=#62788c;strokeColor=none;fillColor=none;" vertex="1" parent="1">
+      <mxGeometry x="50" y="78" width="1100" height="38" as="geometry" />
+    </mxCell>
+    <mxCell id="branch_main" edge="1" source="align" target="main" parent="1" style="edgeStyle=orthogonalEdgeStyle;html=1;rounded=1;arcSize=12;strokeWidth=1.8;strokeColor=#62788c;endArrow=block;endSize=7;endFill=1;exitX=0.5;exitY=1.0;entryX=0.5;entryY=0.0;exitPerimeter=0;entryPerimeter=0;">
+      <mxGeometry relative="1" as="geometry">
+        <Array as="points">
+          <mxPoint x="600.0" y="325.0" />
+          <mxPoint x="300.0" y="325.0" />
+        </Array>
+      </mxGeometry>
+    </mxCell>
+    <mxCell id="branch_ref" edge="1" source="align" target="reference" parent="1" style="edgeStyle=orthogonalEdgeStyle;html=1;rounded=1;arcSize=12;strokeWidth=1.8;strokeColor=#62788c;endArrow=block;endSize=7;endFill=1;exitX=0.5;exitY=1.0;entryX=0.5;entryY=0.0;exitPerimeter=0;entryPerimeter=0;">
+      <mxGeometry relative="1" as="geometry">
+        <Array as="points">
+          <mxPoint x="600.0" y="325.0" />
+          <mxPoint x="900.0" y="325.0" />
+        </Array>
+      </mxGeometry>
+    </mxCell>
+    <mxCell id="main_residual" edge="1" source="main" target="residual" parent="1" style="edgeStyle=orthogonalEdgeStyle;html=1;rounded=1;arcSize=12;strokeWidth=1.8;strokeColor=#62788c;endArrow=block;endSize=7;endFill=1;exitX=0.5;exitY=1.0;entryX=0.5;entryY=0.0;exitPerimeter=0;entryPerimeter=0;">
+      <mxGeometry relative="1" as="geometry" />
+    </mxCell>
+    <mxCell id="reference_adaptive" edge="1" source="reference" target="adaptive" parent="1" style="edgeStyle=orthogonalEdgeStyle;html=1;rounded=1;arcSize=12;strokeWidth=1.8;strokeColor=#62788c;endArrow=block;endSize=7;endFill=1;exitX=0.5;exitY=1.0;entryX=0.5;entryY=0.0;exitPerimeter=0;entryPerimeter=0;">
+      <mxGeometry relative="1" as="geometry" />
+    </mxCell>
+    <mxCell id="estimate" edge="1" source="adaptive" target="residual" parent="1" style="edgeStyle=orthogonalEdgeStyle;html=1;rounded=1;arcSize=12;strokeWidth=1.8;strokeColor=#62788c;endArrow=block;endSize=7;endFill=1;exitX=0.0;exitY=0.3333333333333333;entryX=1.0;entryY=0.26666666666666666;exitPerimeter=0;entryPerimeter=0;">
+      <mxGeometry relative="1" as="geometry" />
+    </mxCell>
+    <mxCell id="feedback" edge="1" source="residual" target="adaptive" parent="1" style="edgeStyle=orthogonalEdgeStyle;html=1;rounded=1;arcSize=12;strokeWidth=1.8;strokeColor=#bb772d;endArrow=block;endSize=7;endFill=1;exitX=1.0;exitY=0.8;entryX=0.0;entryY=0.7142857142857143;exitPerimeter=0;entryPerimeter=0;dashed=1;dashPattern=5 4;">
+      <mxGeometry relative="1" as="geometry" />
+    </mxCell>
+    <mxCell id="output" edge="1" source="residual" target="select" parent="1" style="edgeStyle=orthogonalEdgeStyle;html=1;rounded=1;arcSize=12;strokeWidth=1.8;strokeColor=#62788c;endArrow=block;endSize=7;endFill=1;exitX=0.5;exitY=1.0;entryX=0.06285714285714286;entryY=0.0;exitPerimeter=0;entryPerimeter=0;">
+      <mxGeometry relative="1" as="geometry" />
+    </mxCell>
+    <mxCell id="fallback" edge="1" source="main" target="select" parent="1" style="edgeStyle=orthogonalEdgeStyle;html=1;rounded=1;arcSize=12;strokeWidth=1.8;strokeColor=#62788c;endArrow=block;endSize=7;endFill=1;exitX=0.0;exitY=0.5;entryX=0.0;entryY=0.5;exitPerimeter=0;entryPerimeter=0;">
+      <mxGeometry relative="1" as="geometry">
+        <Array as="points">
+          <mxPoint x="40.0" y="445.0" />
+          <mxPoint x="40.0" y="1005.0" />
+        </Array>
+      </mxGeometry>
+    </mxCell>
+    <mxCell id="align" value="&lt;b style=&quot;font-size:26.0px&quot;&gt;音频抽取与目标补偿&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size:22px&quot;&gt;九路127抽头低通 / 8；按手动方向补偿&lt;/font&gt;" style="rounded=1;arcSize=12;html=1;whiteSpace=wrap;fontFamily=Microsoft YaHei;fontColor=#20384e;fontSize=22;spacing=10;fillColor=#fff5e7;strokeColor=#cda56e;strokeWidth=1.5;" vertex="1" parent="1">
+      <mxGeometry x="380.0" y="165.0" width="440.0" height="100.0" as="geometry" />
+    </mxCell>
+    <mxCell id="main" value="&lt;b style=&quot;font-size:26.0px&quot;&gt;PS等权DAS主支路&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size:22px&quot;&gt;单位脉冲FIR；不作PL逐样匹配&lt;/font&gt;" style="rounded=1;arcSize=12;html=1;whiteSpace=wrap;fontFamily=Microsoft YaHei;fontColor=#20384e;fontSize=22;spacing=10;fillColor=#fff5e7;strokeColor=#cda56e;strokeWidth=1.5;" vertex="1" parent="1">
+      <mxGeometry x="80.0" y="390.0" width="440.0" height="110.0" as="geometry" />
+    </mxCell>
+    <mxCell id="reference" value="&lt;b style=&quot;font-size:26.0px&quot;&gt;八路阻塞参考&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size:22px&quot;&gt;外围麦减中心麦&lt;br&gt;调理后形成32维参考&lt;/font&gt;" style="rounded=1;arcSize=12;html=1;whiteSpace=wrap;fontFamily=Microsoft YaHei;fontColor=#20384e;fontSize=22;spacing=10;fillColor=#fff5e7;strokeColor=#cda56e;strokeWidth=1.5;" vertex="1" parent="1">
+      <mxGeometry x="680.0" y="380.0" width="440.0" height="130.0" as="geometry" />
+    </mxCell>
+    <mxCell id="residual" value="&lt;b style=&quot;font-size:26.0px&quot;&gt;计算输出残差&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size:22px&quot;&gt;主支路减去干扰估计&lt;br&gt;e = d − 干扰估计&lt;/font&gt;" style="rounded=1;arcSize=12;html=1;whiteSpace=wrap;fontFamily=Microsoft YaHei;fontColor=#20384e;fontSize=22;spacing=10;fillColor=#fff5e7;strokeColor=#cda56e;strokeWidth=1.5;" vertex="1" parent="1">
+      <mxGeometry x="80.0" y="655.0" width="440.0" height="150.0" as="geometry" />
+    </mxCell>
+    <mxCell id="adaptive" value="&lt;b style=&quot;font-size:26.0px&quot;&gt;干扰估计与权值更新&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size:22px&quot;&gt;32维NLMS：估计干扰与更新权值&lt;br&gt;每4个音频点更新一次&lt;br&gt;即每32个原始PCM点&lt;/font&gt;" style="rounded=1;arcSize=12;html=1;whiteSpace=wrap;fontFamily=Microsoft YaHei;fontColor=#20384e;fontSize=22;spacing=10;fillColor=#fff5e7;strokeColor=#cda56e;strokeWidth=1.5;" vertex="1" parent="1">
+      <mxGeometry x="680.0" y="625.0" width="440.0" height="210.0" as="geometry" />
+    </mxCell>
+    <mxCell id="select" value="&lt;b style=&quot;font-size:26.0px&quot;&gt;输出选择与保护&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size:22px&quot;&gt;正常时输出残差；保护活动时回退PS DAS&lt;/font&gt;" style="rounded=1;arcSize=12;html=1;whiteSpace=wrap;fontFamily=Microsoft YaHei;fontColor=#20384e;fontSize=22;spacing=10;fillColor=#fff5e7;strokeColor=#cda56e;strokeWidth=1.5;" vertex="1" parent="1">
+      <mxGeometry x="245.0" y="955.0" width="875.0" height="100.0" as="geometry" />
+    </mxCell>
+    <mxCell id="estimate_label" value="干扰估计" style="text;html=1;whiteSpace=wrap;align=center;verticalAlign=middle;fontFamily=Microsoft YaHei;fontSize=21.0;fontColor=#62788c;strokeColor=none;fillColor=#ffffff;" vertex="1" parent="1">
+      <mxGeometry x="530.0" y="652.0" width="140.0" height="33.0" as="geometry" />
+    </mxCell>
+    <mxCell id="feedback_label" value="残差反馈" style="text;html=1;whiteSpace=wrap;align=center;verticalAlign=middle;fontFamily=Microsoft YaHei;fontSize=21.0;fontColor=#bb772d;strokeColor=none;fillColor=#ffffff;" vertex="1" parent="1">
+      <mxGeometry x="530.0" y="783.0" width="140.0" height="33.0" as="geometry" />
+    </mxCell>
+    <mxCell id="fallback_label" value="PS DAS主支路回退" style="text;html=1;whiteSpace=wrap;align=center;verticalAlign=middle;fontFamily=Microsoft YaHei;fontSize=21.0;fontColor=#62788c;strokeColor=none;fillColor=#ffffff;" vertex="1" parent="1">
+      <mxGeometry x="55.0" y="872.0" width="235.0" height="34.0" as="geometry" />
+    </mxCell>
+    <mxCell id="note" value="固定目标音频：冻结仅停止权值更新；保护触发时回退PS DAS。测试记录见第三部分与附录。" style="text;html=1;whiteSpace=wrap;align=left;verticalAlign=middle;fontFamily=Microsoft YaHei;fontSize=20.0;fontColor=#62788c;strokeColor=none;fillColor=none;" vertex="1" parent="1">
+      <mxGeometry x="50.0" y="1095.0" width="1100.0" height="40.0" as="geometry" />
+    </mxCell>
+  </root>
+</mxGraphModel>

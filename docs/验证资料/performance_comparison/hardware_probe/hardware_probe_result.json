@@ -1,0 +1,24 @@
+﻿{
+    "ObservedUTC":  "2026-10-28T05:10:26.0393339Z",
+    "PnPDevices":  [
+
+                   ],
+    "SerialPorts":  [
+
+                    ],
+    "ExistingHardwareProcesses":  [
+
+                                  ],
+    "ProbePort":  3124,
+    "NoReset":  true,
+    "NoProgramming":  true,
+    "NoOpenTarget":  true,
+    "VivadoExitCode":  0,
+    "EnumeratedTargetCount":  0,
+    "TargetNames":  [
+
+                    ],
+    "ReadOnlyMarker":  true,
+    "OwnServerStopped":  true,
+    "CompletedUTC":  "2026-10-28T05:11:18.1715137Z"
+}

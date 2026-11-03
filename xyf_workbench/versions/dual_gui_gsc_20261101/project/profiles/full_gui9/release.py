@@ -3,6 +3,8 @@ from pathlib import Path
 import argparse,hashlib,json,re,shutil,zipfile
 P=Path(__file__).resolve().parent
 R=P.parents[1]
+# Consolidated repository documentation; resolved after clone, without machine paths.
+DOCS = next(parent / 'docs' for parent in Path(__file__).resolve().parents if (parent / 'docs' / '工程设计与接口.md').is_file())
 def sha(p):return hashlib.sha256(p.read_bytes()).hexdigest()
 def main():
  p=argparse.ArgumentParser();p.add_argument('--workspace',type=Path,required=True);a=p.parse_args()
@@ -25,12 +27,27 @@ def main():
  wns,tns,fail,total,whs,ths=summary.groups();assert float(wns)>=0 and float(whs)>=0 and int(fail)==0 and float(tns)==0 and float(ths)==0
  init=a.workspace/'circular9/hw/ps7_init.tcl';assert init.exists()
  out=R/'build/full_gui9_release';out.mkdir(parents=True,exist_ok=True)
- sources={'pl.bit':bit,'ps_ui.elf':ps/'ui.elf','ps7_init.tcl':init,'hardware.xsa':xsa,
- 'timing.rpt':hw/'timing_zynq.rpt','utilization.rpt':hw/'util_zynq.rpt','io.rpt':hw/'io_zynq.rpt',
- 'routed_source_proof.json':hw/'routed_source_proof.json','ps_build_manifest.json':ps/'build_manifest.json',
- 'gui_tests.json':R/'build/gui9_checks/results.json','array.json':R/'configs/circular9_array.json',
- 'firmware_manifest.json':R/'build/circular9/build_manifest.json','program.ps1':P/'program.ps1','program.tcl':P/'program.tcl',
- 'README.md':P/'README.md','jtag_guard.tcl':R/'scripts/jtag_guard.tcl','check_jtag_owner.ps1':R/'scripts/check_jtag_owner.ps1'}
+ sources={
+        'pl.bit': bit,
+        'ps_ui.elf': ps/'ui.elf',
+        'ps7_init.tcl': init,
+        'hardware.xsa': xsa,
+        'timing.rpt': hw/'timing_zynq.rpt',
+        'utilization.rpt': hw/'util_zynq.rpt',
+        'io.rpt': hw/'io_zynq.rpt',
+        'routed_source_proof.json': hw/'routed_source_proof.json',
+        'ps_build_manifest.json': ps/'build_manifest.json',
+        'gui_tests.json': R/'build/gui9_checks/results.json',
+        'array.json': R/'configs/circular9_array.json',
+        'firmware_manifest.json': R/'build/circular9/build_manifest.json',
+        'program.ps1': P/'program.ps1',
+        'program.tcl': P/'program.tcl',
+        'jtag_guard.tcl': R/'scripts/jtag_guard.tcl',
+        'check_jtag_owner.ps1': R/'scripts/check_jtag_owner.ps1',
+        'engineering.md': DOCS / '工程设计与接口.md',
+        'deployment.md': DOCS / '构建部署与操作.md',
+        'verification.md': DOCS / '测试验证与问题记录.md',
+    }
  for name,src in sources.items():shutil.copy2(src,out/name)
  files={name:{'sha256':sha(out/name),'bytes':(out/name).stat().st_size} for name in sources}
  protected={name:digest for name,digest in proof['source_sha256'].items() if name.startswith(('rtl/','constrs/'))}

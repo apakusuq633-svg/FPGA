@@ -1,0 +1,10 @@
+{
+  "passed": true,
+  "scope": "read-only artifact/statistics/numerical check; no performance rerun",
+  "timing_rows": 592,
+  "timing_groups": 12,
+  "artifact_hashes_checked": 55,
+  "production_source_hashes_checked": 15,
+  "division_quotients_checked": 131072,
+  "results_sha256": "ff082906b82f6eab18fa7782b9a2039bcb2956232cd314d0adb9c1ada3ba4be0"
+}

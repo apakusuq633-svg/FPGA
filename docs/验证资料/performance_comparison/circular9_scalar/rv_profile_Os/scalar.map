@@ -1,0 +1,128 @@
+
+Discarded input sections
+
+ .text          0x00000000        0x0 C:\Users\lenovo\Desktop\FPGA_PDM\performance_comparison\circular9_scalar\rv_profile_Os\start.o
+ .data          0x00000000        0x0 C:\Users\lenovo\Desktop\FPGA_PDM\performance_comparison\circular9_scalar\rv_profile_Os\start.o
+ .bss           0x00000000        0x0 C:\Users\lenovo\Desktop\FPGA_PDM\performance_comparison\circular9_scalar\rv_profile_Os\start.o
+ .text          0x00000000        0x0 C:\Users\lenovo\Desktop\FPGA_PDM\performance_comparison\circular9_scalar\rv_profile_Os\rv_main.o
+ .data          0x00000000        0x0 C:\Users\lenovo\Desktop\FPGA_PDM\performance_comparison\circular9_scalar\rv_profile_Os\rv_main.o
+ .bss           0x00000000        0x0 C:\Users\lenovo\Desktop\FPGA_PDM\performance_comparison\circular9_scalar\rv_profile_Os\rv_main.o
+ .comment       0x00000000       0x13 C:\Users\lenovo\Desktop\FPGA_PDM\performance_comparison\circular9_scalar\rv_profile_Os\rv_main.o
+ .text          0x00000000        0x0 C:\Users\lenovo\Desktop\FPGA_PDM\performance_comparison\circular9_scalar\rv_profile_Os\c9_scalar.o
+ .data          0x00000000        0x0 C:\Users\lenovo\Desktop\FPGA_PDM\performance_comparison\circular9_scalar\rv_profile_Os\c9_scalar.o
+ .bss           0x00000000        0x0 C:\Users\lenovo\Desktop\FPGA_PDM\performance_comparison\circular9_scalar\rv_profile_Os\c9_scalar.o
+ .comment       0x00000000       0x13 C:\Users\lenovo\Desktop\FPGA_PDM\performance_comparison\circular9_scalar\rv_profile_Os\c9_scalar.o
+ .text          0x00000000        0x0 C:\Users\lenovo\Desktop\FPGA_PDM\performance_comparison\circular9_scalar\rv_profile_Os\fw_fft.o
+ .data          0x00000000        0x0 C:\Users\lenovo\Desktop\FPGA_PDM\performance_comparison\circular9_scalar\rv_profile_Os\fw_fft.o
+ .bss           0x00000000        0x0 C:\Users\lenovo\Desktop\FPGA_PDM\performance_comparison\circular9_scalar\rv_profile_Os\fw_fft.o
+ .text.fft_init
+                0x00000000        0x4 C:\Users\lenovo\Desktop\FPGA_PDM\performance_comparison\circular9_scalar\rv_profile_Os\fw_fft.o
+ .comment       0x00000000       0x13 C:\Users\lenovo\Desktop\FPGA_PDM\performance_comparison\circular9_scalar\rv_profile_Os\fw_fft.o
+ .text          0x00000000        0x0 C:\Users\lenovo\Desktop\FPGA_PDM\performance_comparison\circular9_scalar\rv_profile_Os\fw_tables.o
+ .data          0x00000000        0x0 C:\Users\lenovo\Desktop\FPGA_PDM\performance_comparison\circular9_scalar\rv_profile_Os\fw_tables.o
+ .bss           0x00000000        0x0 C:\Users\lenovo\Desktop\FPGA_PDM\performance_comparison\circular9_scalar\rv_profile_Os\fw_tables.o
+ .comment       0x00000000       0x13 C:\Users\lenovo\Desktop\FPGA_PDM\performance_comparison\circular9_scalar\rv_profile_Os\fw_tables.o
+
+Memory Configuration
+
+Name             Origin             Length             Attributes
+ITCM             0x00000000         0x00004000         xr
+DTCM             0x00000000         0x00004000         rw
+DLMA             0x10000000         0x00004000         rw
+*default*        0x00000000         0xffffffff
+
+Linker script and memory map
+
+LOAD C:\Users\lenovo\Desktop\FPGA_PDM\performance_comparison\circular9_scalar\rv_profile_Os\start.o
+LOAD C:\Users\lenovo\Desktop\FPGA_PDM\performance_comparison\circular9_scalar\rv_profile_Os\rv_main.o
+LOAD C:\Users\lenovo\Desktop\FPGA_PDM\performance_comparison\circular9_scalar\rv_profile_Os\c9_scalar.o
+LOAD C:\Users\lenovo\Desktop\FPGA_PDM\performance_comparison\circular9_scalar\rv_profile_Os\fw_fft.o
+LOAD C:\Users\lenovo\Desktop\FPGA_PDM\performance_comparison\circular9_scalar\rv_profile_Os\fw_tables.o
+LOAD D:/AMDDesignTools/2025.2/gnu/riscv/nt/bin//../riscv32-xilinx-elf/usr/lib/rv32im/ilp32\libgcc.a
+
+.text           0x00000000      0xd84
+ *(.text.start)
+ .text.start    0x00000000       0x30 C:\Users\lenovo\Desktop\FPGA_PDM\performance_comparison\circular9_scalar\rv_profile_Os\start.o
+                0x00000000                _start
+ *(.text*)
+ .text.startup.main
+                0x00000030      0x154 C:\Users\lenovo\Desktop\FPGA_PDM\performance_comparison\circular9_scalar\rv_profile_Os\rv_main.o
+                0x00000030                main
+ .text.c9s_cycles
+                0x00000184       0x20 C:\Users\lenovo\Desktop\FPGA_PDM\performance_comparison\circular9_scalar\rv_profile_Os\c9_scalar.o
+ .text.asr32    0x000001a4       0x1c C:\Users\lenovo\Desktop\FPGA_PDM\performance_comparison\circular9_scalar\rv_profile_Os\c9_scalar.o
+ .text.c9s_locate
+                0x000001c0      0x6dc C:\Users\lenovo\Desktop\FPGA_PDM\performance_comparison\circular9_scalar\rv_profile_Os\c9_scalar.o
+                0x000001c0                c9s_locate
+ .text.butterflies512.constprop.0
+                0x0000089c      0x194 C:\Users\lenovo\Desktop\FPGA_PDM\performance_comparison\circular9_scalar\rv_profile_Os\fw_fft.o
+ .text.bitrev_swap.constprop.0
+                0x00000a30       0x80 C:\Users\lenovo\Desktop\FPGA_PDM\performance_comparison\circular9_scalar\rv_profile_Os\fw_fft.o
+ .text.fft1024  0x00000ab0      0x198 C:\Users\lenovo\Desktop\FPGA_PDM\performance_comparison\circular9_scalar\rv_profile_Os\fw_fft.o
+                0x00000ab0                fft1024
+ .text.ifft512_real
+                0x00000c48      0x13c C:\Users\lenovo\Desktop\FPGA_PDM\performance_comparison\circular9_scalar\rv_profile_Os\fw_fft.o
+                0x00000c48                ifft512_real
+                0x00000d84                        . = ALIGN (0x4)
+
+.data           0x00000000     0x1028 load address 0x10000000
+ *(.rodata*)
+ .rodata.c9s_hann
+                0x00000000      0x800 C:\Users\lenovo\Desktop\FPGA_PDM\performance_comparison\circular9_scalar\rv_profile_Os\rv_main.o
+ .rodata.reciprocal.0
+                0x00000800       0x20 C:\Users\lenovo\Desktop\FPGA_PDM\performance_comparison\circular9_scalar\rv_profile_Os\c9_scalar.o
+ .rodata.g_tw_im
+                0x00000820      0x402 C:\Users\lenovo\Desktop\FPGA_PDM\performance_comparison\circular9_scalar\rv_profile_Os\fw_tables.o
+                0x00000820                g_tw_im
+ *fill*         0x00000c22        0x2 
+ .rodata.g_tw_re
+                0x00000c24      0x402 C:\Users\lenovo\Desktop\FPGA_PDM\performance_comparison\circular9_scalar\rv_profile_Os\fw_tables.o
+                0x00000c24                g_tw_re
+ *(.srodata*)
+ *(.data*)
+ *(.sdata*)
+                0x00001028                        . = ALIGN (0x4)
+ *fill*         0x00001026        0x2 
+
+.rela.dyn       0x00001028        0x0 load address 0x10001028
+ .rela.text.start
+                0x00001028        0x0 C:\Users\lenovo\Desktop\FPGA_PDM\performance_comparison\circular9_scalar\rv_profile_Os\start.o
+
+.bss            0x00001028     0x2248 load address 0x10001028
+                0x00001028                        _bss_start = .
+ *(.bss*)
+ .bss.workspace
+                0x00001028     0x1a38 C:\Users\lenovo\Desktop\FPGA_PDM\performance_comparison\circular9_scalar\rv_profile_Os\rv_main.o
+ .bss.c9s_phase_cycles
+                0x00002a60       0x10 C:\Users\lenovo\Desktop\FPGA_PDM\performance_comparison\circular9_scalar\rv_profile_Os\c9_scalar.o
+                0x00002a60                c9s_phase_cycles
+ .bss.g_zi      0x00002a70      0x400 C:\Users\lenovo\Desktop\FPGA_PDM\performance_comparison\circular9_scalar\rv_profile_Os\fw_fft.o
+ .bss.g_zr      0x00002e70      0x400 C:\Users\lenovo\Desktop\FPGA_PDM\performance_comparison\circular9_scalar\rv_profile_Os\fw_fft.o
+ *(.sbss*)
+ *(COMMON)
+                0x00003270                        . = ALIGN (0x4)
+                0x00003270                        _bss_end = .
+                0x00000001                        ASSERT ((_bss_end <= 0x3600), scalar work data overlaps results/stack reserve)
+
+.results        0x00003800      0x100
+                0x00003900                        . = (. + 0x100)
+ *fill*         0x00003800      0x100 
+                0x00003ff0                        _stack_top = 0x3ff0
+
+/DISCARD/
+ *(.comment*)
+ *(.eh_frame*)
+OUTPUT(C:\Users\lenovo\Desktop\FPGA_PDM\performance_comparison\circular9_scalar\rv_profile_Os\scalar.elf elf32-littleriscv)
+
+.riscv.attributes
+                0x00000000       0x33
+ .riscv.attributes
+                0x00000000       0x31 C:\Users\lenovo\Desktop\FPGA_PDM\performance_comparison\circular9_scalar\rv_profile_Os\start.o
+ .riscv.attributes
+                0x00000031       0x33 C:\Users\lenovo\Desktop\FPGA_PDM\performance_comparison\circular9_scalar\rv_profile_Os\rv_main.o
+ .riscv.attributes
+                0x00000064       0x33 C:\Users\lenovo\Desktop\FPGA_PDM\performance_comparison\circular9_scalar\rv_profile_Os\c9_scalar.o
+ .riscv.attributes
+                0x00000097       0x33 C:\Users\lenovo\Desktop\FPGA_PDM\performance_comparison\circular9_scalar\rv_profile_Os\fw_fft.o
+ .riscv.attributes
+                0x000000ca       0x33 C:\Users\lenovo\Desktop\FPGA_PDM\performance_comparison\circular9_scalar\rv_profile_Os\fw_tables.o

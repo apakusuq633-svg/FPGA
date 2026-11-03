@@ -1,0 +1,16 @@
+﻿{
+    "ObservedUTC":  "2026-10-28T05:10:26.0393339Z",
+    "PnPDevices":  [
+
+                   ],
+    "SerialPorts":  [
+
+                    ],
+    "ExistingHardwareProcesses":  [
+
+                                  ],
+    "ProbePort":  3124,
+    "NoReset":  true,
+    "NoProgramming":  true,
+    "NoOpenTarget":  true
+}

@@ -1,0 +1,31 @@
+﻿test,variant,platform,mean_ms,speedup_vs_local_reference,samples,p50_ms,p95_ms,max_ms,scope
+SRP_36pairs_1024grids_64lags,1,RTL_cycles_at_40MHz,0.928825,3.9689392512044788,2,,,,START to DONE; excludes load/readback; serial RTL reference
+SRP_36pairs_1024grids_64lags,0,RTL_cycles_at_40MHz,3.68645,1.0,2,,,,START to DONE; excludes load/readback; serial RTL reference
+SRP_36pairs_1024grids_64lags,4,RTL_cycles_at_40MHz,0.232675,15.843773503814333,2,,,,START to DONE; excludes load/readback; serial RTL reference
+fft,scalar,RTL_RV32_at_40MHz,4.4759,1.0,1,,,,"Actual fw_fft.c scalar vs fft1024_hw, includes function and load/run/pop; input creation excluded; internal profile timestamps add small overhead."
+fft,accelerated,RTL_RV32_at_40MHz,0.16505,27.118448954862163,1,,,,"Actual fw_fft.c scalar vs fft1024_hw, includes function and load/run/pop; input creation excluded; internal profile timestamps add small overhead."
+fir,scalar,RTL_RV32_at_40MHz,6.91935,1.0,1,,,,"Actual unmodified fw_fir_run(0/1),512 samples32taps; includes history initialization, generation, normalization,clip and checksums; coefficient preloading excluded. Every scalar and SIMD sample is reconstructed from retirement of ck accumulation and checked independently; no function instrumentation."
+fir,accelerated,RTL_RV32_at_40MHz,0.37845,18.28339278636544,1,,,,"Actual unmodified fw_fir_run(0/1),512 samples32taps; includes history initialization, generation, normalization,clip and checksums; coefficient preloading excluded. Every scalar and SIMD sample is reconstructed from retirement of ck accumulation and checked independently; no function instrumentation."
+circular9_localization,first_PCM_to_stable_RV_publication,RTL_at_40MHz,9.172771875,,32,,,9.176225,Aligned PCM injection; excludes analog/PDM front-end and PS receipt
+circular9_localization,last_PCM_to_stable_RV_publication,RTL_at_40MHz,2.625571875,,32,,,2.629025,Aligned PCM injection; excludes analog/PDM front-end and PS receipt
+circular9_localization,firmware_window_processing,RTL_at_40MHz,2.62341875,,32,,,2.626775,Aligned PCM injection; excludes analog/PDM front-end and PS receipt
+circular9_localization,stable_publication_interval,RTL_at_40MHz,3.276689516129032,,31,,,3.277075,Aligned PCM injection; excludes analog/PDM front-end and PS receipt
+circular9_same_first_window_scores,RV32_scalar_Os,RTL_at_40MHz,276.2343,1.0,1,,,,"Same first window, raw resident to 1024 scores; no peak/quality/publication or PS; accelerated statistics overlap acquisition"
+circular9_same_first_window_scores,accelerated_first_window,RTL_at_40MHz,2.05885,134.1692206814484,1,,,,"Same first window, raw resident to 1024 scores; no peak/quality/publication or PS; accelerated statistics overlap acquisition"
+circular9_scalar_compiler_sensitivity,RV32_scalar_O2,RTL_at_40MHz,245.159525,,1,,,,Auxiliary O2 scalar build; separate from matched Os primary comparison
+circular9_portable_scalar_host,O2_no_auto_vectorization,Windows_x86_native_host,0.34020243055555555,,9,,,,9 timed batches of 64 calls; mean of batch per-window means; no individual-window percentiles; NOT A9
+PS_search_single_wideband,reference,Windows_x86_native_host,8.054587804878048,1.0,41,8.2887,9.0905,10.6421,entire c9_candidates_search; excludes PCM generation/history copying/DMA/queue/HTTP
+PS_search_single_wideband,precomputed_only,Windows_x86_native_host,7.326951219512195,1.0993095987084103,41,7.2885,8.2074,8.4095,entire c9_candidates_search; excludes PCM generation/history copying/DMA/queue/HTTP
+PS_search_single_wideband,paired_ifft_only,Windows_x86_native_host,7.192129268292683,1.1199169959844315,41,7.1314,8.5132,10.8761,entire c9_candidates_search; excludes PCM generation/history copying/DMA/queue/HTTP
+PS_search_single_wideband,combined,Windows_x86_native_host,6.19320487804878,1.300552454420935,41,6.1764,7.2996,8.5765,entire c9_candidates_search; excludes PCM generation/history copying/DMA/queue/HTTP
+PS_search_three_band_sources,reference,Windows_x86_native_host,8.245153658536585,1.0,41,7.8109,9.1545,29.8846,entire c9_candidates_search; excludes PCM generation/history copying/DMA/queue/HTTP
+PS_search_three_band_sources,precomputed_only,Windows_x86_native_host,6.876392682926829,1.199052183132038,41,6.9528,7.8826,8.5787,entire c9_candidates_search; excludes PCM generation/history copying/DMA/queue/HTTP
+PS_search_three_band_sources,paired_ifft_only,Windows_x86_native_host,7.026731707317073,1.1733981034099745,41,6.7928,8.2627,16.334,entire c9_candidates_search; excludes PCM generation/history copying/DMA/queue/HTTP
+PS_search_three_band_sources,combined,Windows_x86_native_host,5.960570731707317,1.3832825797496886,41,6.0048,6.9277,7.7612,entire c9_candidates_search; excludes PCM generation/history copying/DMA/queue/HTTP
+GSC_division_arithmetic,signed_division_reference,Windows_x86_native_host,0.35196831683168317,1.0,101,0.346,0.4379,0.7499,division arithmetic only; NOT gsc9_process throughput
+GSC_division_arithmetic,production_shared_reciprocal,Windows_x86_native_host,1.514008910891089,0.2324744024290635,101,1.4035,2.0928,4.4608,division arithmetic only; NOT gsc9_process throughput
+envelope_frontend_evolution,historical_24x8192_frontend,Windows_x86_native_host,8.27651935483871,1.0,31,8.4284,11.4834,12.3579,Non-equivalent frontends; NOT same-algorithm speedup
+envelope_frontend_evolution,current_C9F2_1x4096_frontend,Windows_x86_native_host,2.069816129032258,3.998673717316327,31,2.0553,3.0237999999999996,3.4675,Non-equivalent frontends; NOT same-algorithm speedup
+GSC_full_32768_samples,disabled_bypass,Windows_x86_native_host,18.168045161290323,,31,18.1824,23.5464,34.7494,Full gsc9_process; bypass and adaptation perform different work; no speedup claimed
+GSC_full_32768_samples,adaptive_enabled,Windows_x86_native_host,23.69593870967742,,31,23.2734,32.7376,42.7424,Full gsc9_process; bypass and adaptation perform different work; no speedup claimed
+two_candidate_full_separation,production,Windows_x86_native_host,56.865593548387096,,31,56.7742,60.6824,67.0968,"entire production c9_candidates_separate including preparation,8 observations,covariance,target protection,bin solves,WOLA,quality"

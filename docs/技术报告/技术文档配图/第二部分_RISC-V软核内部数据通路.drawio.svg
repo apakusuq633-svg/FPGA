@@ -1,0 +1,308 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="1710" viewBox="0 0 1600 1710" content="&lt;mxGraphModel adaptiveColors=&quot;auto&quot; page=&quot;1&quot; pageWidth=&quot;1600&quot; pageHeight=&quot;1710&quot; grid=&quot;1&quot; gridSize=&quot;10&quot;&gt;
+  &lt;root&gt;
+    &lt;mxCell id=&quot;0&quot; /&gt;
+    &lt;mxCell id=&quot;1&quot; parent=&quot;0&quot; /&gt;
+    &lt;mxCell id=&quot;title&quot; value=&quot;九麦工程：软核、声学执行单元与片上数据通路&quot; style=&quot;text;html=1;whiteSpace=wrap;align=left;verticalAlign=middle;fontFamily=Microsoft YaHei;fontSize=32;fontColor=#20384e;strokeColor=none;fillColor=none;fontStyle=1;&quot; vertex=&quot;1&quot; parent=&quot;1&quot;&gt;
+      &lt;mxGeometry x=&quot;50&quot; y=&quot;24&quot; width=&quot;1500&quot; height=&quot;48&quot; as=&quot;geometry&quot; /&gt;
+    &lt;/mxCell&gt;
+    &lt;mxCell id=&quot;subtitle&quot; value=&quot;蓝色实线搬运声音数据；橙色虚线发出计算指令、请求或交接通知。&quot; style=&quot;text;html=1;whiteSpace=wrap;align=left;verticalAlign=middle;fontFamily=Microsoft YaHei;fontSize=21;fontColor=#62788c;strokeColor=none;fillColor=none;&quot; vertex=&quot;1&quot; parent=&quot;1&quot;&gt;
+      &lt;mxGeometry x=&quot;50&quot; y=&quot;78&quot; width=&quot;1500&quot; height=&quot;38&quot; as=&quot;geometry&quot; /&gt;
+    &lt;/mxCell&gt;
+    &lt;mxCell id=&quot;cpu&quot; value=&quot;&quot; style=&quot;rounded=1;arcSize=5;html=1;fillColor=#fff5e7;fillOpacity=40;strokeColor=#dce5ed;strokeWidth=1;&quot; vertex=&quot;1&quot; parent=&quot;1&quot;&gt;
+      &lt;mxGeometry x=&quot;35&quot; y=&quot;155&quot; width=&quot;400&quot; height=&quot;840&quot; as=&quot;geometry&quot; /&gt;
+    &lt;/mxCell&gt;
+    &lt;mxCell id=&quot;cpu-heading&quot; value=&quot;软核负责：发指令、检查与发布&quot; style=&quot;text;html=1;whiteSpace=wrap;align=left;verticalAlign=middle;fontFamily=Microsoft YaHei;fontSize=23;fontColor=#20384e;strokeColor=none;fillColor=none;fontStyle=1;&quot; vertex=&quot;1&quot; parent=&quot;1&quot;&gt;
+      &lt;mxGeometry x=&quot;53&quot; y=&quot;167&quot; width=&quot;364&quot; height=&quot;36&quot; as=&quot;geometry&quot; /&gt;
+    &lt;/mxCell&gt;
+    &lt;mxCell id=&quot;data&quot; value=&quot;&quot; style=&quot;rounded=1;arcSize=5;html=1;fillColor=#edf4fc;fillOpacity=40;strokeColor=#dce5ed;strokeWidth=1;&quot; vertex=&quot;1&quot; parent=&quot;1&quot;&gt;
+      &lt;mxGeometry x=&quot;500&quot; y=&quot;155&quot; width=&quot;1065&quot; height=&quot;1170&quot; as=&quot;geometry&quot; /&gt;
+    &lt;/mxCell&gt;
+    &lt;mxCell id=&quot;data-heading&quot; value=&quot;九麦定位：缓存与声学计算的实际连接&quot; style=&quot;text;html=1;whiteSpace=wrap;align=left;verticalAlign=middle;fontFamily=Microsoft YaHei;fontSize=23;fontColor=#20384e;strokeColor=none;fillColor=none;fontStyle=1;&quot; vertex=&quot;1&quot; parent=&quot;1&quot;&gt;
+      &lt;mxGeometry x=&quot;518&quot; y=&quot;167&quot; width=&quot;1029&quot; height=&quot;36&quot; as=&quot;geometry&quot; /&gt;
+    &lt;/mxCell&gt;
+    &lt;mxCell id=&quot;audio&quot; value=&quot;&quot; style=&quot;rounded=1;arcSize=5;html=1;fillColor=#ebf6f0;fillOpacity=40;strokeColor=#dce5ed;strokeWidth=1;&quot; vertex=&quot;1&quot; parent=&quot;1&quot;&gt;
+      &lt;mxGeometry x=&quot;35&quot; y=&quot;1370&quot; width=&quot;1530&quot; height=&quot;230&quot; as=&quot;geometry&quot; /&gt;
+    &lt;/mxCell&gt;
+    &lt;mxCell id=&quot;audio-heading&quot; value=&quot;连续拾音：与CPU共用核内八路实数SIMD&quot; style=&quot;text;html=1;whiteSpace=wrap;align=left;verticalAlign=middle;fontFamily=Microsoft YaHei;fontSize=23;fontColor=#20384e;strokeColor=none;fillColor=none;fontStyle=1;&quot; vertex=&quot;1&quot; parent=&quot;1&quot;&gt;
+      &lt;mxGeometry x=&quot;53&quot; y=&quot;1382&quot; width=&quot;1494&quot; height=&quot;36&quot; as=&quot;geometry&quot; /&gt;
+    &lt;/mxCell&gt;
+    &lt;mxCell id=&quot;core_dispatch&quot; edge=&quot;1&quot; source=&quot;core&quot; target=&quot;dispatch&quot; parent=&quot;1&quot; style=&quot;edgeStyle=orthogonalEdgeStyle;html=1;rounded=1;arcSize=12;strokeWidth=1.8;strokeColor=#bb772d;endArrow=block;endSize=7;endFill=1;exitX=0.5;exitY=1;entryX=0.5;entryY=0;exitPerimeter=0;entryPerimeter=0;dashed=1;dashPattern=5 4;&quot;&gt;
+      &lt;mxGeometry relative=&quot;1&quot; as=&quot;geometry&quot; /&gt;
+    &lt;/mxCell&gt;
+    &lt;mxCell id=&quot;dispatch_retire&quot; edge=&quot;1&quot; source=&quot;dispatch&quot; target=&quot;retire&quot; parent=&quot;1&quot; style=&quot;edgeStyle=orthogonalEdgeStyle;html=1;rounded=1;arcSize=12;strokeWidth=1.8;strokeColor=#bb772d;endArrow=block;endSize=7;endFill=1;exitX=0.5;exitY=1;entryX=0.5;entryY=0;exitPerimeter=0;entryPerimeter=0;dashed=1;dashPattern=5 4;&quot;&gt;
+      &lt;mxGeometry relative=&quot;1&quot; as=&quot;geometry&quot; /&gt;
+    &lt;/mxCell&gt;
+    &lt;mxCell id=&quot;raw_prepare&quot; edge=&quot;1&quot; source=&quot;raw&quot; target=&quot;prepare&quot; parent=&quot;1&quot; style=&quot;edgeStyle=orthogonalEdgeStyle;html=1;rounded=1;arcSize=12;strokeWidth=1.8;strokeColor=#62788c;endArrow=block;endSize=7;endFill=1;exitX=1;exitY=0.5;entryX=0;entryY=0.5;exitPerimeter=0;entryPerimeter=0;&quot;&gt;
+      &lt;mxGeometry relative=&quot;1&quot; as=&quot;geometry&quot; /&gt;
+    &lt;/mxCell&gt;
+    &lt;mxCell id=&quot;prepare_fft&quot; edge=&quot;1&quot; source=&quot;prepare&quot; target=&quot;fft&quot; parent=&quot;1&quot; style=&quot;edgeStyle=orthogonalEdgeStyle;html=1;rounded=1;arcSize=12;strokeWidth=1.8;strokeColor=#62788c;endArrow=block;endSize=7;endFill=1;exitX=0.5;exitY=1;entryX=0.5;entryY=0;exitPerimeter=0;entryPerimeter=0;&quot;&gt;
+      &lt;mxGeometry relative=&quot;1&quot; as=&quot;geometry&quot;&gt;
+        &lt;Array as=&quot;points&quot;&gt;
+          &lt;mxPoint x=&quot;1217.5&quot; y=&quot;410&quot; /&gt;
+          &lt;mxPoint x=&quot;675&quot; y=&quot;410&quot; /&gt;
+        &lt;/Array&gt;
+      &lt;/mxGeometry&gt;
+    &lt;/mxCell&gt;
+    &lt;mxCell id=&quot;fft_spectra&quot; edge=&quot;1&quot; source=&quot;fft&quot; target=&quot;spectra&quot; parent=&quot;1&quot; style=&quot;edgeStyle=orthogonalEdgeStyle;html=1;rounded=1;arcSize=12;strokeWidth=1.8;strokeColor=#62788c;endArrow=block;endSize=7;endFill=1;exitX=1;exitY=0.5;entryX=0;entryY=0.5;exitPerimeter=0;entryPerimeter=0;&quot;&gt;
+      &lt;mxGeometry relative=&quot;1&quot; as=&quot;geometry&quot; /&gt;
+    &lt;/mxCell&gt;
+    &lt;mxCell id=&quot;spectra_ac&quot; edge=&quot;1&quot; source=&quot;spectra&quot; target=&quot;ac&quot; parent=&quot;1&quot; style=&quot;edgeStyle=orthogonalEdgeStyle;html=1;rounded=1;arcSize=12;strokeWidth=1.8;strokeColor=#62788c;endArrow=block;endSize=7;endFill=1;exitX=1;exitY=0.5;entryX=0;entryY=0.5;exitPerimeter=0;entryPerimeter=0;&quot;&gt;
+      &lt;mxGeometry relative=&quot;1&quot; as=&quot;geometry&quot; /&gt;
+    &lt;/mxCell&gt;
+    &lt;mxCell id=&quot;ac_phi&quot; edge=&quot;1&quot; source=&quot;ac&quot; target=&quot;phi&quot; parent=&quot;1&quot; style=&quot;edgeStyle=orthogonalEdgeStyle;html=1;rounded=1;arcSize=12;strokeWidth=1.8;strokeColor=#62788c;endArrow=block;endSize=7;endFill=1;exitX=0.5;exitY=1;entryX=0.5;entryY=0;exitPerimeter=0;entryPerimeter=0;&quot;&gt;
+      &lt;mxGeometry relative=&quot;1&quot; as=&quot;geometry&quot; /&gt;
+    &lt;/mxCell&gt;
+    &lt;mxCell id=&quot;phi_inverse&quot; edge=&quot;1&quot; source=&quot;phi&quot; target=&quot;inverse&quot; parent=&quot;1&quot; style=&quot;edgeStyle=orthogonalEdgeStyle;html=1;rounded=1;arcSize=12;strokeWidth=1.8;strokeColor=#62788c;endArrow=block;endSize=7;endFill=1;exitX=0;exitY=0.5;entryX=1;entryY=0.5;exitPerimeter=0;entryPerimeter=0;&quot;&gt;
+      &lt;mxGeometry relative=&quot;1&quot; as=&quot;geometry&quot; /&gt;
+    &lt;/mxCell&gt;
+    &lt;mxCell id=&quot;inverse_correlation&quot; edge=&quot;1&quot; source=&quot;inverse&quot; target=&quot;correlation&quot; parent=&quot;1&quot; style=&quot;edgeStyle=orthogonalEdgeStyle;html=1;rounded=1;arcSize=12;strokeWidth=1.8;strokeColor=#62788c;endArrow=block;endSize=7;endFill=1;exitX=0;exitY=0.5;entryX=1;entryY=0.5;exitPerimeter=0;entryPerimeter=0;&quot;&gt;
+      &lt;mxGeometry relative=&quot;1&quot; as=&quot;geometry&quot; /&gt;
+    &lt;/mxCell&gt;
+    &lt;mxCell id=&quot;correlation_srp&quot; edge=&quot;1&quot; source=&quot;correlation&quot; target=&quot;srp&quot; parent=&quot;1&quot; style=&quot;edgeStyle=orthogonalEdgeStyle;html=1;rounded=1;arcSize=12;strokeWidth=1.8;strokeColor=#62788c;endArrow=block;endSize=7;endFill=1;exitX=0.5;exitY=1;entryX=0.5;entryY=0;exitPerimeter=0;entryPerimeter=0;&quot;&gt;
+      &lt;mxGeometry relative=&quot;1&quot; as=&quot;geometry&quot; /&gt;
+    &lt;/mxCell&gt;
+    &lt;mxCell id=&quot;srp_score&quot; edge=&quot;1&quot; source=&quot;srp&quot; target=&quot;score&quot; parent=&quot;1&quot; style=&quot;edgeStyle=orthogonalEdgeStyle;html=1;rounded=1;arcSize=12;strokeWidth=1.8;strokeColor=#62788c;endArrow=block;endSize=7;endFill=1;exitX=1;exitY=0.5;entryX=0;entryY=0.5;exitPerimeter=0;entryPerimeter=0;&quot;&gt;
+      &lt;mxGeometry relative=&quot;1&quot; as=&quot;geometry&quot; /&gt;
+    &lt;/mxCell&gt;
+    &lt;mxCell id=&quot;score_publish&quot; edge=&quot;1&quot; source=&quot;score&quot; target=&quot;publish&quot; parent=&quot;1&quot; style=&quot;edgeStyle=orthogonalEdgeStyle;html=1;rounded=1;arcSize=12;strokeWidth=1.8;strokeColor=#62788c;endArrow=block;endSize=7;endFill=1;exitX=1;exitY=0.5;entryX=0;entryY=0.5;exitPerimeter=0;entryPerimeter=0;&quot;&gt;
+      &lt;mxGeometry relative=&quot;1&quot; as=&quot;geometry&quot; /&gt;
+    &lt;/mxCell&gt;
+    &lt;mxCell id=&quot;retire_transfer&quot; edge=&quot;1&quot; source=&quot;retire&quot; target=&quot;transfer&quot; parent=&quot;1&quot; style=&quot;edgeStyle=orthogonalEdgeStyle;html=1;rounded=1;arcSize=12;strokeWidth=1.8;strokeColor=#bb772d;endArrow=block;endSize=7;endFill=1;exitX=0.5;exitY=1;entryX=0.5;entryY=0;exitPerimeter=0;entryPerimeter=0;dashed=1;dashPattern=5 4;&quot;&gt;
+      &lt;mxGeometry relative=&quot;1&quot; as=&quot;geometry&quot; /&gt;
+    &lt;/mxCell&gt;
+    &lt;mxCell id=&quot;request&quot; edge=&quot;1&quot; source=&quot;transfer&quot; target=&quot;dispatch&quot; parent=&quot;1&quot; style=&quot;edgeStyle=orthogonalEdgeStyle;html=1;rounded=1;arcSize=12;strokeWidth=1.8;strokeColor=#bb772d;endArrow=block;endSize=7;endFill=1;exitX=0;exitY=0.5;entryX=0;entryY=0.5;exitPerimeter=0;entryPerimeter=0;dashed=1;dashPattern=5 4;&quot;&gt;
+      &lt;mxGeometry relative=&quot;1&quot; as=&quot;geometry&quot;&gt;
+        &lt;Array as=&quot;points&quot;&gt;
+          &lt;mxPoint x=&quot;20&quot; y=&quot;1157.5&quot; /&gt;
+          &lt;mxPoint x=&quot;20&quot; y=&quot;557.5&quot; /&gt;
+        &lt;/Array&gt;
+      &lt;/mxGeometry&gt;
+    &lt;/mxCell&gt;
+    &lt;mxCell id=&quot;dispatch_fft&quot; edge=&quot;1&quot; source=&quot;dispatch&quot; target=&quot;fft&quot; parent=&quot;1&quot; style=&quot;edgeStyle=orthogonalEdgeStyle;html=1;rounded=1;arcSize=12;strokeWidth=1.8;strokeColor=#bb772d;endArrow=block;endSize=7;endFill=1;exitX=1;exitY=0.5;entryX=0;entryY=0.5;exitPerimeter=0;entryPerimeter=0;dashed=1;dashPattern=5 4;&quot;&gt;
+      &lt;mxGeometry relative=&quot;1&quot; as=&quot;geometry&quot;&gt;
+        &lt;Array as=&quot;points&quot;&gt;
+          &lt;mxPoint x=&quot;470&quot; y=&quot;557.5&quot; /&gt;
+          &lt;mxPoint x=&quot;470&quot; y=&quot;570&quot; /&gt;
+        &lt;/Array&gt;
+      &lt;/mxGeometry&gt;
+    &lt;/mxCell&gt;
+    &lt;mxCell id=&quot;dispatch_ac&quot; edge=&quot;1&quot; source=&quot;dispatch&quot; target=&quot;ac&quot; parent=&quot;1&quot; style=&quot;edgeStyle=orthogonalEdgeStyle;html=1;rounded=1;arcSize=12;strokeWidth=1.8;strokeColor=#bb772d;endArrow=block;endSize=7;endFill=1;exitX=1;exitY=0.25;entryX=0.5;entryY=0;exitPerimeter=0;entryPerimeter=0;dashed=1;dashPattern=5 4;&quot;&gt;
+      &lt;mxGeometry relative=&quot;1&quot; as=&quot;geometry&quot;&gt;
+        &lt;Array as=&quot;points&quot;&gt;
+          &lt;mxPoint x=&quot;455&quot; y=&quot;521.25&quot; /&gt;
+          &lt;mxPoint x=&quot;455&quot; y=&quot;450&quot; /&gt;
+          &lt;mxPoint x=&quot;1385&quot; y=&quot;450&quot; /&gt;
+        &lt;/Array&gt;
+      &lt;/mxGeometry&gt;
+    &lt;/mxCell&gt;
+    &lt;mxCell id=&quot;dispatch_srp&quot; edge=&quot;1&quot; source=&quot;dispatch&quot; target=&quot;srp&quot; parent=&quot;1&quot; style=&quot;edgeStyle=orthogonalEdgeStyle;html=1;rounded=1;arcSize=12;strokeWidth=1.8;strokeColor=#bb772d;endArrow=block;endSize=7;endFill=1;exitX=1;exitY=0.8;entryX=0;entryY=0.5;exitPerimeter=0;entryPerimeter=0;dashed=1;dashPattern=5 4;&quot;&gt;
+      &lt;mxGeometry relative=&quot;1&quot; as=&quot;geometry&quot;&gt;
+        &lt;Array as=&quot;points&quot;&gt;
+          &lt;mxPoint x=&quot;485&quot; y=&quot;601&quot; /&gt;
+          &lt;mxPoint x=&quot;485&quot; y=&quot;1202.5&quot; /&gt;
+        &lt;/Array&gt;
+      &lt;/mxGeometry&gt;
+    &lt;/mxCell&gt;
+    &lt;mxCell id=&quot;das_arb&quot; edge=&quot;1&quot; source=&quot;das&quot; target=&quot;arb&quot; parent=&quot;1&quot; style=&quot;edgeStyle=orthogonalEdgeStyle;html=1;rounded=1;arcSize=12;strokeWidth=1.8;strokeColor=#62788c;endArrow=block;endSize=7;endFill=1;exitX=1;exitY=0.5;entryX=0;entryY=0.5;exitPerimeter=0;entryPerimeter=0;&quot;&gt;
+      &lt;mxGeometry relative=&quot;1&quot; as=&quot;geometry&quot; /&gt;
+    &lt;/mxCell&gt;
+    &lt;mxCell id=&quot;arb_simd&quot; edge=&quot;1&quot; source=&quot;arb&quot; target=&quot;simd&quot; parent=&quot;1&quot; style=&quot;edgeStyle=orthogonalEdgeStyle;html=1;rounded=1;arcSize=12;strokeWidth=1.8;strokeColor=#62788c;endArrow=block;endSize=7;endFill=1;exitX=1;exitY=0.5;entryX=0;entryY=0.5;exitPerimeter=0;entryPerimeter=0;&quot;&gt;
+      &lt;mxGeometry relative=&quot;1&quot; as=&quot;geometry&quot; /&gt;
+    &lt;/mxCell&gt;
+    &lt;mxCell id=&quot;simd_firout&quot; edge=&quot;1&quot; source=&quot;simd&quot; target=&quot;firout&quot; parent=&quot;1&quot; style=&quot;edgeStyle=orthogonalEdgeStyle;html=1;rounded=1;arcSize=12;strokeWidth=1.8;strokeColor=#62788c;endArrow=block;endSize=7;endFill=1;exitX=1;exitY=0.5;entryX=0;entryY=0.5;exitPerimeter=0;entryPerimeter=0;&quot;&gt;
+      &lt;mxGeometry relative=&quot;1&quot; as=&quot;geometry&quot; /&gt;
+    &lt;/mxCell&gt;
+    &lt;mxCell id=&quot;core&quot; value=&quot;&amp;lt;b style=&amp;quot;font-size:26.0px&amp;quot;&amp;gt;五级RISC-V与固件&amp;lt;/b&amp;gt;&amp;lt;br&amp;gt;&amp;lt;font style=&amp;quot;font-size:22px&amp;quot;&amp;gt;IF → ID → EX → MEM → WB&amp;lt;br&amp;gt;寄存器、前递、ALU及乘除法&amp;lt;br&amp;gt;按定位请求选择计算阶段&amp;lt;/font&amp;gt;&quot; style=&quot;rounded=1;arcSize=12;html=1;whiteSpace=wrap;fontFamily=Microsoft YaHei;fontColor=#20384e;fontSize=22;spacing=10;fillColor=#fff5e7;strokeColor=#cda56e;strokeWidth=1.5;&quot; vertex=&quot;1&quot; parent=&quot;1&quot;&gt;
+      &lt;mxGeometry x=&quot;55&quot; y=&quot;235&quot; width=&quot;360&quot; height=&quot;145&quot; as=&quot;geometry&quot; /&gt;
+    &lt;/mxCell&gt;
+    &lt;mxCell id=&quot;dispatch&quot; value=&quot;&amp;lt;b style=&amp;quot;font-size:26.0px&amp;quot;&amp;gt;自定义指令发射&amp;lt;/b&amp;gt;&amp;lt;br&amp;gt;&amp;lt;font style=&amp;quot;font-size:22px&amp;quot;&amp;gt;VFFT：正 / 逆变换&amp;lt;br&amp;gt;VSUB：共轭互谱；VPHAT&amp;lt;br&amp;gt;VLOC：启动核外SRP&amp;lt;/font&amp;gt;&quot; style=&quot;rounded=1;arcSize=12;html=1;whiteSpace=wrap;fontFamily=Microsoft YaHei;fontColor=#20384e;fontSize=22;spacing=10;fillColor=#fff5e7;strokeColor=#cda56e;strokeWidth=1.5;&quot; vertex=&quot;1&quot; parent=&quot;1&quot;&gt;
+      &lt;mxGeometry x=&quot;55&quot; y=&quot;485&quot; width=&quot;360&quot; height=&quot;145&quot; as=&quot;geometry&quot; /&gt;
+    &lt;/mxCell&gt;
+    &lt;mxCell id=&quot;retire&quot; value=&quot;&amp;lt;b style=&amp;quot;font-size:26.0px&amp;quot;&amp;gt;指令完成与退休交接&amp;lt;/b&amp;gt;&amp;lt;br&amp;gt;&amp;lt;font style=&amp;quot;font-size:22px&amp;quot;&amp;gt;运算完成、流水线接纳结果&amp;lt;br&amp;gt;FFT / 互谱 / PHAT指令退休&amp;lt;br&amp;gt;才通知RTL进入下一搬运阶段&amp;lt;/font&amp;gt;&quot; style=&quot;rounded=1;arcSize=12;html=1;whiteSpace=wrap;fontFamily=Microsoft YaHei;fontColor=#20384e;fontSize=22;spacing=10;fillColor=#fff5e7;strokeColor=#cda56e;strokeWidth=1.5;&quot; vertex=&quot;1&quot; parent=&quot;1&quot;&gt;
+      &lt;mxGeometry x=&quot;55&quot; y=&quot;795&quot; width=&quot;360&quot; height=&quot;145&quot; as=&quot;geometry&quot; /&gt;
+    &lt;/mxCell&gt;
+    &lt;mxCell id=&quot;raw&quot; value=&quot;&amp;lt;b style=&amp;quot;font-size:26.0px&amp;quot;&amp;gt;原始PCM环形缓存&amp;lt;/b&amp;gt;&amp;lt;br&amp;gt;&amp;lt;font style=&amp;quot;font-size:22px&amp;quot;&amp;gt;九路PCM按样本序号写入&amp;lt;br&amp;gt;1024点窗口，512点步长&amp;lt;/font&amp;gt;&quot; style=&quot;rounded=1;arcSize=12;html=1;whiteSpace=wrap;fontFamily=Microsoft YaHei;fontColor=#20384e;fontSize=22;spacing=10;fillColor=#f3f6f9;strokeColor=#9babbc;strokeWidth=1.5;&quot; vertex=&quot;1&quot; parent=&quot;1&quot;&gt;
+      &lt;mxGeometry x=&quot;525&quot; y=&quot;235&quot; width=&quot;300&quot; height=&quot;125&quot; as=&quot;geometry&quot; /&gt;
+    &lt;/mxCell&gt;
+    &lt;mxCell id=&quot;prepare&quot; value=&quot;&amp;lt;b style=&amp;quot;font-size:26.0px&amp;quot;&amp;gt;滚动统计与输入准备&amp;lt;/b&amp;gt;&amp;lt;br&amp;gt;&amp;lt;font style=&amp;quot;font-size:22px&amp;quot;&amp;gt;采集时累积统计；窗就绪后去均值、缩放、加窗&amp;lt;br&amp;gt;两实数打包为一复数，装入FFT&amp;lt;/font&amp;gt;&quot; style=&quot;rounded=1;arcSize=12;html=1;whiteSpace=wrap;fontFamily=Microsoft YaHei;fontColor=#20384e;fontSize=22;spacing=10;fillColor=#edf4fc;strokeColor=#87a7ca;strokeWidth=1.5;&quot; vertex=&quot;1&quot; parent=&quot;1&quot;&gt;
+      &lt;mxGeometry x=&quot;900&quot; y=&quot;235&quot; width=&quot;635&quot; height=&quot;125&quot; as=&quot;geometry&quot; /&gt;
+    &lt;/mxCell&gt;
+    &lt;mxCell id=&quot;fft&quot; value=&quot;&amp;lt;b style=&amp;quot;font-size:26.0px&amp;quot;&amp;gt;核内共享FFT / IFFT&amp;lt;/b&amp;gt;&amp;lt;br&amp;gt;&amp;lt;font style=&amp;quot;font-size:22px&amp;quot;&amp;gt;1024点实数 ↔ 512点复数&amp;lt;br&amp;gt;此处先执行九路正变换&amp;lt;/font&amp;gt;&quot; style=&quot;rounded=1;arcSize=12;html=1;whiteSpace=wrap;fontFamily=Microsoft YaHei;fontColor=#20384e;fontSize=22;spacing=10;fillColor=#edf4fc;strokeColor=#87a7ca;strokeWidth=1.5;&quot; vertex=&quot;1&quot; parent=&quot;1&quot;&gt;
+      &lt;mxGeometry x=&quot;525&quot; y=&quot;500&quot; width=&quot;300&quot; height=&quot;140&quot; as=&quot;geometry&quot; /&gt;
+    &lt;/mxCell&gt;
+    &lt;mxCell id=&quot;spectra&quot; value=&quot;&amp;lt;b style=&amp;quot;font-size:26.0px&amp;quot;&amp;gt;九路频谱缓存&amp;lt;/b&amp;gt;&amp;lt;br&amp;gt;&amp;lt;font style=&amp;quot;font-size:22px&amp;quot;&amp;gt;每通道缓存64个频点&amp;lt;br&amp;gt;36麦对复用九路频谱&amp;lt;/font&amp;gt;&quot; style=&quot;rounded=1;arcSize=12;html=1;whiteSpace=wrap;fontFamily=Microsoft YaHei;fontColor=#20384e;fontSize=22;spacing=10;fillColor=#f3f6f9;strokeColor=#9babbc;strokeWidth=1.5;&quot; vertex=&quot;1&quot; parent=&quot;1&quot;&gt;
+      &lt;mxGeometry x=&quot;880&quot; y=&quot;500&quot; width=&quot;300&quot; height=&quot;140&quot; as=&quot;geometry&quot; /&gt;
+    &lt;/mxCell&gt;
+    &lt;mxCell id=&quot;ac&quot; value=&quot;&amp;lt;b style=&amp;quot;font-size:26.0px&amp;quot;&amp;gt;核内四路复数单元&amp;lt;/b&amp;gt;&amp;lt;br&amp;gt;&amp;lt;font style=&amp;quot;font-size:22px&amp;quot;&amp;gt;读入当前麦对的两路频谱&amp;lt;br&amp;gt;共轭互谱 → PHAT归一化&amp;lt;/font&amp;gt;&quot; style=&quot;rounded=1;arcSize=12;html=1;whiteSpace=wrap;fontFamily=Microsoft YaHei;fontColor=#20384e;fontSize=22;spacing=10;fillColor=#edf4fc;strokeColor=#87a7ca;strokeWidth=1.5;&quot; vertex=&quot;1&quot; parent=&quot;1&quot;&gt;
+      &lt;mxGeometry x=&quot;1235&quot; y=&quot;500&quot; width=&quot;300&quot; height=&quot;140&quot; as=&quot;geometry&quot; /&gt;
+    &lt;/mxCell&gt;
+    &lt;mxCell id=&quot;phi&quot; value=&quot;&amp;lt;b style=&amp;quot;font-size:26.0px&amp;quot;&amp;gt;归一化互谱缓存&amp;lt;/b&amp;gt;&amp;lt;br&amp;gt;&amp;lt;font style=&amp;quot;font-size:22px&amp;quot;&amp;gt;保存当前麦对结果&amp;lt;br&amp;gt;补零后装入同一FFT核&amp;lt;/font&amp;gt;&quot; style=&quot;rounded=1;arcSize=12;html=1;whiteSpace=wrap;fontFamily=Microsoft YaHei;fontColor=#20384e;fontSize=22;spacing=10;fillColor=#f3f6f9;strokeColor=#9babbc;strokeWidth=1.5;&quot; vertex=&quot;1&quot; parent=&quot;1&quot;&gt;
+      &lt;mxGeometry x=&quot;1235&quot; y=&quot;805&quot; width=&quot;300&quot; height=&quot;125&quot; as=&quot;geometry&quot; /&gt;
+    &lt;/mxCell&gt;
+    &lt;mxCell id=&quot;inverse&quot; value=&quot;&amp;lt;b style=&amp;quot;font-size:26.0px&amp;quot;&amp;gt;逆变换复用FFT核&amp;lt;/b&amp;gt;&amp;lt;br&amp;gt;&amp;lt;font style=&amp;quot;font-size:22px&amp;quot;&amp;gt;不新增第二个FFT实例&amp;lt;br&amp;gt;只取定位需要的相关区间&amp;lt;/font&amp;gt;&quot; style=&quot;rounded=1;arcSize=12;html=1;whiteSpace=wrap;fontFamily=Microsoft YaHei;fontColor=#20384e;fontSize=22;spacing=10;fillColor=#edf4fc;strokeColor=#87a7ca;strokeWidth=1.5;&quot; vertex=&quot;1&quot; parent=&quot;1&quot;&gt;
+      &lt;mxGeometry x=&quot;880&quot; y=&quot;805&quot; width=&quot;300&quot; height=&quot;125&quot; as=&quot;geometry&quot; /&gt;
+    &lt;/mxCell&gt;
+    &lt;mxCell id=&quot;correlation&quot; value=&quot;&amp;lt;b style=&amp;quot;font-size:26.0px&amp;quot;&amp;gt;36麦对相关环&amp;lt;/b&amp;gt;&amp;lt;br&amp;gt;&amp;lt;font style=&amp;quot;font-size:22px&amp;quot;&amp;gt;每麦对保留64个相关值&amp;lt;br&amp;gt;按麦对写入SRP相关分区&amp;lt;/font&amp;gt;&quot; style=&quot;rounded=1;arcSize=12;html=1;whiteSpace=wrap;fontFamily=Microsoft YaHei;fontColor=#20384e;fontSize=22;spacing=10;fillColor=#f3f6f9;strokeColor=#9babbc;strokeWidth=1.5;&quot; vertex=&quot;1&quot; parent=&quot;1&quot;&gt;
+      &lt;mxGeometry x=&quot;525&quot; y=&quot;805&quot; width=&quot;300&quot; height=&quot;125&quot; as=&quot;geometry&quot; /&gt;
+    &lt;/mxCell&gt;
+    &lt;mxCell id=&quot;srp&quot; value=&quot;&amp;lt;b style=&amp;quot;font-size:26.0px&amp;quot;&amp;gt;核外四麦对并行SRP&amp;lt;/b&amp;gt;&amp;lt;br&amp;gt;&amp;lt;font style=&amp;quot;font-size:22px&amp;quot;&amp;gt;相关分区 + 方向时差表&amp;lt;br&amp;gt;四麦对插值、求和后累加&amp;lt;br&amp;gt;36麦对 → 1024方向评分&amp;lt;/font&amp;gt;&quot; style=&quot;rounded=1;arcSize=12;html=1;whiteSpace=wrap;fontFamily=Microsoft YaHei;fontColor=#20384e;fontSize=22;spacing=10;fillColor=#edf4fc;strokeColor=#87a7ca;strokeWidth=1.5;&quot; vertex=&quot;1&quot; parent=&quot;1&quot;&gt;
+      &lt;mxGeometry x=&quot;525&quot; y=&quot;1125&quot; width=&quot;300&quot; height=&quot;155&quot; as=&quot;geometry&quot; /&gt;
+    &lt;/mxCell&gt;
+    &lt;mxCell id=&quot;score&quot; value=&quot;&amp;lt;b style=&amp;quot;font-size:26.0px&amp;quot;&amp;gt;方向评分与统计读口&amp;lt;/b&amp;gt;&amp;lt;br&amp;gt;&amp;lt;font style=&amp;quot;font-size:22px&amp;quot;&amp;gt;片上评分存储、质量统计&amp;lt;br&amp;gt;供软核遍历及结果复核&amp;lt;/font&amp;gt;&quot; style=&quot;rounded=1;arcSize=12;html=1;whiteSpace=wrap;fontFamily=Microsoft YaHei;fontColor=#20384e;fontSize=22;spacing=10;fillColor=#f3f6f9;strokeColor=#9babbc;strokeWidth=1.5;&quot; vertex=&quot;1&quot; parent=&quot;1&quot;&gt;
+      &lt;mxGeometry x=&quot;880&quot; y=&quot;1125&quot; width=&quot;300&quot; height=&quot;155&quot; as=&quot;geometry&quot; /&gt;
+    &lt;/mxCell&gt;
+    &lt;mxCell id=&quot;publish&quot; value=&quot;&amp;lt;b style=&amp;quot;font-size:26.0px&amp;quot;&amp;gt;固件发布完整方向图&amp;lt;/b&amp;gt;&amp;lt;br&amp;gt;&amp;lt;font style=&amp;quot;font-size:22px&amp;quot;&amp;gt;检查幅度、峰值与截止期&amp;lt;br&amp;gt;写入结果区并切换版本&amp;lt;br&amp;gt;PS读取方向图和状态&amp;lt;/font&amp;gt;&quot; style=&quot;rounded=1;arcSize=12;html=1;whiteSpace=wrap;fontFamily=Microsoft YaHei;fontColor=#20384e;fontSize=22;spacing=10;fillColor=#fff5e7;strokeColor=#cda56e;strokeWidth=1.5;&quot; vertex=&quot;1&quot; parent=&quot;1&quot;&gt;
+      &lt;mxGeometry x=&quot;1235&quot; y=&quot;1125&quot; width=&quot;300&quot; height=&quot;155&quot; as=&quot;geometry&quot; /&gt;
+    &lt;/mxCell&gt;
+    &lt;mxCell id=&quot;transfer&quot; value=&quot;&amp;lt;b style=&amp;quot;font-size:26.0px&amp;quot;&amp;gt;RTL搬运状态机&amp;lt;/b&amp;gt;&amp;lt;br&amp;gt;&amp;lt;font style=&amp;quot;font-size:22px&amp;quot;&amp;gt;提交当前阶段请求&amp;lt;br&amp;gt;推进地址、装载 / 取回 / 转存&amp;lt;br&amp;gt;管理右侧缓存与核内搬运端口&amp;lt;/font&amp;gt;&quot; style=&quot;rounded=1;arcSize=12;html=1;whiteSpace=wrap;fontFamily=Microsoft YaHei;fontColor=#20384e;fontSize=22;spacing=10;fillColor=#f3f6f9;strokeColor=#9babbc;strokeWidth=1.5;&quot; vertex=&quot;1&quot; parent=&quot;1&quot;&gt;
+      &lt;mxGeometry x=&quot;55&quot; y=&quot;1080&quot; width=&quot;360&quot; height=&quot;155&quot; as=&quot;geometry&quot; /&gt;
+    &lt;/mxCell&gt;
+    &lt;mxCell id=&quot;das&quot; value=&quot;&amp;lt;b style=&amp;quot;font-size:26.0px&amp;quot;&amp;gt;九路DAS输出&amp;lt;/b&amp;gt;&amp;lt;br&amp;gt;&amp;lt;font style=&amp;quot;font-size:22px&amp;quot;&amp;gt;按方向补偿后叠加的逐样音频&amp;lt;/font&amp;gt;&quot; style=&quot;rounded=1;arcSize=12;html=1;whiteSpace=wrap;fontFamily=Microsoft YaHei;fontColor=#20384e;fontSize=22;spacing=10;fillColor=#ebf6f0;strokeColor=#7baa95;strokeWidth=1.5;&quot; vertex=&quot;1&quot; parent=&quot;1&quot;&gt;
+      &lt;mxGeometry x=&quot;55&quot; y=&quot;1460&quot; width=&quot;330&quot; height=&quot;100&quot; as=&quot;geometry&quot; /&gt;
+    &lt;/mxCell&gt;
+    &lt;mxCell id=&quot;arb&quot; value=&quot;&amp;lt;b style=&amp;quot;font-size:26.0px&amp;quot;&amp;gt;音频 / CPU请求仲裁&amp;lt;/b&amp;gt;&amp;lt;br&amp;gt;&amp;lt;font style=&amp;quot;font-size:22px&amp;quot;&amp;gt;音频与向量指令互斥使用&amp;lt;/font&amp;gt;&quot; style=&quot;rounded=1;arcSize=12;html=1;whiteSpace=wrap;fontFamily=Microsoft YaHei;fontColor=#20384e;fontSize=22;spacing=10;fillColor=#ebf6f0;strokeColor=#7baa95;strokeWidth=1.5;&quot; vertex=&quot;1&quot; parent=&quot;1&quot;&gt;
+      &lt;mxGeometry x=&quot;440&quot; y=&quot;1460&quot; width=&quot;330&quot; height=&quot;100&quot; as=&quot;geometry&quot; /&gt;
+    &lt;/mxCell&gt;
+    &lt;mxCell id=&quot;simd&quot; value=&quot;&amp;lt;b style=&amp;quot;font-size:26.0px&amp;quot;&amp;gt;核内八路实数SIMD&amp;lt;/b&amp;gt;&amp;lt;br&amp;gt;&amp;lt;font style=&amp;quot;font-size:22px&amp;quot;&amp;gt;历史、系数分区存储&amp;lt;br&amp;gt;32抽头分4趟计算&amp;lt;/font&amp;gt;&quot; style=&quot;rounded=1;arcSize=12;html=1;whiteSpace=wrap;fontFamily=Microsoft YaHei;fontColor=#20384e;fontSize=22;spacing=10;fillColor=#ebf6f0;strokeColor=#7baa95;strokeWidth=1.5;&quot; vertex=&quot;1&quot; parent=&quot;1&quot;&gt;
+      &lt;mxGeometry x=&quot;825&quot; y=&quot;1447.5&quot; width=&quot;330&quot; height=&quot;125&quot; as=&quot;geometry&quot; /&gt;
+    &lt;/mxCell&gt;
+    &lt;mxCell id=&quot;firout&quot; value=&quot;&amp;lt;b style=&amp;quot;font-size:26.0px&amp;quot;&amp;gt;连续FIR输出&amp;lt;/b&amp;gt;&amp;lt;br&amp;gt;&amp;lt;font style=&amp;quot;font-size:22px&amp;quot;&amp;gt;Q15缩放饱和 → 采样打包&amp;lt;/font&amp;gt;&quot; style=&quot;rounded=1;arcSize=12;html=1;whiteSpace=wrap;fontFamily=Microsoft YaHei;fontColor=#20384e;fontSize=22;spacing=10;fillColor=#ebf6f0;strokeColor=#7baa95;strokeWidth=1.5;&quot; vertex=&quot;1&quot; parent=&quot;1&quot;&gt;
+      &lt;mxGeometry x=&quot;1210&quot; y=&quot;1460&quot; width=&quot;330&quot; height=&quot;100&quot; as=&quot;geometry&quot; /&gt;
+    &lt;/mxCell&gt;
+    &lt;mxCell id=&quot;request_label&quot; value=&quot;阶段请求&quot; style=&quot;text;html=1;whiteSpace=wrap;align=left;verticalAlign=middle;fontFamily=Microsoft YaHei;fontSize=20;fontColor=#bb772d;strokeColor=none;fillColor=#ffffff;&quot; vertex=&quot;1&quot; parent=&quot;1&quot;&gt;
+      &lt;mxGeometry x=&quot;40&quot; y=&quot;1008&quot; width=&quot;140&quot; height=&quot;30&quot; as=&quot;geometry&quot; /&gt;
+    &lt;/mxCell&gt;
+    &lt;mxCell id=&quot;ac_cmd&quot; value=&quot;互谱 / PHAT指令&quot; style=&quot;text;html=1;whiteSpace=wrap;align=center;verticalAlign=middle;fontFamily=Microsoft YaHei;fontSize=19;fontColor=#bb772d;strokeColor=none;fillColor=#ffffff;&quot; vertex=&quot;1&quot; parent=&quot;1&quot;&gt;
+      &lt;mxGeometry x=&quot;1050&quot; y=&quot;425&quot; width=&quot;250&quot; height=&quot;30&quot; as=&quot;geometry&quot; /&gt;
+    &lt;/mxCell&gt;
+    &lt;mxCell id=&quot;srp_cmd&quot; value=&quot;SRP门铃&quot; style=&quot;text;html=1;whiteSpace=wrap;align=center;verticalAlign=middle;fontFamily=Microsoft YaHei;fontSize=19;fontColor=#bb772d;strokeColor=none;fillColor=#ffffff;&quot; vertex=&quot;1&quot; parent=&quot;1&quot;&gt;
+      &lt;mxGeometry x=&quot;485&quot; y=&quot;1050&quot; width=&quot;160&quot; height=&quot;30&quot; as=&quot;geometry&quot; /&gt;
+    &lt;/mxCell&gt;
+    &lt;mxCell id=&quot;audio_cpu&quot; value=&quot;CPU向量指令也接同一仲裁入口；在线GSC在PS端执行。&quot; style=&quot;text;html=1;whiteSpace=wrap;align=left;verticalAlign=middle;fontFamily=Microsoft YaHei;fontSize=20;fontColor=#62788c;strokeColor=none;fillColor=none;&quot; vertex=&quot;1&quot; parent=&quot;1&quot;&gt;
+      &lt;mxGeometry x=&quot;70&quot; y=&quot;1325&quot; width=&quot;1000&quot; height=&quot;30&quot; as=&quot;geometry&quot; /&gt;
+    &lt;/mxCell&gt;
+    &lt;mxCell id=&quot;note&quot; value=&quot;说明：右侧实线由RTL搬运状态机组织；频谱不经通用寄存器逐字搬运。逆变换框表示复用同一FFT核。&quot; style=&quot;text;html=1;whiteSpace=wrap;align=left;verticalAlign=middle;fontFamily=Microsoft YaHei;fontSize=20;fontColor=#62788c;strokeColor=none;fillColor=none;&quot; vertex=&quot;1&quot; parent=&quot;1&quot;&gt;
+      &lt;mxGeometry x=&quot;50&quot; y=&quot;1645&quot; width=&quot;1500&quot; height=&quot;40&quot; as=&quot;geometry&quot; /&gt;
+    &lt;/mxCell&gt;
+  &lt;/root&gt;
+&lt;/mxGraphModel&gt;">
+<title>九麦工程：软核、声学执行单元与片上数据通路</title>
+<rect width="1600" height="1710" fill="white"/>
+<defs><marker id="data-arrow" markerUnits="userSpaceOnUse" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="10" markerHeight="10" orient="auto-start-reverse"><path d="M1 1 L9 5 L1 9 Z" fill="#62788c"/></marker><marker id="control-arrow" markerUnits="userSpaceOnUse" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="10" markerHeight="10" orient="auto-start-reverse"><path d="M1 1 L9 5 L1 9 Z" fill="#bb772d"/></marker></defs>
+<text x="52" y="59.2" font-family="Microsoft YaHei,SimHei,sans-serif" font-size="32" font-weight="700" text-anchor="start" fill="#20384e">九麦工程：软核、声学执行单元与片上数据通路</text>
+<text x="52" y="104.35" font-family="Microsoft YaHei,SimHei,sans-serif" font-size="21" font-weight="400" text-anchor="start" fill="#62788c">蓝色实线搬运声音数据；橙色虚线发出计算指令、请求或交接通知。</text>
+<path d="M50 130 H1550" stroke="#dce5ec" stroke-width="1"/>
+<rect x="35" y="155" width="400" height="840" rx="14" fill="#fff5e7" fill-opacity=".40" stroke="#dce5ed"/>
+<text x="55" y="193.05" font-family="Microsoft YaHei,SimHei,sans-serif" font-size="23" font-weight="700" text-anchor="start" fill="#20384e">软核负责：发指令、检查与发布</text>
+<rect x="500" y="155" width="1065" height="1170" rx="14" fill="#edf4fc" fill-opacity=".40" stroke="#dce5ed"/>
+<text x="520" y="193.05" font-family="Microsoft YaHei,SimHei,sans-serif" font-size="23" font-weight="700" text-anchor="start" fill="#20384e">九麦定位：缓存与声学计算的实际连接</text>
+<rect x="35" y="1370" width="1530" height="230" rx="14" fill="#ebf6f0" fill-opacity=".40" stroke="#dce5ed"/>
+<text x="55" y="1408.05" font-family="Microsoft YaHei,SimHei,sans-serif" font-size="23" font-weight="700" text-anchor="start" fill="#20384e">连续拾音：与CPU共用核内八路实数SIMD</text>
+<path d="M235.0,380 L235.0,485" fill="none" stroke="#bb772d" stroke-width="1.8" stroke-linejoin="round" stroke-dasharray="7 6" marker-end="url(#control-arrow)"/>
+<path d="M235.0,630 L235.0,795" fill="none" stroke="#bb772d" stroke-width="1.8" stroke-linejoin="round" stroke-dasharray="7 6" marker-end="url(#control-arrow)"/>
+<path d="M825,297.5 L900,297.5" fill="none" stroke="#62788c" stroke-width="1.8" stroke-linejoin="round" marker-end="url(#data-arrow)"/>
+<path d="M1217.5,360 L1217.5,402.0 Q1217.5,410 1209.5,410.0 L683.0,410.0 Q675,410 675.0,418.0 L675.0,500" fill="none" stroke="#62788c" stroke-width="1.8" stroke-linejoin="round" marker-end="url(#data-arrow)"/>
+<path d="M825,570.0 L880,570.0" fill="none" stroke="#62788c" stroke-width="1.8" stroke-linejoin="round" marker-end="url(#data-arrow)"/>
+<path d="M1180,570.0 L1235,570.0" fill="none" stroke="#62788c" stroke-width="1.8" stroke-linejoin="round" marker-end="url(#data-arrow)"/>
+<path d="M1385.0,640 L1385.0,805" fill="none" stroke="#62788c" stroke-width="1.8" stroke-linejoin="round" marker-end="url(#data-arrow)"/>
+<path d="M1235,867.5 L1180,867.5" fill="none" stroke="#62788c" stroke-width="1.8" stroke-linejoin="round" marker-end="url(#data-arrow)"/>
+<path d="M880,867.5 L825,867.5" fill="none" stroke="#62788c" stroke-width="1.8" stroke-linejoin="round" marker-end="url(#data-arrow)"/>
+<path d="M675.0,930 L675.0,1125" fill="none" stroke="#62788c" stroke-width="1.8" stroke-linejoin="round" marker-end="url(#data-arrow)"/>
+<path d="M825,1202.5 L880,1202.5" fill="none" stroke="#62788c" stroke-width="1.8" stroke-linejoin="round" marker-end="url(#data-arrow)"/>
+<path d="M1180,1202.5 L1235,1202.5" fill="none" stroke="#62788c" stroke-width="1.8" stroke-linejoin="round" marker-end="url(#data-arrow)"/>
+<path d="M235.0,940 L235.0,1080" fill="none" stroke="#bb772d" stroke-width="1.8" stroke-linejoin="round" stroke-dasharray="7 6" marker-end="url(#control-arrow)"/>
+<path d="M55,1157.5 L28.0,1157.5 Q20,1157.5 20.0,1149.5 L20.0,565.5 Q20,557.5 28.0,557.5 L55,557.5" fill="none" stroke="#bb772d" stroke-width="1.8" stroke-linejoin="round" stroke-dasharray="7 6" marker-end="url(#control-arrow)"/>
+<path d="M415,557.5 L463.75,557.5 Q470,557.5 470.0,563.75 L470.0,563.75 Q470,570 476.25,570.0 L525,570.0" fill="none" stroke="#bb772d" stroke-width="1.8" stroke-linejoin="round" stroke-dasharray="7 6" marker-end="url(#control-arrow)"/>
+<path d="M415,521.25 L447.0,521.25 Q455,521.25 455.0,513.25 L455.0,458.0 Q455,450 463.0,450.0 L1377.0,450.0 Q1385,450 1385.0,458.0 L1385.0,500" fill="none" stroke="#bb772d" stroke-width="1.8" stroke-linejoin="round" stroke-dasharray="7 6" marker-end="url(#control-arrow)"/>
+<path d="M415,601.0 L477.0,601.0 Q485,601 485.0,609.0 L485.0,1194.5 Q485,1202.5 493.0,1202.5 L525,1202.5" fill="none" stroke="#bb772d" stroke-width="1.8" stroke-linejoin="round" stroke-dasharray="7 6" marker-end="url(#control-arrow)"/>
+<path d="M385,1510.0 L440,1510.0" fill="none" stroke="#62788c" stroke-width="1.8" stroke-linejoin="round" marker-end="url(#data-arrow)"/>
+<path d="M770,1510.0 L825,1510.0" fill="none" stroke="#62788c" stroke-width="1.8" stroke-linejoin="round" marker-end="url(#data-arrow)"/>
+<path d="M1155,1510.0 L1210,1510.0" fill="none" stroke="#62788c" stroke-width="1.8" stroke-linejoin="round" marker-end="url(#data-arrow)"/>
+<rect x="55" y="235" width="360" height="145" rx="11" fill="#fff5e7" stroke="#cda56e" stroke-width="1.5"/>
+<text x="235.0" y="264.5" font-family="Microsoft YaHei,SimHei,sans-serif" text-anchor="middle" font-size="26" font-weight="700" fill="#20384e">五级RISC-V与固件</text>
+<text x="235.0" y="298.5" font-family="Microsoft YaHei,SimHei,sans-serif" text-anchor="middle" font-size="22" font-weight="400" fill="#20384e">IF → ID → EX → MEM → WB</text>
+<text x="235.0" y="332.5" font-family="Microsoft YaHei,SimHei,sans-serif" text-anchor="middle" font-size="22" font-weight="400" fill="#20384e">寄存器、前递、ALU及乘除法</text>
+<text x="235.0" y="366.5" font-family="Microsoft YaHei,SimHei,sans-serif" text-anchor="middle" font-size="22" font-weight="400" fill="#20384e">按定位请求选择计算阶段</text>
+<rect x="55" y="485" width="360" height="145" rx="11" fill="#fff5e7" stroke="#cda56e" stroke-width="1.5"/>
+<text x="235.0" y="514.5" font-family="Microsoft YaHei,SimHei,sans-serif" text-anchor="middle" font-size="26" font-weight="700" fill="#20384e">自定义指令发射</text>
+<text x="235.0" y="548.5" font-family="Microsoft YaHei,SimHei,sans-serif" text-anchor="middle" font-size="22" font-weight="400" fill="#20384e">VFFT：正 / 逆变换</text>
+<text x="235.0" y="582.5" font-family="Microsoft YaHei,SimHei,sans-serif" text-anchor="middle" font-size="22" font-weight="400" fill="#20384e">VSUB：共轭互谱；VPHAT</text>
+<text x="235.0" y="616.5" font-family="Microsoft YaHei,SimHei,sans-serif" text-anchor="middle" font-size="22" font-weight="400" fill="#20384e">VLOC：启动核外SRP</text>
+<rect x="55" y="795" width="360" height="145" rx="11" fill="#fff5e7" stroke="#cda56e" stroke-width="1.5"/>
+<text x="235.0" y="824.5" font-family="Microsoft YaHei,SimHei,sans-serif" text-anchor="middle" font-size="26" font-weight="700" fill="#20384e">指令完成与退休交接</text>
+<text x="235.0" y="858.5" font-family="Microsoft YaHei,SimHei,sans-serif" text-anchor="middle" font-size="22" font-weight="400" fill="#20384e">运算完成、流水线接纳结果</text>
+<text x="235.0" y="892.5" font-family="Microsoft YaHei,SimHei,sans-serif" text-anchor="middle" font-size="22" font-weight="400" fill="#20384e">FFT / 互谱 / PHAT指令退休</text>
+<text x="235.0" y="926.5" font-family="Microsoft YaHei,SimHei,sans-serif" text-anchor="middle" font-size="22" font-weight="400" fill="#20384e">才通知RTL进入下一搬运阶段</text>
+<rect x="525" y="235" width="300" height="125" rx="11" fill="#f3f6f9" stroke="#9babbc" stroke-width="1.5"/>
+<text x="675.0" y="271.5" font-family="Microsoft YaHei,SimHei,sans-serif" text-anchor="middle" font-size="26" font-weight="700" fill="#20384e">原始PCM环形缓存</text>
+<text x="675.0" y="305.5" font-family="Microsoft YaHei,SimHei,sans-serif" text-anchor="middle" font-size="22" font-weight="400" fill="#20384e">九路PCM按样本序号写入</text>
+<text x="675.0" y="339.5" font-family="Microsoft YaHei,SimHei,sans-serif" text-anchor="middle" font-size="22" font-weight="400" fill="#20384e">1024点窗口，512点步长</text>
+<rect x="900" y="235" width="635" height="125" rx="11" fill="#edf4fc" stroke="#87a7ca" stroke-width="1.5"/>
+<text x="1217.5" y="271.5" font-family="Microsoft YaHei,SimHei,sans-serif" text-anchor="middle" font-size="26" font-weight="700" fill="#20384e">滚动统计与输入准备</text>
+<text x="1217.5" y="305.5" font-family="Microsoft YaHei,SimHei,sans-serif" text-anchor="middle" font-size="22" font-weight="400" fill="#20384e">采集时累积统计；窗就绪后去均值、缩放、加窗</text>
+<text x="1217.5" y="339.5" font-family="Microsoft YaHei,SimHei,sans-serif" text-anchor="middle" font-size="22" font-weight="400" fill="#20384e">两实数打包为一复数，装入FFT</text>
+<rect x="525" y="500" width="300" height="140" rx="11" fill="#edf4fc" stroke="#87a7ca" stroke-width="1.5"/>
+<text x="675.0" y="544.0" font-family="Microsoft YaHei,SimHei,sans-serif" text-anchor="middle" font-size="26" font-weight="700" fill="#20384e">核内共享FFT / IFFT</text>
+<text x="675.0" y="578.0" font-family="Microsoft YaHei,SimHei,sans-serif" text-anchor="middle" font-size="22" font-weight="400" fill="#20384e">1024点实数 ↔ 512点复数</text>
+<text x="675.0" y="612.0" font-family="Microsoft YaHei,SimHei,sans-serif" text-anchor="middle" font-size="22" font-weight="400" fill="#20384e">此处先执行九路正变换</text>
+<rect x="880" y="500" width="300" height="140" rx="11" fill="#f3f6f9" stroke="#9babbc" stroke-width="1.5"/>
+<text x="1030.0" y="544.0" font-family="Microsoft YaHei,SimHei,sans-serif" text-anchor="middle" font-size="26" font-weight="700" fill="#20384e">九路频谱缓存</text>
+<text x="1030.0" y="578.0" font-family="Microsoft YaHei,SimHei,sans-serif" text-anchor="middle" font-size="22" font-weight="400" fill="#20384e">每通道缓存64个频点</text>
+<text x="1030.0" y="612.0" font-family="Microsoft YaHei,SimHei,sans-serif" text-anchor="middle" font-size="22" font-weight="400" fill="#20384e">36麦对复用九路频谱</text>
+<rect x="1235" y="500" width="300" height="140" rx="11" fill="#edf4fc" stroke="#87a7ca" stroke-width="1.5"/>
+<text x="1385.0" y="544.0" font-family="Microsoft YaHei,SimHei,sans-serif" text-anchor="middle" font-size="26" font-weight="700" fill="#20384e">核内四路复数单元</text>
+<text x="1385.0" y="578.0" font-family="Microsoft YaHei,SimHei,sans-serif" text-anchor="middle" font-size="22" font-weight="400" fill="#20384e">读入当前麦对的两路频谱</text>
+<text x="1385.0" y="612.0" font-family="Microsoft YaHei,SimHei,sans-serif" text-anchor="middle" font-size="22" font-weight="400" fill="#20384e">共轭互谱 → PHAT归一化</text>
+<rect x="1235" y="805" width="300" height="125" rx="11" fill="#f3f6f9" stroke="#9babbc" stroke-width="1.5"/>
+<text x="1385.0" y="841.5" font-family="Microsoft YaHei,SimHei,sans-serif" text-anchor="middle" font-size="26" font-weight="700" fill="#20384e">归一化互谱缓存</text>
+<text x="1385.0" y="875.5" font-family="Microsoft YaHei,SimHei,sans-serif" text-anchor="middle" font-size="22" font-weight="400" fill="#20384e">保存当前麦对结果</text>
+<text x="1385.0" y="909.5" font-family="Microsoft YaHei,SimHei,sans-serif" text-anchor="middle" font-size="22" font-weight="400" fill="#20384e">补零后装入同一FFT核</text>
+<rect x="880" y="805" width="300" height="125" rx="11" fill="#edf4fc" stroke="#87a7ca" stroke-width="1.5"/>
+<text x="1030.0" y="841.5" font-family="Microsoft YaHei,SimHei,sans-serif" text-anchor="middle" font-size="26" font-weight="700" fill="#20384e">逆变换复用FFT核</text>
+<text x="1030.0" y="875.5" font-family="Microsoft YaHei,SimHei,sans-serif" text-anchor="middle" font-size="22" font-weight="400" fill="#20384e">不新增第二个FFT实例</text>
+<text x="1030.0" y="909.5" font-family="Microsoft YaHei,SimHei,sans-serif" text-anchor="middle" font-size="22" font-weight="400" fill="#20384e">只取定位需要的相关区间</text>
+<rect x="525" y="805" width="300" height="125" rx="11" fill="#f3f6f9" stroke="#9babbc" stroke-width="1.5"/>
+<text x="675.0" y="841.5" font-family="Microsoft YaHei,SimHei,sans-serif" text-anchor="middle" font-size="26" font-weight="700" fill="#20384e">36麦对相关环</text>
+<text x="675.0" y="875.5" font-family="Microsoft YaHei,SimHei,sans-serif" text-anchor="middle" font-size="22" font-weight="400" fill="#20384e">每麦对保留64个相关值</text>
+<text x="675.0" y="909.5" font-family="Microsoft YaHei,SimHei,sans-serif" text-anchor="middle" font-size="22" font-weight="400" fill="#20384e">按麦对写入SRP相关分区</text>
+<rect x="525" y="1125" width="300" height="155" rx="11" fill="#edf4fc" stroke="#87a7ca" stroke-width="1.5"/>
+<text x="675.0" y="1159.5" font-family="Microsoft YaHei,SimHei,sans-serif" text-anchor="middle" font-size="26" font-weight="700" fill="#20384e">核外四麦对并行SRP</text>
+<text x="675.0" y="1193.5" font-family="Microsoft YaHei,SimHei,sans-serif" text-anchor="middle" font-size="22" font-weight="400" fill="#20384e">相关分区 + 方向时差表</text>
+<text x="675.0" y="1227.5" font-family="Microsoft YaHei,SimHei,sans-serif" text-anchor="middle" font-size="22" font-weight="400" fill="#20384e">四麦对插值、求和后累加</text>
+<text x="675.0" y="1261.5" font-family="Microsoft YaHei,SimHei,sans-serif" text-anchor="middle" font-size="22" font-weight="400" fill="#20384e">36麦对 → 1024方向评分</text>
+<rect x="880" y="1125" width="300" height="155" rx="11" fill="#f3f6f9" stroke="#9babbc" stroke-width="1.5"/>
+<text x="1030.0" y="1176.5" font-family="Microsoft YaHei,SimHei,sans-serif" text-anchor="middle" font-size="26" font-weight="700" fill="#20384e">方向评分与统计读口</text>
+<text x="1030.0" y="1210.5" font-family="Microsoft YaHei,SimHei,sans-serif" text-anchor="middle" font-size="22" font-weight="400" fill="#20384e">片上评分存储、质量统计</text>
+<text x="1030.0" y="1244.5" font-family="Microsoft YaHei,SimHei,sans-serif" text-anchor="middle" font-size="22" font-weight="400" fill="#20384e">供软核遍历及结果复核</text>
+<rect x="1235" y="1125" width="300" height="155" rx="11" fill="#fff5e7" stroke="#cda56e" stroke-width="1.5"/>
+<text x="1385.0" y="1159.5" font-family="Microsoft YaHei,SimHei,sans-serif" text-anchor="middle" font-size="26" font-weight="700" fill="#20384e">固件发布完整方向图</text>
+<text x="1385.0" y="1193.5" font-family="Microsoft YaHei,SimHei,sans-serif" text-anchor="middle" font-size="22" font-weight="400" fill="#20384e">检查幅度、峰值与截止期</text>
+<text x="1385.0" y="1227.5" font-family="Microsoft YaHei,SimHei,sans-serif" text-anchor="middle" font-size="22" font-weight="400" fill="#20384e">写入结果区并切换版本</text>
+<text x="1385.0" y="1261.5" font-family="Microsoft YaHei,SimHei,sans-serif" text-anchor="middle" font-size="22" font-weight="400" fill="#20384e">PS读取方向图和状态</text>
+<rect x="55" y="1080" width="360" height="155" rx="11" fill="#f3f6f9" stroke="#9babbc" stroke-width="1.5"/>
+<text x="235.0" y="1114.5" font-family="Microsoft YaHei,SimHei,sans-serif" text-anchor="middle" font-size="26" font-weight="700" fill="#20384e">RTL搬运状态机</text>
+<text x="235.0" y="1148.5" font-family="Microsoft YaHei,SimHei,sans-serif" text-anchor="middle" font-size="22" font-weight="400" fill="#20384e">提交当前阶段请求</text>
+<text x="235.0" y="1182.5" font-family="Microsoft YaHei,SimHei,sans-serif" text-anchor="middle" font-size="22" font-weight="400" fill="#20384e">推进地址、装载 / 取回 / 转存</text>
+<text x="235.0" y="1216.5" font-family="Microsoft YaHei,SimHei,sans-serif" text-anchor="middle" font-size="22" font-weight="400" fill="#20384e">管理右侧缓存与核内搬运端口</text>
+<rect x="55" y="1460" width="330" height="100" rx="11" fill="#ebf6f0" stroke="#7baa95" stroke-width="1.5"/>
+<text x="220.0" y="1501.0" font-family="Microsoft YaHei,SimHei,sans-serif" text-anchor="middle" font-size="26" font-weight="700" fill="#20384e">九路DAS输出</text>
+<text x="220.0" y="1535.0" font-family="Microsoft YaHei,SimHei,sans-serif" text-anchor="middle" font-size="22" font-weight="400" fill="#20384e">按方向补偿后叠加的逐样音频</text>
+<rect x="440" y="1460" width="330" height="100" rx="11" fill="#ebf6f0" stroke="#7baa95" stroke-width="1.5"/>
+<text x="605.0" y="1501.0" font-family="Microsoft YaHei,SimHei,sans-serif" text-anchor="middle" font-size="26" font-weight="700" fill="#20384e">音频 / CPU请求仲裁</text>
+<text x="605.0" y="1535.0" font-family="Microsoft YaHei,SimHei,sans-serif" text-anchor="middle" font-size="22" font-weight="400" fill="#20384e">音频与向量指令互斥使用</text>
+<rect x="825" y="1447.5" width="330" height="125" rx="11" fill="#ebf6f0" stroke="#7baa95" stroke-width="1.5"/>
+<text x="990.0" y="1484.0" font-family="Microsoft YaHei,SimHei,sans-serif" text-anchor="middle" font-size="26" font-weight="700" fill="#20384e">核内八路实数SIMD</text>
+<text x="990.0" y="1518.0" font-family="Microsoft YaHei,SimHei,sans-serif" text-anchor="middle" font-size="22" font-weight="400" fill="#20384e">历史、系数分区存储</text>
+<text x="990.0" y="1552.0" font-family="Microsoft YaHei,SimHei,sans-serif" text-anchor="middle" font-size="22" font-weight="400" fill="#20384e">32抽头分4趟计算</text>
+<rect x="1210" y="1460" width="330" height="100" rx="11" fill="#ebf6f0" stroke="#7baa95" stroke-width="1.5"/>
+<text x="1375.0" y="1501.0" font-family="Microsoft YaHei,SimHei,sans-serif" text-anchor="middle" font-size="26" font-weight="700" fill="#20384e">连续FIR输出</text>
+<text x="1375.0" y="1535.0" font-family="Microsoft YaHei,SimHei,sans-serif" text-anchor="middle" font-size="22" font-weight="400" fill="#20384e">Q15缩放饱和 → 采样打包</text>
+<rect x="40" y="1008" width="140" height="30" rx="3" fill="white"/>
+<text x="42" y="1030.0" font-family="Microsoft YaHei,SimHei,sans-serif" font-size="20" font-weight="400" text-anchor="start" fill="#bb772d">阶段请求</text>
+<rect x="1050" y="425" width="250" height="30" rx="3" fill="white"/>
+<text x="1175.0" y="446.65" font-family="Microsoft YaHei,SimHei,sans-serif" font-size="19" font-weight="400" text-anchor="middle" fill="#bb772d">互谱 / PHAT指令</text>
+<rect x="485" y="1050" width="160" height="30" rx="3" fill="white"/>
+<text x="565.0" y="1071.65" font-family="Microsoft YaHei,SimHei,sans-serif" font-size="19" font-weight="400" text-anchor="middle" fill="#bb772d">SRP门铃</text>
+<text x="72" y="1347.0" font-family="Microsoft YaHei,SimHei,sans-serif" font-size="20" font-weight="400" text-anchor="start" fill="#62788c">CPU向量指令也接同一仲裁入口；在线GSC在PS端执行。</text>
+<text x="52" y="1672.0" font-family="Microsoft YaHei,SimHei,sans-serif" font-size="20" font-weight="400" text-anchor="start" fill="#62788c">说明：右侧实线由RTL搬运状态机组织；频谱不经通用寄存器逐字搬运。逆变换框表示复用同一FFT核。</text>
+</svg>

@@ -1,0 +1,102 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="970" viewBox="0 0 1200 970" content="&lt;mxGraphModel adaptiveColors=&quot;auto&quot; page=&quot;1&quot; pageWidth=&quot;1200&quot; pageHeight=&quot;970&quot; grid=&quot;1&quot; gridSize=&quot;10&quot;&gt;
+  &lt;root&gt;
+    &lt;mxCell id=&quot;0&quot; /&gt;
+    &lt;mxCell id=&quot;1&quot; parent=&quot;0&quot; /&gt;
+    &lt;mxCell id=&quot;title&quot; value=&quot;九麦阵列声孔与通道布局&quot; style=&quot;text;html=1;whiteSpace=wrap;align=left;verticalAlign=middle;fontFamily=Microsoft YaHei;fontSize=32;fontColor=#20384e;strokeColor=none;fillColor=none;fontStyle=1;&quot; vertex=&quot;1&quot; parent=&quot;1&quot;&gt;
+      &lt;mxGeometry x=&quot;50&quot; y=&quot;24&quot; width=&quot;1100&quot; height=&quot;48&quot; as=&quot;geometry&quot; /&gt;
+    &lt;/mxCell&gt;
+    &lt;mxCell id=&quot;subtitle&quot; value=&quot;正面观察：+x向右，+y向上，+z朝向声源；通道顺序与实际采集保持一致。&quot; style=&quot;text;html=1;whiteSpace=wrap;align=left;verticalAlign=middle;fontFamily=Microsoft YaHei;fontSize=21;fontColor=#62788c;strokeColor=none;fillColor=none;&quot; vertex=&quot;1&quot; parent=&quot;1&quot;&gt;
+      &lt;mxGeometry x=&quot;50&quot; y=&quot;78&quot; width=&quot;1100&quot; height=&quot;38&quot; as=&quot;geometry&quot; /&gt;
+    &lt;/mxCell&gt;
+    &lt;mxCell id=&quot;sizes&quot; value=&quot;&quot; style=&quot;rounded=1;arcSize=5;html=1;fillColor=#f3f6f9;fillOpacity=40;strokeColor=#dce5ed;strokeWidth=1;&quot; vertex=&quot;1&quot; parent=&quot;1&quot;&gt;
+      &lt;mxGeometry x=&quot;125.0&quot; y=&quot;820.0&quot; width=&quot;950.0&quot; height=&quot;80.0&quot; as=&quot;geometry&quot; /&gt;
+    &lt;/mxCell&gt;
+    &lt;mxCell id=&quot;sizes-heading&quot; value=&quot;坐标来源与通道映射&quot; style=&quot;text;html=1;whiteSpace=wrap;align=left;verticalAlign=middle;fontFamily=Microsoft YaHei;fontSize=23;fontColor=#20384e;strokeColor=none;fillColor=none;fontStyle=1;&quot; vertex=&quot;1&quot; parent=&quot;1&quot;&gt;
+      &lt;mxGeometry x=&quot;143.0&quot; y=&quot;832.0&quot; width=&quot;914.0&quot; height=&quot;36&quot; as=&quot;geometry&quot; /&gt;
+    &lt;/mxCell&gt;
+    &lt;mxCell id=&quot;axis_x&quot; edge=&quot;1&quot; parent=&quot;1&quot; style=&quot;html=1;strokeColor=#c5d1dc;strokeWidth=1.4;endArrow=none;dashed=1;&quot;&gt;
+      &lt;mxGeometry relative=&quot;1&quot; as=&quot;geometry&quot;&gt;
+        &lt;mxPoint x=&quot;300.0&quot; y=&quot;485.0&quot; as=&quot;sourcePoint&quot; /&gt;
+        &lt;mxPoint x=&quot;900.0&quot; y=&quot;485.0&quot; as=&quot;targetPoint&quot; /&gt;
+      &lt;/mxGeometry&gt;
+    &lt;/mxCell&gt;
+    &lt;mxCell id=&quot;axis_y&quot; edge=&quot;1&quot; parent=&quot;1&quot; style=&quot;html=1;strokeColor=#c5d1dc;strokeWidth=1.4;endArrow=none;dashed=1;&quot;&gt;
+      &lt;mxGeometry relative=&quot;1&quot; as=&quot;geometry&quot;&gt;
+        &lt;mxPoint x=&quot;600.0&quot; y=&quot;175.0&quot; as=&quot;sourcePoint&quot; /&gt;
+        &lt;mxPoint x=&quot;600.0&quot; y=&quot;790.0&quot; as=&quot;targetPoint&quot; /&gt;
+      &lt;/mxGeometry&gt;
+    &lt;/mxCell&gt;
+    &lt;mxCell id=&quot;ch0&quot; value=&quot;&amp;lt;b style=&amp;quot;font-size:24.1px&amp;quot;&amp;gt;CH0 / U1&amp;lt;/b&amp;gt;&quot; style=&quot;ellipse;html=1;whiteSpace=wrap;fontFamily=Microsoft YaHei;fontColor=#20384e;fontSize=22;spacing=10;fillColor=#edf4fc;strokeColor=#87a7ca;strokeWidth=1.5;&quot; vertex=&quot;1&quot; parent=&quot;1&quot;&gt;
+      &lt;mxGeometry x=&quot;535.0&quot; y=&quot;710.08052&quot; width=&quot;130.0&quot; height=&quot;68.0&quot; as=&quot;geometry&quot; /&gt;
+    &lt;/mxCell&gt;
+    &lt;mxCell id=&quot;ch1&quot; value=&quot;&amp;lt;b style=&amp;quot;font-size:24.1px&amp;quot;&amp;gt;CH1 / U2&amp;lt;/b&amp;gt;&quot; style=&quot;ellipse;html=1;whiteSpace=wrap;fontFamily=Microsoft YaHei;fontColor=#20384e;fontSize=22;spacing=10;fillColor=#edf4fc;strokeColor=#87a7ca;strokeWidth=1.5;&quot; vertex=&quot;1&quot; parent=&quot;1&quot;&gt;
+      &lt;mxGeometry x=&quot;369.89967&quot; y=&quot;608.48031&quot; width=&quot;130.0&quot; height=&quot;68.0&quot; as=&quot;geometry&quot; /&gt;
+    &lt;/mxCell&gt;
+    &lt;mxCell id=&quot;ch2&quot; value=&quot;&amp;lt;b style=&amp;quot;font-size:24.1px&amp;quot;&amp;gt;CH2 / U3&amp;lt;/b&amp;gt;&quot; style=&quot;ellipse;html=1;whiteSpace=wrap;fontFamily=Microsoft YaHei;fontColor=#20384e;fontSize=22;spacing=10;fillColor=#edf4fc;strokeColor=#87a7ca;strokeWidth=1.5;&quot; vertex=&quot;1&quot; parent=&quot;1&quot;&gt;
+      &lt;mxGeometry x=&quot;314.01955999999996&quot; y=&quot;451.0&quot; width=&quot;130.0&quot; height=&quot;68.0&quot; as=&quot;geometry&quot; /&gt;
+    &lt;/mxCell&gt;
+    &lt;mxCell id=&quot;ch3&quot; value=&quot;&amp;lt;b style=&amp;quot;font-size:24.1px&amp;quot;&amp;gt;CH3 / U4&amp;lt;/b&amp;gt;&quot; style=&quot;ellipse;html=1;whiteSpace=wrap;fontFamily=Microsoft YaHei;fontColor=#20384e;fontSize=22;spacing=10;fillColor=#edf4fc;strokeColor=#87a7ca;strokeWidth=1.5;&quot; vertex=&quot;1&quot; parent=&quot;1&quot;&gt;
+      &lt;mxGeometry x=&quot;372.43967&quot; y=&quot;289.70968000000005&quot; width=&quot;130.0&quot; height=&quot;68.0&quot; as=&quot;geometry&quot; /&gt;
+    &lt;/mxCell&gt;
+    &lt;mxCell id=&quot;ch4&quot; value=&quot;&amp;lt;b style=&amp;quot;font-size:24.1px&amp;quot;&amp;gt;CH4 / U5&amp;lt;/b&amp;gt;&quot; style=&quot;ellipse;html=1;whiteSpace=wrap;fontFamily=Microsoft YaHei;fontColor=#20384e;fontSize=22;spacing=10;fillColor=#edf4fc;strokeColor=#87a7ca;strokeWidth=1.5;&quot; vertex=&quot;1&quot; parent=&quot;1&quot;&gt;
+      &lt;mxGeometry x=&quot;703.91034&quot; y=&quot;608.48031&quot; width=&quot;130.0&quot; height=&quot;68.0&quot; as=&quot;geometry&quot; /&gt;
+    &lt;/mxCell&gt;
+    &lt;mxCell id=&quot;ch5&quot; value=&quot;&amp;lt;b style=&amp;quot;font-size:24.1px&amp;quot;&amp;gt;CH5 / U6&amp;lt;/b&amp;gt;&quot; style=&quot;ellipse;html=1;whiteSpace=wrap;fontFamily=Microsoft YaHei;fontColor=#20384e;fontSize=22;spacing=10;fillColor=#edf4fc;strokeColor=#87a7ca;strokeWidth=1.5;&quot; vertex=&quot;1&quot; parent=&quot;1&quot;&gt;
+      &lt;mxGeometry x=&quot;754.7104400000001&quot; y=&quot;451.0&quot; width=&quot;130.0&quot; height=&quot;68.0&quot; as=&quot;geometry&quot; /&gt;
+    &lt;/mxCell&gt;
+    &lt;mxCell id=&quot;ch6&quot; value=&quot;&amp;lt;b style=&amp;quot;font-size:24.1px&amp;quot;&amp;gt;CH6 / U7&amp;lt;/b&amp;gt;&quot; style=&quot;ellipse;html=1;whiteSpace=wrap;fontFamily=Microsoft YaHei;fontColor=#20384e;fontSize=22;spacing=10;fillColor=#edf4fc;strokeColor=#87a7ca;strokeWidth=1.5;&quot; vertex=&quot;1&quot; parent=&quot;1&quot;&gt;
+      &lt;mxGeometry x=&quot;701.37033&quot; y=&quot;289.70968000000005&quot; width=&quot;130.0&quot; height=&quot;68.0&quot; as=&quot;geometry&quot; /&gt;
+    &lt;/mxCell&gt;
+    &lt;mxCell id=&quot;ch7&quot; value=&quot;&amp;lt;b style=&amp;quot;font-size:24.1px&amp;quot;&amp;gt;CH7 / U8&amp;lt;/b&amp;gt;&quot; style=&quot;ellipse;html=1;whiteSpace=wrap;fontFamily=Microsoft YaHei;fontColor=#20384e;fontSize=22;spacing=10;fillColor=#edf4fc;strokeColor=#87a7ca;strokeWidth=1.5;&quot; vertex=&quot;1&quot; parent=&quot;1&quot;&gt;
+      &lt;mxGeometry x=&quot;533.73&quot; y=&quot;190.64947999999998&quot; width=&quot;130.0&quot; height=&quot;68.0&quot; as=&quot;geometry&quot; /&gt;
+    &lt;/mxCell&gt;
+    &lt;mxCell id=&quot;ch8&quot; value=&quot;&amp;lt;b style=&amp;quot;font-size:24.1px&amp;quot;&amp;gt;CH8 / U9&amp;lt;/b&amp;gt;&quot; style=&quot;ellipse;html=1;whiteSpace=wrap;fontFamily=Microsoft YaHei;fontColor=#20384e;fontSize=22;spacing=10;fillColor=#ebf6f0;strokeColor=#7baa95;strokeWidth=1.5;&quot; vertex=&quot;1&quot; parent=&quot;1&quot;&gt;
+      &lt;mxGeometry x=&quot;535.0&quot; y=&quot;451.0&quot; width=&quot;130.0&quot; height=&quot;68.0&quot; as=&quot;geometry&quot; /&gt;
+    &lt;/mxCell&gt;
+    &lt;mxCell id=&quot;axis_x_text&quot; value=&quot;+x&quot; style=&quot;text;html=1;whiteSpace=wrap;align=center;verticalAlign=middle;fontFamily=Microsoft YaHei;fontSize=23.0;fontColor=#62788c;strokeColor=none;fillColor=none;&quot; vertex=&quot;1&quot; parent=&quot;1&quot;&gt;
+      &lt;mxGeometry x=&quot;910.0&quot; y=&quot;467.0&quot; width=&quot;55.0&quot; height=&quot;34.0&quot; as=&quot;geometry&quot; /&gt;
+    &lt;/mxCell&gt;
+    &lt;mxCell id=&quot;axis_y_text&quot; value=&quot;+y&quot; style=&quot;text;html=1;whiteSpace=wrap;align=center;verticalAlign=middle;fontFamily=Microsoft YaHei;fontSize=23.0;fontColor=#62788c;strokeColor=none;fillColor=none;&quot; vertex=&quot;1&quot; parent=&quot;1&quot;&gt;
+      &lt;mxGeometry x=&quot;575.0&quot; y=&quot;145.0&quot; width=&quot;55.0&quot; height=&quot;34.0&quot; as=&quot;geometry&quot; /&gt;
+    &lt;/mxCell&gt;
+    &lt;mxCell id=&quot;sizes_text&quot; value=&quot;2026-10-31逐麦x、y配置；z = 0平面模型&quot; style=&quot;text;html=1;whiteSpace=wrap;align=left;verticalAlign=middle;fontFamily=Microsoft YaHei;fontSize=20;fontColor=#62788c;strokeColor=none;fillColor=none;&quot; vertex=&quot;1&quot; parent=&quot;1&quot;&gt;
+      &lt;mxGeometry x=&quot;145&quot; y=&quot;866&quot; width=&quot;910&quot; height=&quot;30&quot; as=&quot;geometry&quot; /&gt;
+    &lt;/mxCell&gt;
+    &lt;mxCell id=&quot;note&quot; value=&quot;图中通道顺序与配置保持一致；坐标用于生成时差及拾音补偿表。&quot; style=&quot;text;html=1;whiteSpace=wrap;align=left;verticalAlign=middle;fontFamily=Microsoft YaHei;fontSize=20.0;fontColor=#62788c;strokeColor=none;fillColor=none;&quot; vertex=&quot;1&quot; parent=&quot;1&quot;&gt;
+      &lt;mxGeometry x=&quot;50.0&quot; y=&quot;905.0&quot; width=&quot;1100.0&quot; height=&quot;40.0&quot; as=&quot;geometry&quot; /&gt;
+    &lt;/mxCell&gt;
+  &lt;/root&gt;
+&lt;/mxGraphModel&gt;">
+<title>九麦阵列声孔与通道布局</title>
+<rect width="1200" height="970" fill="white"/>
+<defs><marker id="data-arrow" markerUnits="userSpaceOnUse" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="10" markerHeight="10" orient="auto-start-reverse"><path d="M1 1 L9 5 L1 9 Z" fill="#62788c"/></marker><marker id="control-arrow" markerUnits="userSpaceOnUse" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="10" markerHeight="10" orient="auto-start-reverse"><path d="M1 1 L9 5 L1 9 Z" fill="#bb772d"/></marker></defs>
+<text x="52" y="59.2" font-family="Microsoft YaHei,SimHei,sans-serif" font-size="32" font-weight="700" text-anchor="start" fill="#20384e">九麦阵列声孔与通道布局</text>
+<text x="52" y="104.35" font-family="Microsoft YaHei,SimHei,sans-serif" font-size="21" font-weight="400" text-anchor="start" fill="#62788c">正面观察：+x向右，+y向上，+z朝向声源；通道顺序与实际采集保持一致。</text>
+<path d="M50 130 H1150" stroke="#dce5ec" stroke-width="1"/>
+<rect x="125.0" y="820.0" width="950.0" height="80.0" rx="14" fill="#f3f6f9" fill-opacity=".40" stroke="#dce5ed"/>
+<text x="145.0" y="858.05" font-family="Microsoft YaHei,SimHei,sans-serif" font-size="23" font-weight="700" text-anchor="start" fill="#20384e">坐标来源与通道映射</text>
+<polyline points="300.0,485.0 900.0,485.0" fill="none" stroke="#c5d1dc" stroke-width="1.4" stroke-dasharray="5 6"/>
+<polyline points="600.0,175.0 600.0,790.0" fill="none" stroke="#c5d1dc" stroke-width="1.4" stroke-dasharray="5 6"/>
+<ellipse cx="600.0" cy="744.08052" rx="65.0" ry="34.0" fill="#edf4fc" stroke="#87a7ca" stroke-width="1.5"/>
+<text x="600.0" y="752.08052" font-family="Microsoft YaHei,SimHei,sans-serif" text-anchor="middle" font-size="24.056603773584904" font-weight="700" fill="#20384e">CH0 / U1</text>
+<ellipse cx="434.89967" cy="642.48031" rx="65.0" ry="34.0" fill="#edf4fc" stroke="#87a7ca" stroke-width="1.5"/>
+<text x="434.89967" y="650.48031" font-family="Microsoft YaHei,SimHei,sans-serif" text-anchor="middle" font-size="24.056603773584904" font-weight="700" fill="#20384e">CH1 / U2</text>
+<ellipse cx="379.01955999999996" cy="485.0" rx="65.0" ry="34.0" fill="#edf4fc" stroke="#87a7ca" stroke-width="1.5"/>
+<text x="379.01955999999996" y="493.0" font-family="Microsoft YaHei,SimHei,sans-serif" text-anchor="middle" font-size="24.056603773584904" font-weight="700" fill="#20384e">CH2 / U3</text>
+<ellipse cx="437.43967" cy="323.70968000000005" rx="65.0" ry="34.0" fill="#edf4fc" stroke="#87a7ca" stroke-width="1.5"/>
+<text x="437.43967" y="331.70968000000005" font-family="Microsoft YaHei,SimHei,sans-serif" text-anchor="middle" font-size="24.056603773584904" font-weight="700" fill="#20384e">CH3 / U4</text>
+<ellipse cx="768.91034" cy="642.48031" rx="65.0" ry="34.0" fill="#edf4fc" stroke="#87a7ca" stroke-width="1.5"/>
+<text x="768.91034" y="650.48031" font-family="Microsoft YaHei,SimHei,sans-serif" text-anchor="middle" font-size="24.056603773584904" font-weight="700" fill="#20384e">CH4 / U5</text>
+<ellipse cx="819.7104400000001" cy="485.0" rx="65.0" ry="34.0" fill="#edf4fc" stroke="#87a7ca" stroke-width="1.5"/>
+<text x="819.7104400000001" y="493.0" font-family="Microsoft YaHei,SimHei,sans-serif" text-anchor="middle" font-size="24.056603773584904" font-weight="700" fill="#20384e">CH5 / U6</text>
+<ellipse cx="766.37033" cy="323.70968000000005" rx="65.0" ry="34.0" fill="#edf4fc" stroke="#87a7ca" stroke-width="1.5"/>
+<text x="766.37033" y="331.70968000000005" font-family="Microsoft YaHei,SimHei,sans-serif" text-anchor="middle" font-size="24.056603773584904" font-weight="700" fill="#20384e">CH6 / U7</text>
+<ellipse cx="598.73" cy="224.64947999999998" rx="65.0" ry="34.0" fill="#edf4fc" stroke="#87a7ca" stroke-width="1.5"/>
+<text x="598.73" y="232.64947999999998" font-family="Microsoft YaHei,SimHei,sans-serif" text-anchor="middle" font-size="24.056603773584904" font-weight="700" fill="#20384e">CH7 / U8</text>
+<ellipse cx="600.0" cy="485.0" rx="65.0" ry="34.0" fill="#ebf6f0" stroke="#7baa95" stroke-width="1.5"/>
+<text x="600.0" y="493.0" font-family="Microsoft YaHei,SimHei,sans-serif" text-anchor="middle" font-size="24.056603773584904" font-weight="700" fill="#20384e">CH8 / U9</text>
+<text x="937.5" y="492.05" font-family="Microsoft YaHei,SimHei,sans-serif" font-size="23.0" font-weight="400" text-anchor="middle" fill="#62788c">+x</text>
+<text x="602.5" y="170.05" font-family="Microsoft YaHei,SimHei,sans-serif" font-size="23.0" font-weight="400" text-anchor="middle" fill="#62788c">+y</text>
+<text x="147" y="888.0" font-family="Microsoft YaHei,SimHei,sans-serif" font-size="20" font-weight="400" text-anchor="start" fill="#62788c">2026-10-31逐麦x、y配置；z = 0平面模型</text>
+<text x="52.0" y="932.0" font-family="Microsoft YaHei,SimHei,sans-serif" font-size="20.0" font-weight="400" text-anchor="start" fill="#62788c">图中通道顺序与配置保持一致；坐标用于生成时差及拾音补偿表。</text>
+</svg>

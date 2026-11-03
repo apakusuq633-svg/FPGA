@@ -1,9 +1,0 @@
-benchmark,fixture,variant,iteration,order_in_round,wall_ms
-search,single_wideband,reference,0,0,7.4826
-search,single_wideband,precomputed_only,0,1,7.5939
-search,single_wideband,paired_ifft_only,0,2,7.773
-search,single_wideband,combined,0,3,5.7291
-search,single_wideband,paired_ifft_only,1,0,6.9886
-search,single_wideband,precomputed_only,1,1,7.339
-search,single_wideband,combined,1,2,6.4295
-search,single_wideband,reference,1,3,7.9735

@@ -1,0 +1,39 @@
+{
+  "scope": "Read-only artifact, arithmetic and document checks; no timing rerun",
+  "PL_production_hashes": 187,
+  "PL_artifacts": 91,
+  "PL_drivers": 3,
+  "scalar_artifacts": 373,
+  "primitive_artifacts": 65,
+  "summary_evidence": 7,
+  "summary_rows": 30,
+  "same_window_score_speedup": 134.1692206814484,
+  "ps_software/verify_results.py": {
+    "passed": true,
+    "scope": "read-only artifact/statistics/numerical check; no performance rerun",
+    "timing_rows": 592,
+    "timing_groups": 12,
+    "artifact_hashes_checked": 55,
+    "production_source_hashes_checked": 15,
+    "division_quotients_checked": 131072,
+    "results_sha256": "ff082906b82f6eab18fa7782b9a2039bcb2956232cd314d0adb9c1ada3ba4be0"
+  },
+  "ps_software/full_modules/verify_full_results.py": {
+    "passed": true,
+    "scope": "read-only hashes/CSV/statistics/recorded validity; no timing rerun",
+    "rows": 93,
+    "groups": 3,
+    "artifact_hashes_checked": 18,
+    "production_source_hashes_checked": 15,
+    "results_sha256": "4ca2b222b3d243796a05545b1c5d61e9d9b540c84f9b597022f84f45d01f9d9c"
+  },
+  "document": {
+    "first_part_synced": true,
+    "template_top_sections": 6,
+    "local_links_checked": 14,
+    "other_markdown_document_links": 0,
+    "source_code_excerpts": 0,
+    "chart_bars_match_measured_cycles": true
+  },
+  "passed": true
+}

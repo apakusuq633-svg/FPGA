@@ -1,0 +1,8 @@
+SRP_THROUGHPUT pairs=5 grids=1 fast=4 round=0 cycles=22
+SRP_THROUGHPUT pairs=5 grids=1 fast=4 round=1 cycles=22
+SRP_THROUGHPUT pairs=5 grids=1 fast=4 round=2 cycles=22
+SRP_THROUGHPUT pairs=7 grids=17 fast=4 round=0 cycles=54
+SRP_THROUGHPUT pairs=7 grids=17 fast=4 round=1 cycles=54
+SRP_THROUGHPUT pairs=7 grids=17 fast=4 round=2 cycles=54
+SRP_PARALLEL4_EDGES_PASS partial_group_single_grid_restart_abort=1
+C:\Users\lenovo\Desktop\FPGA_PDM\FPGA\xyf_workbench\zynq_-pl_-simd_-verilog\tb\tb_srp_throughput.v:68: $finish called at 8560000 (1ps)

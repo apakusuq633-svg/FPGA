@@ -1,0 +1,9 @@
+{
+  "passed": true,
+  "scope": "read-only hashes/CSV/statistics/recorded validity; no timing rerun",
+  "rows": 93,
+  "groups": 3,
+  "artifact_hashes_checked": 18,
+  "production_source_hashes_checked": 15,
+  "results_sha256": "4ca2b222b3d243796a05545b1c5d61e9d9b540c84f9b597022f84f45d01f9d9c"
+}

@@ -1,0 +1,2 @@
+FATAL: C:\Users\lenovo\Desktop\FPGA_PDM\FPGA\xyf_workbench\zynq_-pl_-simd_-verilog\tb\tb_fft_sparse.v:101: sparse/full case=0 mode=0 word=0 sparse=01c001d2 full=ff320142
+       Time: 30490000  Scope: tb_fft_sparse

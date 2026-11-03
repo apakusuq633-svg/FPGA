@@ -1,0 +1,1494 @@
+{
+  "performance_comparison/circular9_scalar/__pycache__/run_scalar.cpython-314.pyc": {
+    "bytes": 17875,
+    "sha256": "f62cd7de57b85384ecffefcbda421fb826036b648babfa9616447b7472723ae4"
+  },
+  "performance_comparison/circular9_scalar/c9_scalar.c": {
+    "bytes": 4482,
+    "sha256": "4fdd94806b09cf3271fa4f145b7642c1dde97c159032b518491e34fdbdcec7fa"
+  },
+  "performance_comparison/circular9_scalar/c9_scalar.h": {
+    "bytes": 778,
+    "sha256": "5f7f6e1bd4e04c2cc584c538193deae1a999ad38668c3307b0905c85d1ab0493"
+  },
+  "performance_comparison/circular9_scalar/c9_scalar_host.exe": {
+    "bytes": 52874,
+    "sha256": "66d3eb2af5723b34d7521c7e218faee9edab46a9e8940d2b053177ee7d77a45b"
+  },
+  "performance_comparison/circular9_scalar/comparison.csv": {
+    "bytes": 381,
+    "sha256": "ddcd4b4d3010e72e61a60c12f20fc349fc3175de603b9d7ece5624cc2348ffaa"
+  },
+  "performance_comparison/circular9_scalar/comparison_summary.json": {
+    "bytes": 4956,
+    "sha256": "a6e2ad6499318a274693a19fa79997db8cf299ca071dc104045d80dc6845a8e0"
+  },
+  "performance_comparison/circular9_scalar/hann_q14.h": {
+    "bytes": 5439,
+    "sha256": "e1205b10b6cb6dd0d46e41fca2fe021fadf61891ad3cfcad1875685f1ccbcf0d"
+  },
+  "performance_comparison/circular9_scalar/host_bench.c": {
+    "bytes": 2535,
+    "sha256": "faf23e7d917f9d61f941e6c14694a9e2d6b8ecf14695132eb103577040d4d9df"
+  },
+  "performance_comparison/circular9_scalar/host_compile.log": {
+    "bytes": 668,
+    "sha256": "991c8c606742b67751dd4c85dec8a0dbb52727b76bad89c7ba5b461bc7095ad9"
+  },
+  "performance_comparison/circular9_scalar/host_output/correlation.bin": {
+    "bytes": 4608,
+    "sha256": "572466b1b09a6c1be8336f532422dc7b86ccdcf94ffc1ddb4aee5524c122bd36"
+  },
+  "performance_comparison/circular9_scalar/host_output/scores.bin": {
+    "bytes": 4096,
+    "sha256": "aeb9c750fb4d96a200cd6756a99356b9b66be1c0ae02b09b1824d5eaf5a3b2eb"
+  },
+  "performance_comparison/circular9_scalar/host_output/spectrum.bin": {
+    "bytes": 2304,
+    "sha256": "d7e65947815ad39a07de5680001a385de42cb5484cc6f737cdff6c0353c7be93"
+  },
+  "performance_comparison/circular9_scalar/host_output/statistics.bin": {
+    "bytes": 180,
+    "sha256": "191fc7c8d7752d3f8210840fd7a21476cbdd4fb7b9e059e4a382fbe6aa556b7e"
+  },
+  "performance_comparison/circular9_scalar/host_timing.log": {
+    "bytes": 1066,
+    "sha256": "a40f8970e2659cb84a5843d19e5227298011d38005530375c623358772460829"
+  },
+  "performance_comparison/circular9_scalar/host_validation.log": {
+    "bytes": 447,
+    "sha256": "57c0238e9384508c783cf44766b9c804eabe53e3c6ad918a4aa7efa074e2ce90"
+  },
+  "performance_comparison/circular9_scalar/host_windows/window_1/correlation.bin": {
+    "bytes": 4608,
+    "sha256": "572466b1b09a6c1be8336f532422dc7b86ccdcf94ffc1ddb4aee5524c122bd36"
+  },
+  "performance_comparison/circular9_scalar/host_windows/window_1/input.pcm": {
+    "bytes": 18432,
+    "sha256": "4f0dfc58c9fe1041e30bbf218c33fc64b5004f7752c5d9f3c134cdee222b8bdf"
+  },
+  "performance_comparison/circular9_scalar/host_windows/window_1/scores.bin": {
+    "bytes": 4096,
+    "sha256": "aeb9c750fb4d96a200cd6756a99356b9b66be1c0ae02b09b1824d5eaf5a3b2eb"
+  },
+  "performance_comparison/circular9_scalar/host_windows/window_1/spectrum.bin": {
+    "bytes": 2304,
+    "sha256": "d7e65947815ad39a07de5680001a385de42cb5484cc6f737cdff6c0353c7be93"
+  },
+  "performance_comparison/circular9_scalar/host_windows/window_1/statistics.bin": {
+    "bytes": 180,
+    "sha256": "191fc7c8d7752d3f8210840fd7a21476cbdd4fb7b9e059e4a382fbe6aa556b7e"
+  },
+  "performance_comparison/circular9_scalar/host_windows/window_10/correlation.bin": {
+    "bytes": 4608,
+    "sha256": "572466b1b09a6c1be8336f532422dc7b86ccdcf94ffc1ddb4aee5524c122bd36"
+  },
+  "performance_comparison/circular9_scalar/host_windows/window_10/input.pcm": {
+    "bytes": 18432,
+    "sha256": "4f0dfc58c9fe1041e30bbf218c33fc64b5004f7752c5d9f3c134cdee222b8bdf"
+  },
+  "performance_comparison/circular9_scalar/host_windows/window_10/scores.bin": {
+    "bytes": 4096,
+    "sha256": "aeb9c750fb4d96a200cd6756a99356b9b66be1c0ae02b09b1824d5eaf5a3b2eb"
+  },
+  "performance_comparison/circular9_scalar/host_windows/window_10/spectrum.bin": {
+    "bytes": 2304,
+    "sha256": "d7e65947815ad39a07de5680001a385de42cb5484cc6f737cdff6c0353c7be93"
+  },
+  "performance_comparison/circular9_scalar/host_windows/window_10/statistics.bin": {
+    "bytes": 180,
+    "sha256": "191fc7c8d7752d3f8210840fd7a21476cbdd4fb7b9e059e4a382fbe6aa556b7e"
+  },
+  "performance_comparison/circular9_scalar/host_windows/window_11/correlation.bin": {
+    "bytes": 4608,
+    "sha256": "572466b1b09a6c1be8336f532422dc7b86ccdcf94ffc1ddb4aee5524c122bd36"
+  },
+  "performance_comparison/circular9_scalar/host_windows/window_11/input.pcm": {
+    "bytes": 18432,
+    "sha256": "4f0dfc58c9fe1041e30bbf218c33fc64b5004f7752c5d9f3c134cdee222b8bdf"
+  },
+  "performance_comparison/circular9_scalar/host_windows/window_11/scores.bin": {
+    "bytes": 4096,
+    "sha256": "aeb9c750fb4d96a200cd6756a99356b9b66be1c0ae02b09b1824d5eaf5a3b2eb"
+  },
+  "performance_comparison/circular9_scalar/host_windows/window_11/spectrum.bin": {
+    "bytes": 2304,
+    "sha256": "d7e65947815ad39a07de5680001a385de42cb5484cc6f737cdff6c0353c7be93"
+  },
+  "performance_comparison/circular9_scalar/host_windows/window_11/statistics.bin": {
+    "bytes": 180,
+    "sha256": "191fc7c8d7752d3f8210840fd7a21476cbdd4fb7b9e059e4a382fbe6aa556b7e"
+  },
+  "performance_comparison/circular9_scalar/host_windows/window_12/correlation.bin": {
+    "bytes": 4608,
+    "sha256": "572466b1b09a6c1be8336f532422dc7b86ccdcf94ffc1ddb4aee5524c122bd36"
+  },
+  "performance_comparison/circular9_scalar/host_windows/window_12/input.pcm": {
+    "bytes": 18432,
+    "sha256": "4f0dfc58c9fe1041e30bbf218c33fc64b5004f7752c5d9f3c134cdee222b8bdf"
+  },
+  "performance_comparison/circular9_scalar/host_windows/window_12/scores.bin": {
+    "bytes": 4096,
+    "sha256": "aeb9c750fb4d96a200cd6756a99356b9b66be1c0ae02b09b1824d5eaf5a3b2eb"
+  },
+  "performance_comparison/circular9_scalar/host_windows/window_12/spectrum.bin": {
+    "bytes": 2304,
+    "sha256": "d7e65947815ad39a07de5680001a385de42cb5484cc6f737cdff6c0353c7be93"
+  },
+  "performance_comparison/circular9_scalar/host_windows/window_12/statistics.bin": {
+    "bytes": 180,
+    "sha256": "191fc7c8d7752d3f8210840fd7a21476cbdd4fb7b9e059e4a382fbe6aa556b7e"
+  },
+  "performance_comparison/circular9_scalar/host_windows/window_13/correlation.bin": {
+    "bytes": 4608,
+    "sha256": "572466b1b09a6c1be8336f532422dc7b86ccdcf94ffc1ddb4aee5524c122bd36"
+  },
+  "performance_comparison/circular9_scalar/host_windows/window_13/input.pcm": {
+    "bytes": 18432,
+    "sha256": "4f0dfc58c9fe1041e30bbf218c33fc64b5004f7752c5d9f3c134cdee222b8bdf"
+  },
+  "performance_comparison/circular9_scalar/host_windows/window_13/scores.bin": {
+    "bytes": 4096,
+    "sha256": "aeb9c750fb4d96a200cd6756a99356b9b66be1c0ae02b09b1824d5eaf5a3b2eb"
+  },
+  "performance_comparison/circular9_scalar/host_windows/window_13/spectrum.bin": {
+    "bytes": 2304,
+    "sha256": "d7e65947815ad39a07de5680001a385de42cb5484cc6f737cdff6c0353c7be93"
+  },
+  "performance_comparison/circular9_scalar/host_windows/window_13/statistics.bin": {
+    "bytes": 180,
+    "sha256": "191fc7c8d7752d3f8210840fd7a21476cbdd4fb7b9e059e4a382fbe6aa556b7e"
+  },
+  "performance_comparison/circular9_scalar/host_windows/window_14/correlation.bin": {
+    "bytes": 4608,
+    "sha256": "572466b1b09a6c1be8336f532422dc7b86ccdcf94ffc1ddb4aee5524c122bd36"
+  },
+  "performance_comparison/circular9_scalar/host_windows/window_14/input.pcm": {
+    "bytes": 18432,
+    "sha256": "4f0dfc58c9fe1041e30bbf218c33fc64b5004f7752c5d9f3c134cdee222b8bdf"
+  },
+  "performance_comparison/circular9_scalar/host_windows/window_14/scores.bin": {
+    "bytes": 4096,
+    "sha256": "aeb9c750fb4d96a200cd6756a99356b9b66be1c0ae02b09b1824d5eaf5a3b2eb"
+  },
+  "performance_comparison/circular9_scalar/host_windows/window_14/spectrum.bin": {
+    "bytes": 2304,
+    "sha256": "d7e65947815ad39a07de5680001a385de42cb5484cc6f737cdff6c0353c7be93"
+  },
+  "performance_comparison/circular9_scalar/host_windows/window_14/statistics.bin": {
+    "bytes": 180,
+    "sha256": "191fc7c8d7752d3f8210840fd7a21476cbdd4fb7b9e059e4a382fbe6aa556b7e"
+  },
+  "performance_comparison/circular9_scalar/host_windows/window_15/correlation.bin": {
+    "bytes": 4608,
+    "sha256": "572466b1b09a6c1be8336f532422dc7b86ccdcf94ffc1ddb4aee5524c122bd36"
+  },
+  "performance_comparison/circular9_scalar/host_windows/window_15/input.pcm": {
+    "bytes": 18432,
+    "sha256": "4f0dfc58c9fe1041e30bbf218c33fc64b5004f7752c5d9f3c134cdee222b8bdf"
+  },
+  "performance_comparison/circular9_scalar/host_windows/window_15/scores.bin": {
+    "bytes": 4096,
+    "sha256": "aeb9c750fb4d96a200cd6756a99356b9b66be1c0ae02b09b1824d5eaf5a3b2eb"
+  },
+  "performance_comparison/circular9_scalar/host_windows/window_15/spectrum.bin": {
+    "bytes": 2304,
+    "sha256": "d7e65947815ad39a07de5680001a385de42cb5484cc6f737cdff6c0353c7be93"
+  },
+  "performance_comparison/circular9_scalar/host_windows/window_15/statistics.bin": {
+    "bytes": 180,
+    "sha256": "191fc7c8d7752d3f8210840fd7a21476cbdd4fb7b9e059e4a382fbe6aa556b7e"
+  },
+  "performance_comparison/circular9_scalar/host_windows/window_16/correlation.bin": {
+    "bytes": 4608,
+    "sha256": "572466b1b09a6c1be8336f532422dc7b86ccdcf94ffc1ddb4aee5524c122bd36"
+  },
+  "performance_comparison/circular9_scalar/host_windows/window_16/input.pcm": {
+    "bytes": 18432,
+    "sha256": "4f0dfc58c9fe1041e30bbf218c33fc64b5004f7752c5d9f3c134cdee222b8bdf"
+  },
+  "performance_comparison/circular9_scalar/host_windows/window_16/scores.bin": {
+    "bytes": 4096,
+    "sha256": "aeb9c750fb4d96a200cd6756a99356b9b66be1c0ae02b09b1824d5eaf5a3b2eb"
+  },
+  "performance_comparison/circular9_scalar/host_windows/window_16/spectrum.bin": {
+    "bytes": 2304,
+    "sha256": "d7e65947815ad39a07de5680001a385de42cb5484cc6f737cdff6c0353c7be93"
+  },
+  "performance_comparison/circular9_scalar/host_windows/window_16/statistics.bin": {
+    "bytes": 180,
+    "sha256": "191fc7c8d7752d3f8210840fd7a21476cbdd4fb7b9e059e4a382fbe6aa556b7e"
+  },
+  "performance_comparison/circular9_scalar/host_windows/window_17/correlation.bin": {
+    "bytes": 4608,
+    "sha256": "572466b1b09a6c1be8336f532422dc7b86ccdcf94ffc1ddb4aee5524c122bd36"
+  },
+  "performance_comparison/circular9_scalar/host_windows/window_17/input.pcm": {
+    "bytes": 18432,
+    "sha256": "4f0dfc58c9fe1041e30bbf218c33fc64b5004f7752c5d9f3c134cdee222b8bdf"
+  },
+  "performance_comparison/circular9_scalar/host_windows/window_17/scores.bin": {
+    "bytes": 4096,
+    "sha256": "aeb9c750fb4d96a200cd6756a99356b9b66be1c0ae02b09b1824d5eaf5a3b2eb"
+  },
+  "performance_comparison/circular9_scalar/host_windows/window_17/spectrum.bin": {
+    "bytes": 2304,
+    "sha256": "d7e65947815ad39a07de5680001a385de42cb5484cc6f737cdff6c0353c7be93"
+  },
+  "performance_comparison/circular9_scalar/host_windows/window_17/statistics.bin": {
+    "bytes": 180,
+    "sha256": "191fc7c8d7752d3f8210840fd7a21476cbdd4fb7b9e059e4a382fbe6aa556b7e"
+  },
+  "performance_comparison/circular9_scalar/host_windows/window_18/correlation.bin": {
+    "bytes": 4608,
+    "sha256": "572466b1b09a6c1be8336f532422dc7b86ccdcf94ffc1ddb4aee5524c122bd36"
+  },
+  "performance_comparison/circular9_scalar/host_windows/window_18/input.pcm": {
+    "bytes": 18432,
+    "sha256": "4f0dfc58c9fe1041e30bbf218c33fc64b5004f7752c5d9f3c134cdee222b8bdf"
+  },
+  "performance_comparison/circular9_scalar/host_windows/window_18/scores.bin": {
+    "bytes": 4096,
+    "sha256": "aeb9c750fb4d96a200cd6756a99356b9b66be1c0ae02b09b1824d5eaf5a3b2eb"
+  },
+  "performance_comparison/circular9_scalar/host_windows/window_18/spectrum.bin": {
+    "bytes": 2304,
+    "sha256": "d7e65947815ad39a07de5680001a385de42cb5484cc6f737cdff6c0353c7be93"
+  },
+  "performance_comparison/circular9_scalar/host_windows/window_18/statistics.bin": {
+    "bytes": 180,
+    "sha256": "191fc7c8d7752d3f8210840fd7a21476cbdd4fb7b9e059e4a382fbe6aa556b7e"
+  },
+  "performance_comparison/circular9_scalar/host_windows/window_19/correlation.bin": {
+    "bytes": 4608,
+    "sha256": "572466b1b09a6c1be8336f532422dc7b86ccdcf94ffc1ddb4aee5524c122bd36"
+  },
+  "performance_comparison/circular9_scalar/host_windows/window_19/input.pcm": {
+    "bytes": 18432,
+    "sha256": "4f0dfc58c9fe1041e30bbf218c33fc64b5004f7752c5d9f3c134cdee222b8bdf"
+  },
+  "performance_comparison/circular9_scalar/host_windows/window_19/scores.bin": {
+    "bytes": 4096,
+    "sha256": "aeb9c750fb4d96a200cd6756a99356b9b66be1c0ae02b09b1824d5eaf5a3b2eb"
+  },
+  "performance_comparison/circular9_scalar/host_windows/window_19/spectrum.bin": {
+    "bytes": 2304,
+    "sha256": "d7e65947815ad39a07de5680001a385de42cb5484cc6f737cdff6c0353c7be93"
+  },
+  "performance_comparison/circular9_scalar/host_windows/window_19/statistics.bin": {
+    "bytes": 180,
+    "sha256": "191fc7c8d7752d3f8210840fd7a21476cbdd4fb7b9e059e4a382fbe6aa556b7e"
+  },
+  "performance_comparison/circular9_scalar/host_windows/window_2/correlation.bin": {
+    "bytes": 4608,
+    "sha256": "572466b1b09a6c1be8336f532422dc7b86ccdcf94ffc1ddb4aee5524c122bd36"
+  },
+  "performance_comparison/circular9_scalar/host_windows/window_2/input.pcm": {
+    "bytes": 18432,
+    "sha256": "4f0dfc58c9fe1041e30bbf218c33fc64b5004f7752c5d9f3c134cdee222b8bdf"
+  },
+  "performance_comparison/circular9_scalar/host_windows/window_2/scores.bin": {
+    "bytes": 4096,
+    "sha256": "aeb9c750fb4d96a200cd6756a99356b9b66be1c0ae02b09b1824d5eaf5a3b2eb"
+  },
+  "performance_comparison/circular9_scalar/host_windows/window_2/spectrum.bin": {
+    "bytes": 2304,
+    "sha256": "d7e65947815ad39a07de5680001a385de42cb5484cc6f737cdff6c0353c7be93"
+  },
+  "performance_comparison/circular9_scalar/host_windows/window_2/statistics.bin": {
+    "bytes": 180,
+    "sha256": "191fc7c8d7752d3f8210840fd7a21476cbdd4fb7b9e059e4a382fbe6aa556b7e"
+  },
+  "performance_comparison/circular9_scalar/host_windows/window_20/correlation.bin": {
+    "bytes": 4608,
+    "sha256": "572466b1b09a6c1be8336f532422dc7b86ccdcf94ffc1ddb4aee5524c122bd36"
+  },
+  "performance_comparison/circular9_scalar/host_windows/window_20/input.pcm": {
+    "bytes": 18432,
+    "sha256": "4f0dfc58c9fe1041e30bbf218c33fc64b5004f7752c5d9f3c134cdee222b8bdf"
+  },
+  "performance_comparison/circular9_scalar/host_windows/window_20/scores.bin": {
+    "bytes": 4096,
+    "sha256": "aeb9c750fb4d96a200cd6756a99356b9b66be1c0ae02b09b1824d5eaf5a3b2eb"
+  },
+  "performance_comparison/circular9_scalar/host_windows/window_20/spectrum.bin": {
+    "bytes": 2304,
+    "sha256": "d7e65947815ad39a07de5680001a385de42cb5484cc6f737cdff6c0353c7be93"
+  },
+  "performance_comparison/circular9_scalar/host_windows/window_20/statistics.bin": {
+    "bytes": 180,
+    "sha256": "191fc7c8d7752d3f8210840fd7a21476cbdd4fb7b9e059e4a382fbe6aa556b7e"
+  },
+  "performance_comparison/circular9_scalar/host_windows/window_21/correlation.bin": {
+    "bytes": 4608,
+    "sha256": "572466b1b09a6c1be8336f532422dc7b86ccdcf94ffc1ddb4aee5524c122bd36"
+  },
+  "performance_comparison/circular9_scalar/host_windows/window_21/input.pcm": {
+    "bytes": 18432,
+    "sha256": "4f0dfc58c9fe1041e30bbf218c33fc64b5004f7752c5d9f3c134cdee222b8bdf"
+  },
+  "performance_comparison/circular9_scalar/host_windows/window_21/scores.bin": {
+    "bytes": 4096,
+    "sha256": "aeb9c750fb4d96a200cd6756a99356b9b66be1c0ae02b09b1824d5eaf5a3b2eb"
+  },
+  "performance_comparison/circular9_scalar/host_windows/window_21/spectrum.bin": {
+    "bytes": 2304,
+    "sha256": "d7e65947815ad39a07de5680001a385de42cb5484cc6f737cdff6c0353c7be93"
+  },
+  "performance_comparison/circular9_scalar/host_windows/window_21/statistics.bin": {
+    "bytes": 180,
+    "sha256": "191fc7c8d7752d3f8210840fd7a21476cbdd4fb7b9e059e4a382fbe6aa556b7e"
+  },
+  "performance_comparison/circular9_scalar/host_windows/window_22/correlation.bin": {
+    "bytes": 4608,
+    "sha256": "572466b1b09a6c1be8336f532422dc7b86ccdcf94ffc1ddb4aee5524c122bd36"
+  },
+  "performance_comparison/circular9_scalar/host_windows/window_22/input.pcm": {
+    "bytes": 18432,
+    "sha256": "4f0dfc58c9fe1041e30bbf218c33fc64b5004f7752c5d9f3c134cdee222b8bdf"
+  },
+  "performance_comparison/circular9_scalar/host_windows/window_22/scores.bin": {
+    "bytes": 4096,
+    "sha256": "aeb9c750fb4d96a200cd6756a99356b9b66be1c0ae02b09b1824d5eaf5a3b2eb"
+  },
+  "performance_comparison/circular9_scalar/host_windows/window_22/spectrum.bin": {
+    "bytes": 2304,
+    "sha256": "d7e65947815ad39a07de5680001a385de42cb5484cc6f737cdff6c0353c7be93"
+  },
+  "performance_comparison/circular9_scalar/host_windows/window_22/statistics.bin": {
+    "bytes": 180,
+    "sha256": "191fc7c8d7752d3f8210840fd7a21476cbdd4fb7b9e059e4a382fbe6aa556b7e"
+  },
+  "performance_comparison/circular9_scalar/host_windows/window_23/correlation.bin": {
+    "bytes": 4608,
+    "sha256": "572466b1b09a6c1be8336f532422dc7b86ccdcf94ffc1ddb4aee5524c122bd36"
+  },
+  "performance_comparison/circular9_scalar/host_windows/window_23/input.pcm": {
+    "bytes": 18432,
+    "sha256": "4f0dfc58c9fe1041e30bbf218c33fc64b5004f7752c5d9f3c134cdee222b8bdf"
+  },
+  "performance_comparison/circular9_scalar/host_windows/window_23/scores.bin": {
+    "bytes": 4096,
+    "sha256": "aeb9c750fb4d96a200cd6756a99356b9b66be1c0ae02b09b1824d5eaf5a3b2eb"
+  },
+  "performance_comparison/circular9_scalar/host_windows/window_23/spectrum.bin": {
+    "bytes": 2304,
+    "sha256": "d7e65947815ad39a07de5680001a385de42cb5484cc6f737cdff6c0353c7be93"
+  },
+  "performance_comparison/circular9_scalar/host_windows/window_23/statistics.bin": {
+    "bytes": 180,
+    "sha256": "191fc7c8d7752d3f8210840fd7a21476cbdd4fb7b9e059e4a382fbe6aa556b7e"
+  },
+  "performance_comparison/circular9_scalar/host_windows/window_24/correlation.bin": {
+    "bytes": 4608,
+    "sha256": "572466b1b09a6c1be8336f532422dc7b86ccdcf94ffc1ddb4aee5524c122bd36"
+  },
+  "performance_comparison/circular9_scalar/host_windows/window_24/input.pcm": {
+    "bytes": 18432,
+    "sha256": "4f0dfc58c9fe1041e30bbf218c33fc64b5004f7752c5d9f3c134cdee222b8bdf"
+  },
+  "performance_comparison/circular9_scalar/host_windows/window_24/scores.bin": {
+    "bytes": 4096,
+    "sha256": "aeb9c750fb4d96a200cd6756a99356b9b66be1c0ae02b09b1824d5eaf5a3b2eb"
+  },
+  "performance_comparison/circular9_scalar/host_windows/window_24/spectrum.bin": {
+    "bytes": 2304,
+    "sha256": "d7e65947815ad39a07de5680001a385de42cb5484cc6f737cdff6c0353c7be93"
+  },
+  "performance_comparison/circular9_scalar/host_windows/window_24/statistics.bin": {
+    "bytes": 180,
+    "sha256": "191fc7c8d7752d3f8210840fd7a21476cbdd4fb7b9e059e4a382fbe6aa556b7e"
+  },
+  "performance_comparison/circular9_scalar/host_windows/window_25/correlation.bin": {
+    "bytes": 4608,
+    "sha256": "572466b1b09a6c1be8336f532422dc7b86ccdcf94ffc1ddb4aee5524c122bd36"
+  },
+  "performance_comparison/circular9_scalar/host_windows/window_25/input.pcm": {
+    "bytes": 18432,
+    "sha256": "4f0dfc58c9fe1041e30bbf218c33fc64b5004f7752c5d9f3c134cdee222b8bdf"
+  },
+  "performance_comparison/circular9_scalar/host_windows/window_25/scores.bin": {
+    "bytes": 4096,
+    "sha256": "aeb9c750fb4d96a200cd6756a99356b9b66be1c0ae02b09b1824d5eaf5a3b2eb"
+  },
+  "performance_comparison/circular9_scalar/host_windows/window_25/spectrum.bin": {
+    "bytes": 2304,
+    "sha256": "d7e65947815ad39a07de5680001a385de42cb5484cc6f737cdff6c0353c7be93"
+  },
+  "performance_comparison/circular9_scalar/host_windows/window_25/statistics.bin": {
+    "bytes": 180,
+    "sha256": "191fc7c8d7752d3f8210840fd7a21476cbdd4fb7b9e059e4a382fbe6aa556b7e"
+  },
+  "performance_comparison/circular9_scalar/host_windows/window_26/correlation.bin": {
+    "bytes": 4608,
+    "sha256": "572466b1b09a6c1be8336f532422dc7b86ccdcf94ffc1ddb4aee5524c122bd36"
+  },
+  "performance_comparison/circular9_scalar/host_windows/window_26/input.pcm": {
+    "bytes": 18432,
+    "sha256": "4f0dfc58c9fe1041e30bbf218c33fc64b5004f7752c5d9f3c134cdee222b8bdf"
+  },
+  "performance_comparison/circular9_scalar/host_windows/window_26/scores.bin": {
+    "bytes": 4096,
+    "sha256": "aeb9c750fb4d96a200cd6756a99356b9b66be1c0ae02b09b1824d5eaf5a3b2eb"
+  },
+  "performance_comparison/circular9_scalar/host_windows/window_26/spectrum.bin": {
+    "bytes": 2304,
+    "sha256": "d7e65947815ad39a07de5680001a385de42cb5484cc6f737cdff6c0353c7be93"
+  },
+  "performance_comparison/circular9_scalar/host_windows/window_26/statistics.bin": {
+    "bytes": 180,
+    "sha256": "191fc7c8d7752d3f8210840fd7a21476cbdd4fb7b9e059e4a382fbe6aa556b7e"
+  },
+  "performance_comparison/circular9_scalar/host_windows/window_27/correlation.bin": {
+    "bytes": 4608,
+    "sha256": "572466b1b09a6c1be8336f532422dc7b86ccdcf94ffc1ddb4aee5524c122bd36"
+  },
+  "performance_comparison/circular9_scalar/host_windows/window_27/input.pcm": {
+    "bytes": 18432,
+    "sha256": "4f0dfc58c9fe1041e30bbf218c33fc64b5004f7752c5d9f3c134cdee222b8bdf"
+  },
+  "performance_comparison/circular9_scalar/host_windows/window_27/scores.bin": {
+    "bytes": 4096,
+    "sha256": "aeb9c750fb4d96a200cd6756a99356b9b66be1c0ae02b09b1824d5eaf5a3b2eb"
+  },
+  "performance_comparison/circular9_scalar/host_windows/window_27/spectrum.bin": {
+    "bytes": 2304,
+    "sha256": "d7e65947815ad39a07de5680001a385de42cb5484cc6f737cdff6c0353c7be93"
+  },
+  "performance_comparison/circular9_scalar/host_windows/window_27/statistics.bin": {
+    "bytes": 180,
+    "sha256": "191fc7c8d7752d3f8210840fd7a21476cbdd4fb7b9e059e4a382fbe6aa556b7e"
+  },
+  "performance_comparison/circular9_scalar/host_windows/window_28/correlation.bin": {
+    "bytes": 4608,
+    "sha256": "572466b1b09a6c1be8336f532422dc7b86ccdcf94ffc1ddb4aee5524c122bd36"
+  },
+  "performance_comparison/circular9_scalar/host_windows/window_28/input.pcm": {
+    "bytes": 18432,
+    "sha256": "4f0dfc58c9fe1041e30bbf218c33fc64b5004f7752c5d9f3c134cdee222b8bdf"
+  },
+  "performance_comparison/circular9_scalar/host_windows/window_28/scores.bin": {
+    "bytes": 4096,
+    "sha256": "aeb9c750fb4d96a200cd6756a99356b9b66be1c0ae02b09b1824d5eaf5a3b2eb"
+  },
+  "performance_comparison/circular9_scalar/host_windows/window_28/spectrum.bin": {
+    "bytes": 2304,
+    "sha256": "d7e65947815ad39a07de5680001a385de42cb5484cc6f737cdff6c0353c7be93"
+  },
+  "performance_comparison/circular9_scalar/host_windows/window_28/statistics.bin": {
+    "bytes": 180,
+    "sha256": "191fc7c8d7752d3f8210840fd7a21476cbdd4fb7b9e059e4a382fbe6aa556b7e"
+  },
+  "performance_comparison/circular9_scalar/host_windows/window_29/correlation.bin": {
+    "bytes": 4608,
+    "sha256": "572466b1b09a6c1be8336f532422dc7b86ccdcf94ffc1ddb4aee5524c122bd36"
+  },
+  "performance_comparison/circular9_scalar/host_windows/window_29/input.pcm": {
+    "bytes": 18432,
+    "sha256": "4f0dfc58c9fe1041e30bbf218c33fc64b5004f7752c5d9f3c134cdee222b8bdf"
+  },
+  "performance_comparison/circular9_scalar/host_windows/window_29/scores.bin": {
+    "bytes": 4096,
+    "sha256": "aeb9c750fb4d96a200cd6756a99356b9b66be1c0ae02b09b1824d5eaf5a3b2eb"
+  },
+  "performance_comparison/circular9_scalar/host_windows/window_29/spectrum.bin": {
+    "bytes": 2304,
+    "sha256": "d7e65947815ad39a07de5680001a385de42cb5484cc6f737cdff6c0353c7be93"
+  },
+  "performance_comparison/circular9_scalar/host_windows/window_29/statistics.bin": {
+    "bytes": 180,
+    "sha256": "191fc7c8d7752d3f8210840fd7a21476cbdd4fb7b9e059e4a382fbe6aa556b7e"
+  },
+  "performance_comparison/circular9_scalar/host_windows/window_3/correlation.bin": {
+    "bytes": 4608,
+    "sha256": "572466b1b09a6c1be8336f532422dc7b86ccdcf94ffc1ddb4aee5524c122bd36"
+  },
+  "performance_comparison/circular9_scalar/host_windows/window_3/input.pcm": {
+    "bytes": 18432,
+    "sha256": "4f0dfc58c9fe1041e30bbf218c33fc64b5004f7752c5d9f3c134cdee222b8bdf"
+  },
+  "performance_comparison/circular9_scalar/host_windows/window_3/scores.bin": {
+    "bytes": 4096,
+    "sha256": "aeb9c750fb4d96a200cd6756a99356b9b66be1c0ae02b09b1824d5eaf5a3b2eb"
+  },
+  "performance_comparison/circular9_scalar/host_windows/window_3/spectrum.bin": {
+    "bytes": 2304,
+    "sha256": "d7e65947815ad39a07de5680001a385de42cb5484cc6f737cdff6c0353c7be93"
+  },
+  "performance_comparison/circular9_scalar/host_windows/window_3/statistics.bin": {
+    "bytes": 180,
+    "sha256": "191fc7c8d7752d3f8210840fd7a21476cbdd4fb7b9e059e4a382fbe6aa556b7e"
+  },
+  "performance_comparison/circular9_scalar/host_windows/window_30/correlation.bin": {
+    "bytes": 4608,
+    "sha256": "572466b1b09a6c1be8336f532422dc7b86ccdcf94ffc1ddb4aee5524c122bd36"
+  },
+  "performance_comparison/circular9_scalar/host_windows/window_30/input.pcm": {
+    "bytes": 18432,
+    "sha256": "4f0dfc58c9fe1041e30bbf218c33fc64b5004f7752c5d9f3c134cdee222b8bdf"
+  },
+  "performance_comparison/circular9_scalar/host_windows/window_30/scores.bin": {
+    "bytes": 4096,
+    "sha256": "aeb9c750fb4d96a200cd6756a99356b9b66be1c0ae02b09b1824d5eaf5a3b2eb"
+  },
+  "performance_comparison/circular9_scalar/host_windows/window_30/spectrum.bin": {
+    "bytes": 2304,
+    "sha256": "d7e65947815ad39a07de5680001a385de42cb5484cc6f737cdff6c0353c7be93"
+  },
+  "performance_comparison/circular9_scalar/host_windows/window_30/statistics.bin": {
+    "bytes": 180,
+    "sha256": "191fc7c8d7752d3f8210840fd7a21476cbdd4fb7b9e059e4a382fbe6aa556b7e"
+  },
+  "performance_comparison/circular9_scalar/host_windows/window_31/correlation.bin": {
+    "bytes": 4608,
+    "sha256": "572466b1b09a6c1be8336f532422dc7b86ccdcf94ffc1ddb4aee5524c122bd36"
+  },
+  "performance_comparison/circular9_scalar/host_windows/window_31/input.pcm": {
+    "bytes": 18432,
+    "sha256": "4f0dfc58c9fe1041e30bbf218c33fc64b5004f7752c5d9f3c134cdee222b8bdf"
+  },
+  "performance_comparison/circular9_scalar/host_windows/window_31/scores.bin": {
+    "bytes": 4096,
+    "sha256": "aeb9c750fb4d96a200cd6756a99356b9b66be1c0ae02b09b1824d5eaf5a3b2eb"
+  },
+  "performance_comparison/circular9_scalar/host_windows/window_31/spectrum.bin": {
+    "bytes": 2304,
+    "sha256": "d7e65947815ad39a07de5680001a385de42cb5484cc6f737cdff6c0353c7be93"
+  },
+  "performance_comparison/circular9_scalar/host_windows/window_31/statistics.bin": {
+    "bytes": 180,
+    "sha256": "191fc7c8d7752d3f8210840fd7a21476cbdd4fb7b9e059e4a382fbe6aa556b7e"
+  },
+  "performance_comparison/circular9_scalar/host_windows/window_32/correlation.bin": {
+    "bytes": 4608,
+    "sha256": "572466b1b09a6c1be8336f532422dc7b86ccdcf94ffc1ddb4aee5524c122bd36"
+  },
+  "performance_comparison/circular9_scalar/host_windows/window_32/input.pcm": {
+    "bytes": 18432,
+    "sha256": "4f0dfc58c9fe1041e30bbf218c33fc64b5004f7752c5d9f3c134cdee222b8bdf"
+  },
+  "performance_comparison/circular9_scalar/host_windows/window_32/scores.bin": {
+    "bytes": 4096,
+    "sha256": "aeb9c750fb4d96a200cd6756a99356b9b66be1c0ae02b09b1824d5eaf5a3b2eb"
+  },
+  "performance_comparison/circular9_scalar/host_windows/window_32/spectrum.bin": {
+    "bytes": 2304,
+    "sha256": "d7e65947815ad39a07de5680001a385de42cb5484cc6f737cdff6c0353c7be93"
+  },
+  "performance_comparison/circular9_scalar/host_windows/window_32/statistics.bin": {
+    "bytes": 180,
+    "sha256": "191fc7c8d7752d3f8210840fd7a21476cbdd4fb7b9e059e4a382fbe6aa556b7e"
+  },
+  "performance_comparison/circular9_scalar/host_windows/window_4/correlation.bin": {
+    "bytes": 4608,
+    "sha256": "572466b1b09a6c1be8336f532422dc7b86ccdcf94ffc1ddb4aee5524c122bd36"
+  },
+  "performance_comparison/circular9_scalar/host_windows/window_4/input.pcm": {
+    "bytes": 18432,
+    "sha256": "4f0dfc58c9fe1041e30bbf218c33fc64b5004f7752c5d9f3c134cdee222b8bdf"
+  },
+  "performance_comparison/circular9_scalar/host_windows/window_4/scores.bin": {
+    "bytes": 4096,
+    "sha256": "aeb9c750fb4d96a200cd6756a99356b9b66be1c0ae02b09b1824d5eaf5a3b2eb"
+  },
+  "performance_comparison/circular9_scalar/host_windows/window_4/spectrum.bin": {
+    "bytes": 2304,
+    "sha256": "d7e65947815ad39a07de5680001a385de42cb5484cc6f737cdff6c0353c7be93"
+  },
+  "performance_comparison/circular9_scalar/host_windows/window_4/statistics.bin": {
+    "bytes": 180,
+    "sha256": "191fc7c8d7752d3f8210840fd7a21476cbdd4fb7b9e059e4a382fbe6aa556b7e"
+  },
+  "performance_comparison/circular9_scalar/host_windows/window_5/correlation.bin": {
+    "bytes": 4608,
+    "sha256": "572466b1b09a6c1be8336f532422dc7b86ccdcf94ffc1ddb4aee5524c122bd36"
+  },
+  "performance_comparison/circular9_scalar/host_windows/window_5/input.pcm": {
+    "bytes": 18432,
+    "sha256": "4f0dfc58c9fe1041e30bbf218c33fc64b5004f7752c5d9f3c134cdee222b8bdf"
+  },
+  "performance_comparison/circular9_scalar/host_windows/window_5/scores.bin": {
+    "bytes": 4096,
+    "sha256": "aeb9c750fb4d96a200cd6756a99356b9b66be1c0ae02b09b1824d5eaf5a3b2eb"
+  },
+  "performance_comparison/circular9_scalar/host_windows/window_5/spectrum.bin": {
+    "bytes": 2304,
+    "sha256": "d7e65947815ad39a07de5680001a385de42cb5484cc6f737cdff6c0353c7be93"
+  },
+  "performance_comparison/circular9_scalar/host_windows/window_5/statistics.bin": {
+    "bytes": 180,
+    "sha256": "191fc7c8d7752d3f8210840fd7a21476cbdd4fb7b9e059e4a382fbe6aa556b7e"
+  },
+  "performance_comparison/circular9_scalar/host_windows/window_6/correlation.bin": {
+    "bytes": 4608,
+    "sha256": "572466b1b09a6c1be8336f532422dc7b86ccdcf94ffc1ddb4aee5524c122bd36"
+  },
+  "performance_comparison/circular9_scalar/host_windows/window_6/input.pcm": {
+    "bytes": 18432,
+    "sha256": "4f0dfc58c9fe1041e30bbf218c33fc64b5004f7752c5d9f3c134cdee222b8bdf"
+  },
+  "performance_comparison/circular9_scalar/host_windows/window_6/scores.bin": {
+    "bytes": 4096,
+    "sha256": "aeb9c750fb4d96a200cd6756a99356b9b66be1c0ae02b09b1824d5eaf5a3b2eb"
+  },
+  "performance_comparison/circular9_scalar/host_windows/window_6/spectrum.bin": {
+    "bytes": 2304,
+    "sha256": "d7e65947815ad39a07de5680001a385de42cb5484cc6f737cdff6c0353c7be93"
+  },
+  "performance_comparison/circular9_scalar/host_windows/window_6/statistics.bin": {
+    "bytes": 180,
+    "sha256": "191fc7c8d7752d3f8210840fd7a21476cbdd4fb7b9e059e4a382fbe6aa556b7e"
+  },
+  "performance_comparison/circular9_scalar/host_windows/window_7/correlation.bin": {
+    "bytes": 4608,
+    "sha256": "572466b1b09a6c1be8336f532422dc7b86ccdcf94ffc1ddb4aee5524c122bd36"
+  },
+  "performance_comparison/circular9_scalar/host_windows/window_7/input.pcm": {
+    "bytes": 18432,
+    "sha256": "4f0dfc58c9fe1041e30bbf218c33fc64b5004f7752c5d9f3c134cdee222b8bdf"
+  },
+  "performance_comparison/circular9_scalar/host_windows/window_7/scores.bin": {
+    "bytes": 4096,
+    "sha256": "aeb9c750fb4d96a200cd6756a99356b9b66be1c0ae02b09b1824d5eaf5a3b2eb"
+  },
+  "performance_comparison/circular9_scalar/host_windows/window_7/spectrum.bin": {
+    "bytes": 2304,
+    "sha256": "d7e65947815ad39a07de5680001a385de42cb5484cc6f737cdff6c0353c7be93"
+  },
+  "performance_comparison/circular9_scalar/host_windows/window_7/statistics.bin": {
+    "bytes": 180,
+    "sha256": "191fc7c8d7752d3f8210840fd7a21476cbdd4fb7b9e059e4a382fbe6aa556b7e"
+  },
+  "performance_comparison/circular9_scalar/host_windows/window_8/correlation.bin": {
+    "bytes": 4608,
+    "sha256": "572466b1b09a6c1be8336f532422dc7b86ccdcf94ffc1ddb4aee5524c122bd36"
+  },
+  "performance_comparison/circular9_scalar/host_windows/window_8/input.pcm": {
+    "bytes": 18432,
+    "sha256": "4f0dfc58c9fe1041e30bbf218c33fc64b5004f7752c5d9f3c134cdee222b8bdf"
+  },
+  "performance_comparison/circular9_scalar/host_windows/window_8/scores.bin": {
+    "bytes": 4096,
+    "sha256": "aeb9c750fb4d96a200cd6756a99356b9b66be1c0ae02b09b1824d5eaf5a3b2eb"
+  },
+  "performance_comparison/circular9_scalar/host_windows/window_8/spectrum.bin": {
+    "bytes": 2304,
+    "sha256": "d7e65947815ad39a07de5680001a385de42cb5484cc6f737cdff6c0353c7be93"
+  },
+  "performance_comparison/circular9_scalar/host_windows/window_8/statistics.bin": {
+    "bytes": 180,
+    "sha256": "191fc7c8d7752d3f8210840fd7a21476cbdd4fb7b9e059e4a382fbe6aa556b7e"
+  },
+  "performance_comparison/circular9_scalar/host_windows/window_9/correlation.bin": {
+    "bytes": 4608,
+    "sha256": "572466b1b09a6c1be8336f532422dc7b86ccdcf94ffc1ddb4aee5524c122bd36"
+  },
+  "performance_comparison/circular9_scalar/host_windows/window_9/input.pcm": {
+    "bytes": 18432,
+    "sha256": "4f0dfc58c9fe1041e30bbf218c33fc64b5004f7752c5d9f3c134cdee222b8bdf"
+  },
+  "performance_comparison/circular9_scalar/host_windows/window_9/scores.bin": {
+    "bytes": 4096,
+    "sha256": "aeb9c750fb4d96a200cd6756a99356b9b66be1c0ae02b09b1824d5eaf5a3b2eb"
+  },
+  "performance_comparison/circular9_scalar/host_windows/window_9/spectrum.bin": {
+    "bytes": 2304,
+    "sha256": "d7e65947815ad39a07de5680001a385de42cb5484cc6f737cdff6c0353c7be93"
+  },
+  "performance_comparison/circular9_scalar/host_windows/window_9/statistics.bin": {
+    "bytes": 180,
+    "sha256": "191fc7c8d7752d3f8210840fd7a21476cbdd4fb7b9e059e4a382fbe6aa556b7e"
+  },
+  "performance_comparison/circular9_scalar/input.pcm": {
+    "bytes": 18432,
+    "sha256": "4f0dfc58c9fe1041e30bbf218c33fc64b5004f7752c5d9f3c134cdee222b8bdf"
+  },
+  "performance_comparison/circular9_scalar/results.json": {
+    "bytes": 3310,
+    "sha256": "10f4dbad6b2853ee9599fabe00f615d01aefbae43284be41c0f3d2c8aba5b73a"
+  },
+  "performance_comparison/circular9_scalar/run_rv.py": {
+    "bytes": 5564,
+    "sha256": "e53a1a6b0163b6934f1025c1acf35fff92e96c5aaaffb96a125d5d30d31db7fc"
+  },
+  "performance_comparison/circular9_scalar/run_scalar.py": {
+    "bytes": 6804,
+    "sha256": "e64bfb4f9c17a0e2cd47916f09eb171be8f0a5771551850ea0cd3fc3c7d55cbc"
+  },
+  "performance_comparison/circular9_scalar/rv_cc_c9_scalar.log": {
+    "bytes": 573,
+    "sha256": "d0d91d365289b22d835da470b12c95d071d3acea79297cc25b8244d8634ecdb9"
+  },
+  "performance_comparison/circular9_scalar/rv_cc_fw_fft.log": {
+    "bytes": 579,
+    "sha256": "d0a7cd930b76958895d4983e145d576030e8abcfaefc2af60d61c727af6a7bed"
+  },
+  "performance_comparison/circular9_scalar/rv_cc_fw_tables.log": {
+    "bytes": 585,
+    "sha256": "d3d94709f5a282608b8dc9574143a8a7ea41bf6be2862d31497ea1c964763a8f"
+  },
+  "performance_comparison/circular9_scalar/rv_cc_Os_c9_scalar.log": {
+    "bytes": 576,
+    "sha256": "df8dc846edb1b2e7d4a4fa575421df3f99d71a536cff336a0381f58d1cf83226"
+  },
+  "performance_comparison/circular9_scalar/rv_cc_Os_fw_fft.log": {
+    "bytes": 582,
+    "sha256": "3892aad79ec9c5b50de7223cf9dfb6d8fba9d3a6a63f5a48e87009975e7d6d2d"
+  },
+  "performance_comparison/circular9_scalar/rv_cc_Os_fw_tables.log": {
+    "bytes": 588,
+    "sha256": "782d62fec52ee9e207efefacdc0f4d2d032e81363fce5cc05105220a0491d3ca"
+  },
+  "performance_comparison/circular9_scalar/rv_cc_Os_profile_c9_scalar.log": {
+    "bytes": 594,
+    "sha256": "c56c71c3997d445d59e834333d9b1cc1a5dadb83a20b82b873470372af9f5a1f"
+  },
+  "performance_comparison/circular9_scalar/rv_cc_Os_profile_fw_fft.log": {
+    "bytes": 600,
+    "sha256": "573ac4eecba7c71252889025eebc1b517a85724e5285974c3b073eb7a1b630d9"
+  },
+  "performance_comparison/circular9_scalar/rv_cc_Os_profile_fw_tables.log": {
+    "bytes": 606,
+    "sha256": "2a608305955f3f1f1b2d1e1f180d404ddf8ead121202db8099b54e459e0a529a"
+  },
+  "performance_comparison/circular9_scalar/rv_cc_Os_profile_rv_main.log": {
+    "bytes": 590,
+    "sha256": "cf2f55bfeadbae177d2edde89671c573ca5a260ef2d3527f706ce80cf56c6700"
+  },
+  "performance_comparison/circular9_scalar/rv_cc_Os_profile_start.log": {
+    "bytes": 589,
+    "sha256": "cfdf9697177c20b99be1f4f06529477b577736b5f7cc56702787e302a429fc53"
+  },
+  "performance_comparison/circular9_scalar/rv_cc_Os_rv_main.log": {
+    "bytes": 572,
+    "sha256": "c0b5a98d980567b00a8d040d596009ea88bb73ae7200cb60d5d2cb44320a8945"
+  },
+  "performance_comparison/circular9_scalar/rv_cc_Os_start.log": {
+    "bytes": 571,
+    "sha256": "552ddf60889eca322fb1857342377c167a360eee9dfba217a5b56396344ed741"
+  },
+  "performance_comparison/circular9_scalar/rv_cc_rv_main.log": {
+    "bytes": 569,
+    "sha256": "b2377fd5355d0b17d47bcc0c8939ae20e865e28c5d62eb98b9fdb015475534bb"
+  },
+  "performance_comparison/circular9_scalar/rv_cc_start.log": {
+    "bytes": 568,
+    "sha256": "3e3ce3fe5798c5244dec9951396d8c8978559b2ebcb5e949f9f819962636ac4d"
+  },
+  "performance_comparison/circular9_scalar/rv_failed_build_id_vma24/c9_scalar.o": {
+    "bytes": 4652,
+    "sha256": "47c86988010b96b9614d99ac78c5e9ea7777d736ce314e3c95cef126b5081596"
+  },
+  "performance_comparison/circular9_scalar/rv_failed_build_id_vma24/dtcm.bin": {
+    "bytes": 4136,
+    "sha256": "3758c1ada1da39badb8ac32592f6860583649c88a78898780223d5f5017e5948"
+  },
+  "performance_comparison/circular9_scalar/rv_failed_build_id_vma24/dtcm.hex": {
+    "bytes": 10340,
+    "sha256": "cc76572782cb3cbcf9b0b0eb3d2709e3b8325641c36ad20640b7c7e7a7753979"
+  },
+  "performance_comparison/circular9_scalar/rv_failed_build_id_vma24/dump/dtcm.hex": {
+    "bytes": 40960,
+    "sha256": "86b19b4bc0885295f72828d49c101a76177f5d8168274a8ac80dc2932c547609"
+  },
+  "performance_comparison/circular9_scalar/rv_failed_build_id_vma24/dump/scratch.hex": {
+    "bytes": 163840,
+    "sha256": "acaf12d73a5bb49808891d06556aa67d0d690e05a591d1a0f427acd36c98ff2a"
+  },
+  "performance_comparison/circular9_scalar/rv_failed_build_id_vma24/failure.json": {
+    "bytes": 346,
+    "sha256": "4df6a68aba174485838af36b8f8dc43540f4d3e66c55f3e881b6eabdb27f8de0"
+  },
+  "performance_comparison/circular9_scalar/rv_failed_build_id_vma24/fw_fft.o": {
+    "bytes": 4492,
+    "sha256": "40b50c7c1c998c4f09554e8bb81e5730fd3671faff4caaa882ed32fda88adcce"
+  },
+  "performance_comparison/circular9_scalar/rv_failed_build_id_vma24/fw_tables.o": {
+    "bytes": 2924,
+    "sha256": "8e8fbdfa8deed8dfb62bcf0dfd1d3a9eb795fc29b2a41221c0fb2b355ab433b0"
+  },
+  "performance_comparison/circular9_scalar/rv_failed_build_id_vma24/itcm.bin": {
+    "bytes": 3532,
+    "sha256": "5017ae9e46cc0c15f082200ea214e394bca8e6161d0f3e997a0f1b4d2d548acf"
+  },
+  "performance_comparison/circular9_scalar/rv_failed_build_id_vma24/itcm.hex": {
+    "bytes": 8830,
+    "sha256": "a00e67ac70a3da44409d582ac83eb67c8513c120383e33d0055afe326d616dc1"
+  },
+  "performance_comparison/circular9_scalar/rv_failed_build_id_vma24/original_run.log": {
+    "bytes": 1565,
+    "sha256": "e090314893e6eec509a92b59803c32715a2d8a3fcb999b5aa7a83e90be5564a9"
+  },
+  "performance_comparison/circular9_scalar/rv_failed_build_id_vma24/rv_main.o": {
+    "bytes": 3704,
+    "sha256": "bec16bfc12ebfb61b28675fc1cffec870d80129e646f9d814571007cf159eff6"
+  },
+  "performance_comparison/circular9_scalar/rv_failed_build_id_vma24/scalar.elf": {
+    "bytes": 13712,
+    "sha256": "bc26d87ad0bfb2aa6e979b4ff7a932dc716ae501aa02a338438c3c3c4c8c1886"
+  },
+  "performance_comparison/circular9_scalar/rv_failed_build_id_vma24/scalar.map": {
+    "bytes": 8487,
+    "sha256": "0f452259a58906d796ebe64f3ef36140dc6ce2e49ef837497081ec677f7f3207"
+  },
+  "performance_comparison/circular9_scalar/rv_failed_build_id_vma24/start.o": {
+    "bytes": 1224,
+    "sha256": "c990a5c362782b77ccffd8e09411168b33261855f79fe2a3878c74712dec393d"
+  },
+  "performance_comparison/circular9_scalar/rv_link.ld": {
+    "bytes": 633,
+    "sha256": "33a73cd12bffb0abf92de1d98f2ff0c14a244d0b0609a7b867e4236bd9a9937a"
+  },
+  "performance_comparison/circular9_scalar/rv_link_False.log": {
+    "bytes": 922,
+    "sha256": "f28a4e87df6d3d43a02e3d554da219a2ce0c720fafd6942ce1c21caa65b4a797"
+  },
+  "performance_comparison/circular9_scalar/rv_link_True.log": {
+    "bytes": 936,
+    "sha256": "2319ff04c345bc2750635476780ae5e314cf79fdd3cd45248e7ba231b33becac"
+  },
+  "performance_comparison/circular9_scalar/rv_main.c": {
+    "bytes": 1213,
+    "sha256": "e44a4a4224d79e02b5721535f13a15def84b46033449b12bf3868884dc3f36d8"
+  },
+  "performance_comparison/circular9_scalar/rv_model/verilated.d": {
+    "bytes": 754,
+    "sha256": "18f9ef19222e1045a01e0e118dfafd212aea16629054be786e79e6b24356d62e"
+  },
+  "performance_comparison/circular9_scalar/rv_model/verilated.o": {
+    "bytes": 224553,
+    "sha256": "3a5ad9f6a73518af3f753d8855e421a411b5045485f857ad01ae204385ac0152"
+  },
+  "performance_comparison/circular9_scalar/rv_model/verilated_threads.d": {
+    "bytes": 460,
+    "sha256": "c63f236ccab160b4f60f9f622541c5ae94e99547299d9d23506c74102f1f0bce"
+  },
+  "performance_comparison/circular9_scalar/rv_model/verilated_threads.o": {
+    "bytes": 36120,
+    "sha256": "e41de7ed6d5e0120aa17152c00ae724c6c71b799f88a41ee070dba82f2b18bd5"
+  },
+  "performance_comparison/circular9_scalar/rv_model/verilated_timing.d": {
+    "bytes": 457,
+    "sha256": "8310cb50583f6c55be33a961281c351a00631415f4f334c87183e4a0e155d46b"
+  },
+  "performance_comparison/circular9_scalar/rv_model/verilated_timing.o": {
+    "bytes": 16504,
+    "sha256": "3473953d03978ee6bfa5a132c08483db1515193a8f3dd4cec32d9ae2f15dc814"
+  },
+  "performance_comparison/circular9_scalar/rv_model/Vtb_c9_scalar.cpp": {
+    "bytes": 3420,
+    "sha256": "df77a15a3f1ee860707e468c66d15eab4689d5559c9a6b72baf60867c9dbeed2"
+  },
+  "performance_comparison/circular9_scalar/rv_model/Vtb_c9_scalar.d": {
+    "bytes": 57,
+    "sha256": "28ca82a724366f6f2ddcb9d210f7687a8398b73ba3c3d30b38e9d2b13f2bbd44"
+  },
+  "performance_comparison/circular9_scalar/rv_model/Vtb_c9_scalar.exe": {
+    "bytes": 3198754,
+    "sha256": "50461538531d62b5f07deb741a0b997e7dfaf61630d98f09d695baf0d1966d06"
+  },
+  "performance_comparison/circular9_scalar/rv_model/Vtb_c9_scalar.h": {
+    "bytes": 3584,
+    "sha256": "7cd1268dff2b9bed0cc5d9cb7a485634964976c084a0748f2f72f5284fa52533"
+  },
+  "performance_comparison/circular9_scalar/rv_model/Vtb_c9_scalar.mk": {
+    "bytes": 2057,
+    "sha256": "2473c15eb5cae836b5d817874b4bcb0b6bd9faaaded7482aeedaeafd4ff977e1"
+  },
+  "performance_comparison/circular9_scalar/rv_model/Vtb_c9_scalar.o": {
+    "bytes": 8645,
+    "sha256": "0ad165ddb0f09cb3bb3ece4082d6534f977a393126178dcfee87668bebf520c8"
+  },
+  "performance_comparison/circular9_scalar/rv_model/Vtb_c9_scalar___024root.h": {
+    "bytes": 157594,
+    "sha256": "6d338b85427782ea1a8ebb0c4d3475459fe684e0134a2f353475fb0ede5789be"
+  },
+  "performance_comparison/circular9_scalar/rv_model/Vtb_c9_scalar___024root__0.cpp": {
+    "bytes": 1376859,
+    "sha256": "aa1ef48c7666d520e4a673447590396b6ae3d03ba88a2050ab4f68d17bfa0b10"
+  },
+  "performance_comparison/circular9_scalar/rv_model/Vtb_c9_scalar___024root__0.d": {
+    "bytes": 87,
+    "sha256": "9d503dbbd3cbb4268c4e34ea7fe04f599bfd5b88ba87b69283b48ae8a78e2972"
+  },
+  "performance_comparison/circular9_scalar/rv_model/Vtb_c9_scalar___024root__0.o": {
+    "bytes": 106611,
+    "sha256": "81ae2f12b18e5fc0cae87e6814b8d412a09ca06700eb5540ab964e1b68a374a1"
+  },
+  "performance_comparison/circular9_scalar/rv_model/Vtb_c9_scalar___024root__0__Slow.cpp": {
+    "bytes": 830749,
+    "sha256": "5eb15b8c00418ad22a7bc3ce209fe2c1a9da089e664692205cbfc3e2b862c173"
+  },
+  "performance_comparison/circular9_scalar/rv_model/Vtb_c9_scalar___024root__0__Slow.d": {
+    "bytes": 99,
+    "sha256": "40359ed706748940e2f06d61751360dd3537d174e375b1d0b3ad4b81222948ac"
+  },
+  "performance_comparison/circular9_scalar/rv_model/Vtb_c9_scalar___024root__0__Slow.o": {
+    "bytes": 236968,
+    "sha256": "4a3a0e3335f429df93297e89916e4d0daaeb7167507e1f51a478d425998c658c"
+  },
+  "performance_comparison/circular9_scalar/rv_model/Vtb_c9_scalar___024root__1.cpp": {
+    "bytes": 724616,
+    "sha256": "5ff78f3ef0f13b4810d19daa45ff93827954ff03da4a38ab87a85705a458c6f9"
+  },
+  "performance_comparison/circular9_scalar/rv_model/Vtb_c9_scalar___024root__1.d": {
+    "bytes": 87,
+    "sha256": "dcb3760cad9e924825e3da2ccbd8da237a891ba40addfe88761d4b1f1860ecb5"
+  },
+  "performance_comparison/circular9_scalar/rv_model/Vtb_c9_scalar___024root__1.o": {
+    "bytes": 44790,
+    "sha256": "36c5736212dcf0d46befc3118458c32c4a8a0160ebff26ed5c6e7430b0b08ada"
+  },
+  "performance_comparison/circular9_scalar/rv_model/Vtb_c9_scalar___024root__2.cpp": {
+    "bytes": 26929,
+    "sha256": "5dd29f406657c5f83bb066014d511d6116fc6685ba5bf256f4f896317154f0d7"
+  },
+  "performance_comparison/circular9_scalar/rv_model/Vtb_c9_scalar___024root__2.d": {
+    "bytes": 87,
+    "sha256": "109d776a1a3c6c3f64222a02554eb30fe1b0e6da699862f3d57d6298dec874f2"
+  },
+  "performance_comparison/circular9_scalar/rv_model/Vtb_c9_scalar___024root__2.o": {
+    "bytes": 6588,
+    "sha256": "ce0e4d19ac679e453c9fa9f8a290a718332bc4e54f20b2d58602ae3dec4a122a"
+  },
+  "performance_comparison/circular9_scalar/rv_model/Vtb_c9_scalar___024root__Slow.cpp": {
+    "bytes": 797,
+    "sha256": "50cdfc97940da114aeec7abb2b1bfebe1108c7adf1b4ab82e10617cf809d56c8"
+  },
+  "performance_comparison/circular9_scalar/rv_model/Vtb_c9_scalar___024root__Slow.d": {
+    "bytes": 93,
+    "sha256": "bb7aac84ae621ef054ca94821c858ba893b48441c6661205ce23da5ed11b8373"
+  },
+  "performance_comparison/circular9_scalar/rv_model/Vtb_c9_scalar___024root__Slow.o": {
+    "bytes": 66414,
+    "sha256": "34f4a1b7885d82eda71b88a6f9c041c21a956d91edb4e52438aaa17b3f93f70d"
+  },
+  "performance_comparison/circular9_scalar/rv_model/Vtb_c9_scalar__ALL.a": {
+    "bytes": 515792,
+    "sha256": "6b4ce1981ec7b85dbdfa45e0ea7ff1434d265d4e204039304ecd6c75166f385a"
+  },
+  "performance_comparison/circular9_scalar/rv_model/Vtb_c9_scalar__ConstPool__0__Slow.cpp": {
+    "bytes": 3406,
+    "sha256": "33eeea4bf68202d68750b58ac1fe9c9a3ddda9ec34071e3c3914df6ec627ef42"
+  },
+  "performance_comparison/circular9_scalar/rv_model/Vtb_c9_scalar__ConstPool__0__Slow.d": {
+    "bytes": 137,
+    "sha256": "8ee5ca1aef7d243488da119908615a42b521de1d716ecada809afdf3b5d7818a"
+  },
+  "performance_comparison/circular9_scalar/rv_model/Vtb_c9_scalar__ConstPool__0__Slow.o": {
+    "bytes": 1748,
+    "sha256": "82a0cbfbc2e599a1f5dd3d87d60666cfd64d9134a85b7a9ea1477c407477ca48"
+  },
+  "performance_comparison/circular9_scalar/rv_model/Vtb_c9_scalar__main.cpp": {
+    "bytes": 1170,
+    "sha256": "eec64c3db503d269593497e848ea56ffc739e2c9b141124d9352d1d0540370db"
+  },
+  "performance_comparison/circular9_scalar/rv_model/Vtb_c9_scalar__main.d": {
+    "bytes": 121,
+    "sha256": "0a37535b6f6bc7ae8df80223d71d35222c109d4d4d73469e7d6bff45bc288d1b"
+  },
+  "performance_comparison/circular9_scalar/rv_model/Vtb_c9_scalar__main.o": {
+    "bytes": 3949,
+    "sha256": "2a3093360aa6b76c0b16d5b429c31d5d3c50c914340491087f5cf62d37ae86a3"
+  },
+  "performance_comparison/circular9_scalar/rv_model/Vtb_c9_scalar__pch.h": {
+    "bytes": 817,
+    "sha256": "9230235c08ea622154da2a824bd4ebd8a5c90e2322472d276a894a201c1732fe"
+  },
+  "performance_comparison/circular9_scalar/rv_model/Vtb_c9_scalar__pch.h.fast.d": {
+    "bytes": 548,
+    "sha256": "7f1b27348c59dd434bbc65ee151be2be0d622d73949787c136eca80c4fa13832"
+  },
+  "performance_comparison/circular9_scalar/rv_model/Vtb_c9_scalar__pch.h.fast.gch": {
+    "bytes": 146861902,
+    "sha256": "e21f37eee8cbea7ee8d03520b36c2bb5ba9b62a65fb9265b8e499553dbae1215"
+  },
+  "performance_comparison/circular9_scalar/rv_model/Vtb_c9_scalar__pch.h.slow.d": {
+    "bytes": 548,
+    "sha256": "ea123cd24946b043aeae3f1c618527186d10458a33695a941957cf9ab0c54298"
+  },
+  "performance_comparison/circular9_scalar/rv_model/Vtb_c9_scalar__pch.h.slow.gch": {
+    "bytes": 144379888,
+    "sha256": "22d99a2de28715a778df716d84a785650f4643f320a73c0b3a6db0828d8b6fbc"
+  },
+  "performance_comparison/circular9_scalar/rv_model/Vtb_c9_scalar__Syms.h": {
+    "bytes": 1039,
+    "sha256": "b8ee53f31745a27e8ed8540648db7715c995b092800bc5c6384f6d55311ffb10"
+  },
+  "performance_comparison/circular9_scalar/rv_model/Vtb_c9_scalar__Syms__Slow.cpp": {
+    "bytes": 934,
+    "sha256": "9f17ce13f5dcfe3e63f391ba5850a1640e527bc0369a75ab14ad25a1c98ee887"
+  },
+  "performance_comparison/circular9_scalar/rv_model/Vtb_c9_scalar__Syms__Slow.d": {
+    "bytes": 85,
+    "sha256": "b7143e7e0ae162bd1268213c2559a0b0f0fa9a875ab69fd478109a78101a2685"
+  },
+  "performance_comparison/circular9_scalar/rv_model/Vtb_c9_scalar__Syms__Slow.o": {
+    "bytes": 24280,
+    "sha256": "38de8a2abf66dd7e9e86fa6938bef1b011ffa81c1804892e0942bedf5679ae8f"
+  },
+  "performance_comparison/circular9_scalar/rv_model/Vtb_c9_scalar__ver.d": {
+    "bytes": 8128,
+    "sha256": "8588a52f2e3c23a5faa4cfc49ffa6501bb4718a3775476265428ac4c1c092045"
+  },
+  "performance_comparison/circular9_scalar/rv_model/Vtb_c9_scalar__verFiles.dat": {
+    "bytes": 23848,
+    "sha256": "981b916ff84271b281498295002988889fb06afde24c492a450975902565a885"
+  },
+  "performance_comparison/circular9_scalar/rv_model/Vtb_c9_scalar_classes.mk": {
+    "bytes": 1916,
+    "sha256": "3262d33c3561184ed7ac7cbce0ce5c006d5bae31e47d12862a2f313f8bb50038"
+  },
+  "performance_comparison/circular9_scalar/rv_model_compile.log": {
+    "bytes": 170968,
+    "sha256": "65c66447873d81caecaa48b10001b8010f089a2deabf6fa4e35dd50205781095"
+  },
+  "performance_comparison/circular9_scalar/rv_objcopy_dtcmFalse.log": {
+    "bytes": 298,
+    "sha256": "f36425776b856e84843203f422574ce6a712e4e4ce6478a191d67db405310ce9"
+  },
+  "performance_comparison/circular9_scalar/rv_objcopy_dtcmTrue.log": {
+    "bytes": 302,
+    "sha256": "e8e9a9d3f4739852661144184f7af300756a386bbe0e18dabed7b19c82d55d7c"
+  },
+  "performance_comparison/circular9_scalar/rv_objcopy_itcmFalse.log": {
+    "bytes": 298,
+    "sha256": "0fb03ac37c3f4f7981bed868278e27875197849de0ff891cef654a9d52aad353"
+  },
+  "performance_comparison/circular9_scalar/rv_objcopy_itcmTrue.log": {
+    "bytes": 302,
+    "sha256": "b74f7c672975ef43255fd851022aec91b20c12aed372b8cd26771494dc15ae84"
+  },
+  "performance_comparison/circular9_scalar/rv_plain/c9_scalar.o": {
+    "bytes": 4652,
+    "sha256": "47c86988010b96b9614d99ac78c5e9ea7777d736ce314e3c95cef126b5081596"
+  },
+  "performance_comparison/circular9_scalar/rv_plain/dtcm.bin": {
+    "bytes": 4136,
+    "sha256": "3758c1ada1da39badb8ac32592f6860583649c88a78898780223d5f5017e5948"
+  },
+  "performance_comparison/circular9_scalar/rv_plain/dtcm.hex": {
+    "bytes": 10340,
+    "sha256": "cc76572782cb3cbcf9b0b0eb3d2709e3b8325641c36ad20640b7c7e7a7753979"
+  },
+  "performance_comparison/circular9_scalar/rv_plain/dump/dtcm.hex": {
+    "bytes": 40960,
+    "sha256": "8d6eb1286aa02c53fbc8d7e2a72dcc1cb8b8d13114b4871a7fa9ac56b645a92c"
+  },
+  "performance_comparison/circular9_scalar/rv_plain/dump/scratch.hex": {
+    "bytes": 163840,
+    "sha256": "d49f5acf11fd439eafab79504364d878f380a8bd3b68d063d6bbe48b63798e7e"
+  },
+  "performance_comparison/circular9_scalar/rv_plain/fw_fft.o": {
+    "bytes": 4492,
+    "sha256": "40b50c7c1c998c4f09554e8bb81e5730fd3671faff4caaa882ed32fda88adcce"
+  },
+  "performance_comparison/circular9_scalar/rv_plain/fw_tables.o": {
+    "bytes": 2924,
+    "sha256": "8e8fbdfa8deed8dfb62bcf0dfd1d3a9eb795fc29b2a41221c0fb2b355ab433b0"
+  },
+  "performance_comparison/circular9_scalar/rv_plain/itcm.bin": {
+    "bytes": 3532,
+    "sha256": "96181d269f31ad1ed9f8cf870b159fb9f1194d1844267cc371f83594868a35a0"
+  },
+  "performance_comparison/circular9_scalar/rv_plain/itcm.hex": {
+    "bytes": 8830,
+    "sha256": "f1d3e7ca5c7ed6e7d28e611f9333ec8c2ff85b93038c553b520fc6a9edb37a5a"
+  },
+  "performance_comparison/circular9_scalar/rv_plain/results.json": {
+    "bytes": 2571,
+    "sha256": "9a9e12d221b90a8517adef3ba6399964f07c0015714860deaed65da3bdd1c667"
+  },
+  "performance_comparison/circular9_scalar/rv_plain/rv_main.o": {
+    "bytes": 3704,
+    "sha256": "bec16bfc12ebfb61b28675fc1cffec870d80129e646f9d814571007cf159eff6"
+  },
+  "performance_comparison/circular9_scalar/rv_plain/scalar.elf": {
+    "bytes": 13636,
+    "sha256": "ebc88be18277276b749cf557ae40f94f73949ef7eb0aefb1dc49868692ff3d62"
+  },
+  "performance_comparison/circular9_scalar/rv_plain/scalar.map": {
+    "bytes": 8276,
+    "sha256": "e47daab08ee4b9448f6914fb6758c69aacd23110ecfb63093467ff494ca6d05f"
+  },
+  "performance_comparison/circular9_scalar/rv_plain/start.o": {
+    "bytes": 1224,
+    "sha256": "c990a5c362782b77ccffd8e09411168b33261855f79fe2a3878c74712dec393d"
+  },
+  "performance_comparison/circular9_scalar/rv_plain_O2_corrected/build_driver_used.py": {
+    "bytes": 5338,
+    "sha256": "6d13354f32ba4abb4244470218d201a58694f4c95a2e611caa03a1ed0dcf73d3"
+  },
+  "performance_comparison/circular9_scalar/rv_plain_O2_corrected/c9_scalar.o": {
+    "bytes": 4652,
+    "sha256": "47c86988010b96b9614d99ac78c5e9ea7777d736ce314e3c95cef126b5081596"
+  },
+  "performance_comparison/circular9_scalar/rv_plain_O2_corrected/dtcm.bin": {
+    "bytes": 4136,
+    "sha256": "3758c1ada1da39badb8ac32592f6860583649c88a78898780223d5f5017e5948"
+  },
+  "performance_comparison/circular9_scalar/rv_plain_O2_corrected/dtcm.hex": {
+    "bytes": 10340,
+    "sha256": "cc76572782cb3cbcf9b0b0eb3d2709e3b8325641c36ad20640b7c7e7a7753979"
+  },
+  "performance_comparison/circular9_scalar/rv_plain_O2_corrected/dump/dtcm.hex": {
+    "bytes": 40960,
+    "sha256": "8d6eb1286aa02c53fbc8d7e2a72dcc1cb8b8d13114b4871a7fa9ac56b645a92c"
+  },
+  "performance_comparison/circular9_scalar/rv_plain_O2_corrected/dump/scratch.hex": {
+    "bytes": 163840,
+    "sha256": "d49f5acf11fd439eafab79504364d878f380a8bd3b68d063d6bbe48b63798e7e"
+  },
+  "performance_comparison/circular9_scalar/rv_plain_O2_corrected/fw_fft.o": {
+    "bytes": 4492,
+    "sha256": "40b50c7c1c998c4f09554e8bb81e5730fd3671faff4caaa882ed32fda88adcce"
+  },
+  "performance_comparison/circular9_scalar/rv_plain_O2_corrected/fw_tables.o": {
+    "bytes": 2924,
+    "sha256": "8e8fbdfa8deed8dfb62bcf0dfd1d3a9eb795fc29b2a41221c0fb2b355ab433b0"
+  },
+  "performance_comparison/circular9_scalar/rv_plain_O2_corrected/itcm.bin": {
+    "bytes": 3532,
+    "sha256": "96181d269f31ad1ed9f8cf870b159fb9f1194d1844267cc371f83594868a35a0"
+  },
+  "performance_comparison/circular9_scalar/rv_plain_O2_corrected/itcm.hex": {
+    "bytes": 8830,
+    "sha256": "f1d3e7ca5c7ed6e7d28e611f9333ec8c2ff85b93038c553b520fc6a9edb37a5a"
+  },
+  "performance_comparison/circular9_scalar/rv_plain_O2_corrected/results.json": {
+    "bytes": 2662,
+    "sha256": "d9e5df6e612dbd137d075effc6bff217150a90866f683ae69c09ee4daf2e520d"
+  },
+  "performance_comparison/circular9_scalar/rv_plain_O2_corrected/run.log": {
+    "bytes": 1565,
+    "sha256": "add18ba7e0e26c817b9e4c5325b3dcfd347deeee98809923eb457542b8d31c23"
+  },
+  "performance_comparison/circular9_scalar/rv_plain_O2_corrected/rv_main.o": {
+    "bytes": 3704,
+    "sha256": "bec16bfc12ebfb61b28675fc1cffec870d80129e646f9d814571007cf159eff6"
+  },
+  "performance_comparison/circular9_scalar/rv_plain_O2_corrected/scalar.elf": {
+    "bytes": 13636,
+    "sha256": "ebc88be18277276b749cf557ae40f94f73949ef7eb0aefb1dc49868692ff3d62"
+  },
+  "performance_comparison/circular9_scalar/rv_plain_O2_corrected/scalar.map": {
+    "bytes": 8276,
+    "sha256": "e47daab08ee4b9448f6914fb6758c69aacd23110ecfb63093467ff494ca6d05f"
+  },
+  "performance_comparison/circular9_scalar/rv_plain_O2_corrected/start.o": {
+    "bytes": 1224,
+    "sha256": "c990a5c362782b77ccffd8e09411168b33261855f79fe2a3878c74712dec393d"
+  },
+  "performance_comparison/circular9_scalar/rv_plain_Os/c9_scalar.o": {
+    "bytes": 4244,
+    "sha256": "a1d926cc7bc3b6dc345162f99776ed305d819720d1a1579bce78eeac93caf688"
+  },
+  "performance_comparison/circular9_scalar/rv_plain_Os/dtcm.bin": {
+    "bytes": 4136,
+    "sha256": "3758c1ada1da39badb8ac32592f6860583649c88a78898780223d5f5017e5948"
+  },
+  "performance_comparison/circular9_scalar/rv_plain_Os/dtcm.hex": {
+    "bytes": 10340,
+    "sha256": "cc76572782cb3cbcf9b0b0eb3d2709e3b8325641c36ad20640b7c7e7a7753979"
+  },
+  "performance_comparison/circular9_scalar/rv_plain_Os/dump/dtcm.hex": {
+    "bytes": 40960,
+    "sha256": "cd2fec001e145524930ac7042e756394dc88a9b4c6660a3ea61acd937ef18c8d"
+  },
+  "performance_comparison/circular9_scalar/rv_plain_Os/dump/scratch.hex": {
+    "bytes": 163840,
+    "sha256": "d49f5acf11fd439eafab79504364d878f380a8bd3b68d063d6bbe48b63798e7e"
+  },
+  "performance_comparison/circular9_scalar/rv_plain_Os/fw_fft.o": {
+    "bytes": 4296,
+    "sha256": "f1f4663f602a4ba9dec777b7cdb1288ad40910611d929a47f3ad37d53f44587c"
+  },
+  "performance_comparison/circular9_scalar/rv_plain_Os/fw_tables.o": {
+    "bytes": 2924,
+    "sha256": "8e8fbdfa8deed8dfb62bcf0dfd1d3a9eb795fc29b2a41221c0fb2b355ab433b0"
+  },
+  "performance_comparison/circular9_scalar/rv_plain_Os/itcm.bin": {
+    "bytes": 3228,
+    "sha256": "d647f1c481ad7671b1e8b87c285249d9d16472bdde2ca5b6bea180534bcf6795"
+  },
+  "performance_comparison/circular9_scalar/rv_plain_Os/itcm.hex": {
+    "bytes": 8070,
+    "sha256": "5af96834454cf9bc0451ac58921c3a17a735678b6572efa7f3fa24a88c2859ff"
+  },
+  "performance_comparison/circular9_scalar/rv_plain_Os/results.json": {
+    "bytes": 2661,
+    "sha256": "fcf1f1607c7965a4703e0ed7a553551c7adaf13b4a920877e1c05098ccf7f203"
+  },
+  "performance_comparison/circular9_scalar/rv_plain_Os/rv_main.o": {
+    "bytes": 3704,
+    "sha256": "1a8fc7055d480c6ecb1c76e1229d7ff90e0123e116ef01a57e213c24ddb26cac"
+  },
+  "performance_comparison/circular9_scalar/rv_plain_Os/scalar.elf": {
+    "bytes": 13672,
+    "sha256": "8de4624d1eef38036e2577be8014402aee73407a390a54d0dfd81301ff895274"
+  },
+  "performance_comparison/circular9_scalar/rv_plain_Os/scalar.map": {
+    "bytes": 8550,
+    "sha256": "ea9b7667bbb13998acfa609a210f98e69ec8316098718d34eca1bd87793b6622"
+  },
+  "performance_comparison/circular9_scalar/rv_plain_Os/start.o": {
+    "bytes": 1224,
+    "sha256": "c990a5c362782b77ccffd8e09411168b33261855f79fe2a3878c74712dec393d"
+  },
+  "performance_comparison/circular9_scalar/rv_profile_Os/c9_scalar.o": {
+    "bytes": 5104,
+    "sha256": "4b7f97cc4f9d73ef568e9faee81b5579aae6cf2f774323048b9828906aafc545"
+  },
+  "performance_comparison/circular9_scalar/rv_profile_Os/dtcm.bin": {
+    "bytes": 4136,
+    "sha256": "3758c1ada1da39badb8ac32592f6860583649c88a78898780223d5f5017e5948"
+  },
+  "performance_comparison/circular9_scalar/rv_profile_Os/dtcm.hex": {
+    "bytes": 10340,
+    "sha256": "cc76572782cb3cbcf9b0b0eb3d2709e3b8325641c36ad20640b7c7e7a7753979"
+  },
+  "performance_comparison/circular9_scalar/rv_profile_Os/dump/dtcm.hex": {
+    "bytes": 40960,
+    "sha256": "3bb591905b70a3d4f00ff8debb1dd12254c6f1b0a095c54963d520a1df30bce9"
+  },
+  "performance_comparison/circular9_scalar/rv_profile_Os/dump/scratch.hex": {
+    "bytes": 163840,
+    "sha256": "d49f5acf11fd439eafab79504364d878f380a8bd3b68d063d6bbe48b63798e7e"
+  },
+  "performance_comparison/circular9_scalar/rv_profile_Os/fw_fft.o": {
+    "bytes": 4296,
+    "sha256": "f1f4663f602a4ba9dec777b7cdb1288ad40910611d929a47f3ad37d53f44587c"
+  },
+  "performance_comparison/circular9_scalar/rv_profile_Os/fw_tables.o": {
+    "bytes": 2924,
+    "sha256": "8e8fbdfa8deed8dfb62bcf0dfd1d3a9eb795fc29b2a41221c0fb2b355ab433b0"
+  },
+  "performance_comparison/circular9_scalar/rv_profile_Os/itcm.bin": {
+    "bytes": 3460,
+    "sha256": "4bc68478d319a14fbcde05b7d62bda3573fd9083ff6f7a23a6a38b9410b97296"
+  },
+  "performance_comparison/circular9_scalar/rv_profile_Os/itcm.hex": {
+    "bytes": 8650,
+    "sha256": "1c39847a38d4f3e6b27a80dca1ef4da2324bdfec7705078d0e2a09c9188b68aa"
+  },
+  "performance_comparison/circular9_scalar/rv_profile_Os/results.json": {
+    "bytes": 2683,
+    "sha256": "ac8327ce8804e306d52b55f1f9a9a8b0da16baa5ab6e3f580c65b6a79377fbdb"
+  },
+  "performance_comparison/circular9_scalar/rv_profile_Os/rv_main.o": {
+    "bytes": 3812,
+    "sha256": "3a5210851ecbe0b52f32c68c92aa9f2045d5fbaec566eed8f1a98200368540cf"
+  },
+  "performance_comparison/circular9_scalar/rv_profile_Os/scalar.elf": {
+    "bytes": 13748,
+    "sha256": "dfe8f685012e99938ecfbc80efb87d0da69b3d0230d6f7bbbd2899f0f7dffef7"
+  },
+  "performance_comparison/circular9_scalar/rv_profile_Os/scalar.map": {
+    "bytes": 9023,
+    "sha256": "afeff6348af5cc3d42dc887fff3c5fc99f3521420e7187e7656fbcc35276c890"
+  },
+  "performance_comparison/circular9_scalar/rv_profile_Os/start.o": {
+    "bytes": 1224,
+    "sha256": "c990a5c362782b77ccffd8e09411168b33261855f79fe2a3878c74712dec393d"
+  },
+  "performance_comparison/circular9_scalar/rv_run_Os_plain.log": {
+    "bytes": 1672,
+    "sha256": "0f0893a9f239f13bb3dcfa640f74a8f187dc9f3b87315b89d295ec8c3e6a5b46"
+  },
+  "performance_comparison/circular9_scalar/rv_run_Os_profile.log": {
+    "bytes": 1650,
+    "sha256": "02a00efbd88e0d33db50917b5146895379bf95a7574fbd8119b1b72dca819c85"
+  },
+  "performance_comparison/circular9_scalar/rv_run_plain.log": {
+    "bytes": 1565,
+    "sha256": "add18ba7e0e26c817b9e4c5325b3dcfd347deeee98809923eb457542b8d31c23"
+  },
+  "performance_comparison/circular9_scalar/rv_sections_False.log": {
+    "bytes": 913,
+    "sha256": "a330fff662560d167255cbcf2649b17baf2f307661974761256c089bf4a371a1"
+  },
+  "performance_comparison/circular9_scalar/rv_sections_True.log": {
+    "bytes": 917,
+    "sha256": "de7a138c6d367d929ccb706f18092f5914228b8d54d11dfacbc15f3e91ca34ac"
+  },
+  "performance_comparison/circular9_scalar/scratch_input.hex": {
+    "bytes": 163840,
+    "sha256": "eb786573e130c14b4bde50103847cbc4492b09a44bb0c8b1da540ce7390a47df"
+  },
+  "performance_comparison/circular9_scalar/source_hashes.json": {
+    "bytes": 1559,
+    "sha256": "0b0f163fa409af59dbe6b0c189662726bec5ed9399b9b628faebc55947c0cc85"
+  },
+  "performance_comparison/circular9_scalar/srp_lut10.bin": {
+    "bytes": 46080,
+    "sha256": "95cc626dedd0852ec997856cace8809fc14abbf3bc21af5c2322c03ff8888969"
+  },
+  "performance_comparison/circular9_scalar/summarize.py": {
+    "bytes": 5785,
+    "sha256": "e69abcfa5261209cd0f5ff8c0e54687d9b16ed4396ebde38487d3f1c802d5319"
+  },
+  "performance_comparison/circular9_scalar/tb_c9_scalar.sv": {
+    "bytes": 2173,
+    "sha256": "49c0780ccf87bdfa4a1cdd853d625c76299f87123b9b8e9322bda9464c3d7d71"
+  },
+  "performance_comparison/circular9_scalar/third_party/fw_cycle_profile.h": {
+    "bytes": 1507,
+    "sha256": "24053dd3afb36971524d2281275ee590770a5fce633228c8f08aa1825819ad3e"
+  },
+  "performance_comparison/circular9_scalar/third_party/fw_fft.c": {
+    "bytes": 14787,
+    "sha256": "15b5505352e1d9d42c219d4f734561b5f6da57ca498d38ad8779c9015fecaaab"
+  },
+  "performance_comparison/circular9_scalar/third_party/fw_fft.h": {
+    "bytes": 3139,
+    "sha256": "eb26ac4f7ff2f36090bd61bf79398e533b0ad69ddcbb6db7ed9fe8a23b31c79c"
+  },
+  "performance_comparison/circular9_scalar/third_party/fw_plat.h": {
+    "bytes": 3004,
+    "sha256": "bc632632c0c7e262af3580415d166bd48ddb03aff31aeb9f11e361bb59c09fc4"
+  },
+  "performance_comparison/circular9_scalar/third_party/fw_tables.c": {
+    "bytes": 9235,
+    "sha256": "3eed4a31600da6d910334f2dc23af5095b7c653e1752613990dc1867ba0acd69"
+  },
+  "performance_comparison/circular9_scalar/third_party/fw_tables.h": {
+    "bytes": 711,
+    "sha256": "20a25da8af7e8bc7bbad17906da75392c1c42d9945324fb316c0d834ffb46958"
+  },
+  "performance_comparison/circular9_scalar/validation.json": {
+    "bytes": 1829,
+    "sha256": "6b0ad1ceb4f7bb79e38132db0c24bca3ba085ce6a44d5271f6f171a623402daa"
+  },
+  "performance_comparison/circular9_scalar/window_1.log": {
+    "bytes": 479,
+    "sha256": "f930114354d6b45db2610036bfd1d3be0333b73806a8a046a654fe9761b8fe3d"
+  },
+  "performance_comparison/circular9_scalar/window_10.log": {
+    "bytes": 481,
+    "sha256": "d669ec0bb9e66f5e76cda5f827f3080f680b3197e9c2db8af40ea1f801773e89"
+  },
+  "performance_comparison/circular9_scalar/window_11.log": {
+    "bytes": 481,
+    "sha256": "6bedd18a32d9a4daa13225e1027b1297c6a9881b51a4653fdfebaffba08298cb"
+  },
+  "performance_comparison/circular9_scalar/window_12.log": {
+    "bytes": 481,
+    "sha256": "d90e2ac25d8ca1bdb7375ee509f8aadd9b7f2828733f81c39fb2fadba34455a0"
+  },
+  "performance_comparison/circular9_scalar/window_13.log": {
+    "bytes": 481,
+    "sha256": "0c610d62950e050d8c2dd197e23889d738bf0a3d03a23ac59ff5bb726c6fa668"
+  },
+  "performance_comparison/circular9_scalar/window_14.log": {
+    "bytes": 481,
+    "sha256": "5a11d6d4d59fb54a624c31143cb1b2638cab416b65c3d2a67b4c9e53e49fd428"
+  },
+  "performance_comparison/circular9_scalar/window_15.log": {
+    "bytes": 481,
+    "sha256": "9ee7195c1877660ec263812660d6523c08b3e8b71d6c1de177e6e00235c0dcf1"
+  },
+  "performance_comparison/circular9_scalar/window_16.log": {
+    "bytes": 481,
+    "sha256": "f37ded4aba1e881b729449ac575e940cd01c2413e159b6e2c9129781b4b8b5f9"
+  },
+  "performance_comparison/circular9_scalar/window_17.log": {
+    "bytes": 481,
+    "sha256": "2ba6f764972b5f7ab90c258d2c10ff43885335b848f32e514bef08fd1b23aa98"
+  },
+  "performance_comparison/circular9_scalar/window_18.log": {
+    "bytes": 481,
+    "sha256": "45881488e5c3e5040eb6027c96a210589b54f7d2e8724113c4df20dab3f63ff8"
+  },
+  "performance_comparison/circular9_scalar/window_19.log": {
+    "bytes": 481,
+    "sha256": "f0c97c52d7a84e2b2f04621b6c52eda0719a8773dda045ddffb647d1b1a5c90c"
+  },
+  "performance_comparison/circular9_scalar/window_2.log": {
+    "bytes": 479,
+    "sha256": "6361aa14179e9d6212be68282747c5b0660c73172a483ab3390ddeca6548658f"
+  },
+  "performance_comparison/circular9_scalar/window_20.log": {
+    "bytes": 481,
+    "sha256": "d80843e0e5721971878abb09884a7308e277c35f5942c889cfeedef16e330130"
+  },
+  "performance_comparison/circular9_scalar/window_21.log": {
+    "bytes": 481,
+    "sha256": "e61428b9a5c5d7cc15395663366c7c4a2920f189ae4eef89939b8d7cfc782866"
+  },
+  "performance_comparison/circular9_scalar/window_22.log": {
+    "bytes": 481,
+    "sha256": "054810886056fd394ef9bfe3ba20c91bfa6ffc42cfcf198d2ae90fbea09efff1"
+  },
+  "performance_comparison/circular9_scalar/window_23.log": {
+    "bytes": 481,
+    "sha256": "defe124161e6531724e89117911da723517d4fea3aad3b5b19b6389db9f3326a"
+  },
+  "performance_comparison/circular9_scalar/window_24.log": {
+    "bytes": 481,
+    "sha256": "e88e0ab2d35f660640f842ea560f4080616c10c81ea4d8d1acd1229c80a06e4c"
+  },
+  "performance_comparison/circular9_scalar/window_25.log": {
+    "bytes": 481,
+    "sha256": "e80151f48a777e2591b908c7ffa4d005632cef766b4f3cebd1c9c4db41a03c78"
+  },
+  "performance_comparison/circular9_scalar/window_26.log": {
+    "bytes": 481,
+    "sha256": "390f7449de59342dfe75b5020387a08ebbae6766624575802cd561fe7fe056be"
+  },
+  "performance_comparison/circular9_scalar/window_27.log": {
+    "bytes": 481,
+    "sha256": "902c46ec6e188529c9765cc1c1e30c1ca727458f1e4673b4662f51d0c0dc702c"
+  },
+  "performance_comparison/circular9_scalar/window_28.log": {
+    "bytes": 481,
+    "sha256": "340b47df1a666c9263538a3b320fddf01da50d8e9be6548787c9a5ef865497d4"
+  },
+  "performance_comparison/circular9_scalar/window_29.log": {
+    "bytes": 481,
+    "sha256": "149df5da6e2bc3bda9fcd67bf965c1561366e18579052f76b57a2b14435688f1"
+  },
+  "performance_comparison/circular9_scalar/window_3.log": {
+    "bytes": 479,
+    "sha256": "504a3b6ec47ef28f8f4dfc447489d679d439fda5462b93259cd6060a9c47fe50"
+  },
+  "performance_comparison/circular9_scalar/window_30.log": {
+    "bytes": 481,
+    "sha256": "ebe3ead18e1049f48254cafc5ad52deca95e3aabc1b9b1ac809f8ce492ff8801"
+  },
+  "performance_comparison/circular9_scalar/window_31.log": {
+    "bytes": 481,
+    "sha256": "4be6bc901dc57690c50e01eea06ae6c8a4d53ded64a948dab1de9322fe1335a8"
+  },
+  "performance_comparison/circular9_scalar/window_32.log": {
+    "bytes": 481,
+    "sha256": "140dfa0347e07fdb5300704bae80aafd6aa14e9c655c113e53ea604fc6518ad2"
+  },
+  "performance_comparison/circular9_scalar/window_4.log": {
+    "bytes": 479,
+    "sha256": "1bd2c06f20d49ae385050d02a4862d3ce377ef82cbd1b9b51bcaf7adf794b76b"
+  },
+  "performance_comparison/circular9_scalar/window_5.log": {
+    "bytes": 479,
+    "sha256": "8fb1e29c717167e95902cab076437fed8afbb05bedf1aa128d89d6a5497034a4"
+  },
+  "performance_comparison/circular9_scalar/window_6.log": {
+    "bytes": 479,
+    "sha256": "a2b6bbb742798d4ebd3fcec9e997476766f01fa7599a9889c68ac9d9c3f4928e"
+  },
+  "performance_comparison/circular9_scalar/window_7.log": {
+    "bytes": 479,
+    "sha256": "e3253291cb538d425d46df007ebafbec74a91ed15d842adc86fc1bbc5e1be81b"
+  },
+  "performance_comparison/circular9_scalar/window_8.log": {
+    "bytes": 479,
+    "sha256": "03f330b840cb731973f0dcb36352492e063945546aca4911e0333cab97ebce90"
+  },
+  "performance_comparison/circular9_scalar/window_9.log": {
+    "bytes": 479,
+    "sha256": "d8b058ef2d889c6f105ed60233e87d04336a785f1c3b64b80dde9a71f8746a8f"
+  },
+  "performance_comparison/circular9_scalar/windows_validation.json": {
+    "bytes": 15158,
+    "sha256": "5d2b2c8c3931e36ccc31c2f7c32c759fc4e7e6813d6baddf0b43a430f6946677"
+  }
+}

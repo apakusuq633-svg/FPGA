@@ -1,0 +1,527 @@
+{
+  "scope": "Consolidated documentation sections; no benchmark rerun",
+  "documents": [
+    {
+      "original_path": "xyf_workbench/zynq_-pl_-simd_-verilog/docs/board_io.md",
+      "original_sha256": "c5240b5455b632e327f0b199b26167fe94217cf9f882cdb9da61d1de11ff0a07",
+      "merged_file": "docs/工程设计与接口.md",
+      "anchor": "doc-0b9ebc083fe5"
+    },
+    {
+      "original_path": "xyf_workbench/zynq_-pl_-simd_-verilog/docs/circular9_direction_scan_20261025.md",
+      "original_sha256": "095e13c0a2c856af43de93eec13b82c9e26e3cd67e1a7700c518397e9409074e",
+      "merged_file": "docs/工程设计与接口.md",
+      "anchor": "doc-8ff9571ea39c"
+    },
+    {
+      "original_path": "xyf_workbench/zynq_-pl_-simd_-verilog/docs/circular9_direction_separation_20261025.md",
+      "original_sha256": "652ad258fa55cb53e12a44625a507167d51b4ef4272a43aaa1a185f57c37d7cc",
+      "merged_file": "docs/工程设计与接口.md",
+      "anchor": "doc-60cd04405fe2"
+    },
+    {
+      "original_path": "xyf_workbench/zynq_-pl_-simd_-verilog/docs/circular9_fault_localization_plan_20261022.md",
+      "original_sha256": "5496461712f7b4ea5a25c75e8b067932a31eeb56ae06eb9999d3c56d91b1e422",
+      "merged_file": "docs/工程设计与接口.md",
+      "anchor": "doc-240e9cca772c"
+    },
+    {
+      "original_path": "xyf_workbench/zynq_-pl_-simd_-verilog/docs/circular9_spectral_covariance_20261025.md",
+      "original_sha256": "df4675825cd0c194eb02e4bfa9bc0046454282c4f60f4fba92238daf8668e0fd",
+      "merged_file": "docs/工程设计与接口.md",
+      "anchor": "doc-3f7cd267d1a3"
+    },
+    {
+      "original_path": "xyf_workbench/zynq_-pl_-simd_-verilog/docs/das_audio_interface.md",
+      "original_sha256": "8d40757eec2035d0be4aa83d3e977c4b6f9a3e723818c31a936fa4a81dec721f",
+      "merged_file": "docs/工程设计与接口.md",
+      "anchor": "doc-4d681ff638af"
+    },
+    {
+      "original_path": "xyf_workbench/zynq_-pl_-simd_-verilog/docs/fstf_offline_training_20261027.md",
+      "original_sha256": "176c65eb28891effda3044c8d20168862f4497c5662e59c7a1d5c5757640558c",
+      "merged_file": "docs/工程设计与接口.md",
+      "anchor": "doc-e221312f7d35"
+    },
+    {
+      "original_path": "xyf_workbench/zynq_-pl_-simd_-verilog/docs/gsc9_hotpath_guard_20261025.md",
+      "original_sha256": "82bcedd238fc85d7a0d0c07782334c78933f5a24b42ad290b9bce93a4b30cd3a",
+      "merged_file": "docs/工程设计与接口.md",
+      "anchor": "doc-565bc412ebee"
+    },
+    {
+      "original_path": "xyf_workbench/zynq_-pl_-simd_-verilog/docs/gsc_vec_design.md",
+      "original_sha256": "9bb71881151e2621842795d127db370be117d0636790d6f74f732d00c3cfbce5",
+      "merged_file": "docs/工程设计与接口.md",
+      "anchor": "doc-4e8518844077"
+    },
+    {
+      "original_path": "xyf_workbench/zynq_-pl_-simd_-verilog/docs/localization_stability.md",
+      "original_sha256": "3c6724a01fe50160e0817a0d01bd35ddd8915b47887a6653a74337f97668f464",
+      "merged_file": "docs/工程设计与接口.md",
+      "anchor": "doc-e0f67fce8dfc"
+    },
+    {
+      "original_path": "xyf_workbench/zynq_-pl_-simd_-verilog/docs/M7_几何标定机制_2026-10-16.md",
+      "original_sha256": "7a44344d1fee28cdb0a161c4df934dc9d120ae7e358f07ebe94e4ee20c2a02a7",
+      "merged_file": "docs/工程设计与接口.md",
+      "anchor": "doc-36ee4a19e848"
+    },
+    {
+      "original_path": "xyf_workbench/zynq_-pl_-simd_-verilog/docs/M9_开发记录与源码漂移阻碍_2026-10-16.md",
+      "original_sha256": "f4d4ad22680c62dc9b83e31aa92876361e5709ab97216b957a11668f04fb4bb6",
+      "merged_file": "docs/工程设计与接口.md",
+      "anchor": "doc-020981d6d621"
+    },
+    {
+      "original_path": "xyf_workbench/zynq_-pl_-simd_-verilog/docs/mic_array_layout.md",
+      "original_sha256": "4ce398608051f3c248624d16805dd4d4281beb4eabd99798aa441c85283f6dd0",
+      "merged_file": "docs/工程设计与接口.md",
+      "anchor": "doc-0318679fbb5e"
+    },
+    {
+      "original_path": "xyf_workbench/zynq_-pl_-simd_-verilog/docs/mic_array_spec.md",
+      "original_sha256": "16255c4ade479d7fcdfb224006db35665f0bbda851ae9f59beeb5edece163528",
+      "merged_file": "docs/工程设计与接口.md",
+      "anchor": "doc-91f91fc0596c"
+    },
+    {
+      "original_path": "xyf_workbench/zynq_-pl_-simd_-verilog/docs/pcb_8maic_review_20261022.md",
+      "original_sha256": "b6beab5ee1cc568570f5a113a22d3b4bd1c5f39fd4da1388fd240679a8b41e04",
+      "merged_file": "docs/工程设计与接口.md",
+      "anchor": "doc-e112d5991758"
+    },
+    {
+      "original_path": "xyf_workbench/zynq_-pl_-simd_-verilog/docs/pdm_array_spec.md",
+      "original_sha256": "28c8ff4e32207448a4b7b7e0a91a2aeae05c42d7066765026896823fd475288a",
+      "merged_file": "docs/工程设计与接口.md",
+      "anchor": "doc-3fcf83a76066"
+    },
+    {
+      "original_path": "xyf_workbench/zynq_-pl_-simd_-verilog/docs/pdm_both_rewired_20261022.md",
+      "original_sha256": "c923d2402326b26eaeabaab68a45ad2f12c23aaf316010196179d939f7b3e8da",
+      "merged_file": "docs/工程设计与接口.md",
+      "anchor": "doc-e1854126452f"
+    },
+    {
+      "original_path": "xyf_workbench/zynq_-pl_-simd_-verilog/docs/pdm_bus_bias_control_20261022.md",
+      "original_sha256": "6a46860f3da471208dde6edf6681bce265cfe46b70a44fcfb795c1aed30bf30d",
+      "merged_file": "docs/工程设计与接口.md",
+      "anchor": "doc-a78fa1350db1"
+    },
+    {
+      "original_path": "xyf_workbench/zynq_-pl_-simd_-verilog/docs/pdm_diagnostic_proposal.md",
+      "original_sha256": "b5595b4d7157465ff672476dd1cf2204e89d0a9d8a1ffafe564a4c02673b96b3",
+      "merged_file": "docs/工程设计与接口.md",
+      "anchor": "doc-e2ef4caf9750"
+    },
+    {
+      "original_path": "xyf_workbench/zynq_-pl_-simd_-verilog/docs/pdm_exact_reference_edges_20261022.md",
+      "original_sha256": "349fde8333a9e221b8a7a5009c9cdbe5643e31908c701efa9c4855de932b7414",
+      "merged_file": "docs/工程设计与接口.md",
+      "anchor": "doc-9b4f229e9bbf"
+    },
+    {
+      "original_path": "xyf_workbench/zynq_-pl_-simd_-verilog/docs/pdm_external_window.md",
+      "original_sha256": "b3951f8087848d5732d82ce260b5a46e9a54590d569e94e65161c465420255c7",
+      "merged_file": "docs/工程设计与接口.md",
+      "anchor": "doc-2cd098810e2b"
+    },
+    {
+      "original_path": "xyf_workbench/zynq_-pl_-simd_-verilog/docs/pdm_ila_board_20261021.md",
+      "original_sha256": "acb86a2f14d50aed44457ba5545154a9f85e0285bc8df245bb28198ff609430c",
+      "merged_file": "docs/工程设计与接口.md",
+      "anchor": "doc-bf0bb891f07a"
+    },
+    {
+      "original_path": "xyf_workbench/zynq_-pl_-simd_-verilog/docs/pdm_ila_board_20261022.md",
+      "original_sha256": "9ddb2b30146f81a69e77d3301338f52fb9be8f8eedd33ee468ccaa59742b0079",
+      "merged_file": "docs/工程设计与接口.md",
+      "anchor": "doc-a71dfb467fa9"
+    },
+    {
+      "original_path": "xyf_workbench/zynq_-pl_-simd_-verilog/docs/pdm_reference_comparison_20261022.md",
+      "original_sha256": "d08f743afceff8cce8125f07b4165934c2cccb7228de96baab5bf3668e8de163",
+      "merged_file": "docs/工程设计与接口.md",
+      "anchor": "doc-cf157dd02c51"
+    },
+    {
+      "original_path": "xyf_workbench/zynq_-pl_-simd_-verilog/docs/pdm_shared_timing.md",
+      "original_sha256": "f04c43ea1bde784d1a43cc6bb1a34062eefd40e57df81c28a6709b937f59e948",
+      "merged_file": "docs/工程设计与接口.md",
+      "anchor": "doc-c3b4262cf945"
+    },
+    {
+      "original_path": "xyf_workbench/zynq_-pl_-simd_-verilog/docs/pdm_single_both_same_build_20261022.md",
+      "original_sha256": "5bc6c64e4b78b2f0c0334d67146c0db056cd6530fbcc5e160cf5775ddc915346",
+      "merged_file": "docs/工程设计与接口.md",
+      "anchor": "doc-66042340ae78"
+    },
+    {
+      "original_path": "xyf_workbench/zynq_-pl_-simd_-verilog/docs/pdm_u2_rewired_20261022.md",
+      "original_sha256": "588cfbab7daa764dc2744a340b1b60d545940765812266ed4366154da5a11982",
+      "merged_file": "docs/工程设计与接口.md",
+      "anchor": "doc-f66dee48e29f"
+    },
+    {
+      "original_path": "xyf_workbench/zynq_-pl_-simd_-verilog/docs/perf_rv32_bottlenecks.md",
+      "original_sha256": "285d6a5abb8f62ba16f13bd2c088be0a627f800bd4121c8b79112e6f0454d373",
+      "merged_file": "docs/工程设计与接口.md",
+      "anchor": "doc-1c81f267545d"
+    },
+    {
+      "original_path": "xyf_workbench/zynq_-pl_-simd_-verilog/docs/PL端全部内容详解_2026-10-12.md",
+      "original_sha256": "d9645ed2af32dbb1843ad54f33e2850c62c614aa278ff5075120cb66fbc88d83",
+      "merged_file": "docs/工程设计与接口.md",
+      "anchor": "doc-04a573eff9c4"
+    },
+    {
+      "original_path": "xyf_workbench/zynq_-pl_-simd_-verilog/docs/ps_fifo_integration.md",
+      "original_sha256": "127e271799bc9d3bc979377011ddf85cf822010ce59dacc0ac2e747711eb06ce",
+      "merged_file": "docs/工程设计与接口.md",
+      "anchor": "doc-12d3572777af"
+    },
+    {
+      "original_path": "xyf_workbench/zynq_-pl_-simd_-verilog/docs/PS_GSC接口契约_2026-10-15.md",
+      "original_sha256": "e408b358384102fd31c0f5cc924887639976ae1685f0d92aedc32a6b916b8c05",
+      "merged_file": "docs/工程设计与接口.md",
+      "anchor": "doc-88190214067a"
+    },
+    {
+      "original_path": "xyf_workbench/versions/dual_gui_gsc_20261101/README.md",
+      "original_sha256": "c29a956f934d73dd26350d645756220f248ae19edbca369402a6c5e9041670e2",
+      "merged_file": "docs/工程设计与接口.md",
+      "anchor": "doc-49b036519dde"
+    },
+    {
+      "original_path": "xyf_workbench/zynq_-pl_-simd_-verilog/docs/vfft_design.md",
+      "original_sha256": "233782d9baa4cda7de5ad3aa88d8de2f8c260d038713c23195764302d7a1fd72",
+      "merged_file": "docs/工程设计与接口.md",
+      "anchor": "doc-d61fce6c320a"
+    },
+    {
+      "original_path": "xyf_workbench/zynq_-pl_-simd_-verilog/docs/声源定位_DAS_集成验证复现.md",
+      "original_sha256": "71d4af89141783c8fdeac65b35946db6e15c053f1850a38271bfa56fac9ca557",
+      "merged_file": "docs/工程设计与接口.md",
+      "anchor": "doc-468ae1e0a38c"
+    },
+    {
+      "original_path": "xyf_workbench/zynq_-pl_-simd_-verilog/docs/board_ui_runbook.md",
+      "original_sha256": "330095256642e53b16c13d61d1301c68a0e1fe6a9786d31b4bca125d5746b84f",
+      "merged_file": "docs/构建部署与操作.md",
+      "anchor": "doc-8edeeea203f7"
+    },
+    {
+      "original_path": "xyf_workbench/zynq_-pl_-simd_-verilog/docs/circular9_board_bringup_20261024.md",
+      "original_sha256": "7c446f05eb0eec828ad5bacd26efa32e957018da05e007754bcd3a0f13475a05",
+      "merged_file": "docs/构建部署与操作.md",
+      "anchor": "doc-ada9c67564e0"
+    },
+    {
+      "original_path": "xyf_workbench/zynq_-pl_-simd_-verilog/docs/circular9_calibration_input_20261025.md",
+      "original_sha256": "d2f3b4b425775a27d4b519d48278f7aa7ff0a58d51a2ae17ac42609508045712",
+      "merged_file": "docs/构建部署与操作.md",
+      "anchor": "doc-1d088c4cd723"
+    },
+    {
+      "original_path": "xyf_workbench/zynq_-pl_-simd_-verilog/docs/circular9_diagnosis_data_workflow_20261025.md",
+      "original_sha256": "4ccfa994cce695a2d1d93d9b513e890a2fed206865aa4b00036e7eb2ab43e15e",
+      "merged_file": "docs/构建部署与操作.md",
+      "anchor": "doc-7bc82840e2db"
+    },
+    {
+      "original_path": "xyf_workbench/zynq_-pl_-simd_-verilog/docs/circular9_latency_contract_20261023.md",
+      "original_sha256": "37401566953fb03aebea69a84df6abeb868c03c4fc2b3ec94222fc780e606e00",
+      "merged_file": "docs/构建部署与操作.md",
+      "anchor": "doc-e447f69cf815"
+    },
+    {
+      "original_path": "xyf_workbench/zynq_-pl_-simd_-verilog/docs/circular9_packet_capture_20261025.md",
+      "original_sha256": "d54932bfecb3d1deacecd26b0a256291faabd8b42aa69d89c41ed36fa3620bb8",
+      "merged_file": "docs/构建部署与操作.md",
+      "anchor": "doc-b14b4c29b0b6"
+    },
+    {
+      "original_path": "xyf_workbench/zynq_-pl_-simd_-verilog/docs/circular9_preflight_20261025.md",
+      "original_sha256": "93fb8cbb737109f0275f2a79803690a7e7f45a48b43062324c3897fe79a71c62",
+      "merged_file": "docs/构建部署与操作.md",
+      "anchor": "doc-b8665ba35c3f"
+    },
+    {
+      "original_path": "xyf_workbench/zynq_-pl_-simd_-verilog/docs/circular9_readiness_20261025.md",
+      "original_sha256": "c9da2ae2b95e1302de85d4e6837e3efabbe31eaf06a81de4dd0fd4c6f2e042b7",
+      "merged_file": "docs/构建部署与操作.md",
+      "anchor": "doc-0675290b2bcb"
+    },
+    {
+      "original_path": "xyf_workbench/zynq_-pl_-simd_-verilog/docs/circular9_user_confirmed_inputs_20261026.md",
+      "original_sha256": "984d27cc56c398ef824e3922d5f2c5fdeac2f5d7c183d8f484aca32ac1550a47",
+      "merged_file": "docs/构建部署与操作.md",
+      "anchor": "doc-4e16264cbda5"
+    },
+    {
+      "original_path": "xyf_workbench/versions/dual_gui_gsc_20261101/release/docs/GSC实时性风险.md",
+      "original_sha256": "85cce446addbce47196f73316d3571e71be1971af12ac3e724db8cfb128b896d",
+      "merged_file": "docs/构建部署与操作.md",
+      "anchor": "doc-573414a03aef"
+    },
+    {
+      "original_path": "xyf_workbench/zynq_-pl_-simd_-verilog/profiles/full_gui9/docs/GUI_MIGRATION.md",
+      "original_sha256": "fdfacfa73d6a190e4f48e391ccc1f1dcee8ffaca80dd168ec3ab11d65c698a5e",
+      "merged_file": "docs/构建部署与操作.md",
+      "anchor": "doc-8f3084ab857e"
+    },
+    {
+      "original_path": "xyf_workbench/versions/dual_gui_gsc_20261101/project/profiles/full_gui9/docs/GUI_MIGRATION.md",
+      "original_sha256": "fdfacfa73d6a190e4f48e391ccc1f1dcee8ffaca80dd168ec3ab11d65c698a5e",
+      "merged_file": "docs/构建部署与操作.md",
+      "anchor": "doc-c58de1502057"
+    },
+    {
+      "original_path": "xyf_workbench/zynq_-pl_-simd_-verilog/docs/M8_GSC原型接口与验收_2026-10-16.md",
+      "original_sha256": "6cacdb4391081af29de3f59fb881cafd1c3bcf3486d552417755d9e01f48327c",
+      "merged_file": "docs/构建部署与操作.md",
+      "anchor": "doc-da93d60382a8"
+    },
+    {
+      "original_path": "xyf_workbench/zynq_-pl_-simd_-verilog/docs/raw_microphone_capture.md",
+      "original_sha256": "26c64045ff1c11eb0fabaff1b77935d37c9cc244d6e6b36137728f59abcf3cec",
+      "merged_file": "docs/构建部署与操作.md",
+      "anchor": "doc-4a951694865a"
+    },
+    {
+      "original_path": "xyf_workbench/zynq_-pl_-simd_-verilog/profiles/full_gui9/README.md",
+      "original_sha256": "4c7dc60d77780e624b081fec7a2dc38ae154754e76ab5dc8a1cc023a374f9898",
+      "merged_file": "docs/构建部署与操作.md",
+      "anchor": "doc-e8e8b993cd19"
+    },
+    {
+      "original_path": "xyf_workbench/versions/dual_gui_gsc_20261101/project/profiles/full_gui9/README.md",
+      "original_sha256": "812cde82fe54dc7dceff0151d050427e0e47334e6fc90de424e0e12428a8549d",
+      "merged_file": "docs/构建部署与操作.md",
+      "anchor": "doc-2b979d731647"
+    },
+    {
+      "original_path": "xyf_workbench/versions/dual_gui_gsc_20261101/project/profiles/raw9_128k/README.md",
+      "original_sha256": "067775a1cffe887f8ea88406f62f88997d1847504e1ea4a518952a4a6dfe7c6d",
+      "merged_file": "docs/构建部署与操作.md",
+      "anchor": "doc-65bbd999546d"
+    },
+    {
+      "original_path": "xyf_workbench/versions/dual_gui_gsc_20261101/project/profiles/raw9_128k/docs/VERIFICATION.md",
+      "original_sha256": "0df87cd9eed078730a1a71f558eecf82d205b5b395c74fe35cca5d125bfa49bf",
+      "merged_file": "docs/构建部署与操作.md",
+      "anchor": "doc-da616c5acffb"
+    },
+    {
+      "original_path": "xyf_workbench/zynq_-pl_-simd_-verilog/docs/acoustic_acceptance.md",
+      "original_sha256": "dc03420f87f590d1569b26f9cb63386948b4e18a41bbd1cb996cf765f8462d02",
+      "merged_file": "docs/测试验证与问题记录.md",
+      "anchor": "doc-b348d71d6696"
+    },
+    {
+      "original_path": "xyf_workbench/zynq_-pl_-simd_-verilog/docs/circular9_optimization_20261025.md",
+      "original_sha256": "19bf2ed6dabdcab3446b25baf3ddeaa90eb11d789643a008663e075dd14cff16",
+      "merged_file": "docs/测试验证与问题记录.md",
+      "anchor": "doc-7aad92b3720f"
+    },
+    {
+      "original_path": "xyf_workbench/zynq_-pl_-simd_-verilog/docs/circular9_optimization_completion_20261025.md",
+      "original_sha256": "33db96a28d2253491979ea6455533cdb6cdf95beca6b9f217ec186f49d64ec29",
+      "merged_file": "docs/测试验证与问题记录.md",
+      "anchor": "doc-73520ff0027d"
+    },
+    {
+      "original_path": "xyf_workbench/zynq_-pl_-simd_-verilog/docs/cycle_profile.md",
+      "original_sha256": "3305d3e78c41569f3da3d983a61c7f5e03b09b5373eef758eea1aff2eeae3ecb",
+      "merged_file": "docs/测试验证与问题记录.md",
+      "anchor": "doc-06380d3b8d13"
+    },
+    {
+      "original_path": "xyf_workbench/zynq_-pl_-simd_-verilog/docs/das_fir_completion.md",
+      "original_sha256": "f51702d6c6577509838bfef84b379a050f9ae5223a3f98db1e07ec2b312bd3c9",
+      "merged_file": "docs/测试验证与问题记录.md",
+      "anchor": "doc-4b8f0546e410"
+    },
+    {
+      "original_path": "xyf_workbench/zynq_-pl_-simd_-verilog/docs/gui_signal_validation.md",
+      "original_sha256": "0dcc9589086294c788f8a2ff8758b79ac6056a08db31104b700fefd22937672b",
+      "merged_file": "docs/测试验证与问题记录.md",
+      "anchor": "doc-4f88bef19d36"
+    },
+    {
+      "original_path": "xyf_workbench/zynq_-pl_-simd_-verilog/docs/localizer12_realtime_safety_report.md",
+      "original_sha256": "fca0e9241ed49a9af4a3cfa8423db5ae10875690dadccc7edcc1f6f8da04b582",
+      "merged_file": "docs/测试验证与问题记录.md",
+      "anchor": "doc-67db7ab2c459"
+    },
+    {
+      "original_path": "xyf_workbench/zynq_-pl_-simd_-verilog/docs/M10_固件派发优化与验收_2026-10-16.md",
+      "original_sha256": "9b5ebfd661b1857666ca1750011b57bf6bfc41609f0dbd20a785c1b8ff500db5",
+      "merged_file": "docs/测试验证与问题记录.md",
+      "anchor": "doc-a981b1f48698"
+    },
+    {
+      "original_path": "xyf_workbench/zynq_-pl_-simd_-verilog/docs/M6-M10_交付索引_2026-10-16.md",
+      "original_sha256": "0fc03213f2e7fec6974abeca040d34c12c31e73cff09d22e1dac4f430499d066",
+      "merged_file": "docs/测试验证与问题记录.md",
+      "anchor": "doc-99ed4c13cdde"
+    },
+    {
+      "original_path": "xyf_workbench/zynq_-pl_-simd_-verilog/docs/M6_PDM同步审计_2026-10-16.md",
+      "original_sha256": "82439c2940ebe07e8ae6c01e56de408461b5c374c81b20c1a04da061ca05fd72",
+      "merged_file": "docs/测试验证与问题记录.md",
+      "anchor": "doc-c81a73ad870d"
+    },
+    {
+      "original_path": "xyf_workbench/zynq_-pl_-simd_-verilog/docs/M9_DMA_UDP实施与验收_2026-10-16.md",
+      "original_sha256": "e9debfb151da8b304face4e22f3d3fe51c6098098c4e40c2eaaf7239052fe206",
+      "merged_file": "docs/测试验证与问题记录.md",
+      "anchor": "doc-2bbe31dde3fe"
+    },
+    {
+      "original_path": "xyf_workbench/zynq_-pl_-simd_-verilog/docs/measurements.md",
+      "original_sha256": "19894e7e6c51f01ccbca8d93aa3a2603fc7b67eae5bd9abe6d877f138f4049d2",
+      "merged_file": "docs/测试验证与问题记录.md",
+      "anchor": "doc-bf23fa285305"
+    },
+    {
+      "original_path": "xyf_workbench/zynq_-pl_-simd_-verilog/docs/merged_pl_ps_audit.md",
+      "original_sha256": "c4bdaacf11bf6f0978eed26d357a5815413386e2596972683ba2485dea0a2fd7",
+      "merged_file": "docs/测试验证与问题记录.md",
+      "anchor": "doc-56799a2b0982"
+    },
+    {
+      "original_path": "xyf_workbench/zynq_-pl_-simd_-verilog/docs/pdm_recheck_20261022.md",
+      "original_sha256": "7ddd93d65a27a735dd5790277073ec2aa81b42e36450f4006ce1f7901cf94b21",
+      "merged_file": "docs/测试验证与问题记录.md",
+      "anchor": "doc-c4c6b5310dd1"
+    },
+    {
+      "original_path": "xyf_workbench/zynq_-pl_-simd_-verilog/docs/PDM双麦共线整改报告_2026-10-16.md",
+      "original_sha256": "40a726b050e129b9099ac0b7bc431ef8606c6397af91bb9e6ed9caa7654ca904",
+      "merged_file": "docs/测试验证与问题记录.md",
+      "anchor": "doc-41ff9b6b0192"
+    },
+    {
+      "original_path": "xyf_workbench/zynq_-pl_-simd_-verilog/docs/PDM收敛性整改报告_2026-10-16.md",
+      "original_sha256": "2b5882cf289ae06d7e884b13d1fff383a6ce4c527113345cff5fec5522e7393e",
+      "merged_file": "docs/测试验证与问题记录.md",
+      "anchor": "doc-6891b9f26665"
+    },
+    {
+      "original_path": "xyf_workbench/zynq_-pl_-simd_-verilog/docs/PDM验收自动化与RAM实验报告_2026-10-16.md",
+      "original_sha256": "9d1d1a1249172c810e66f3c3ea901e37f7ccd3ab2741e571d3f6526ab00d5c4e",
+      "merged_file": "docs/测试验证与问题记录.md",
+      "anchor": "doc-44e29cbe1431"
+    },
+    {
+      "original_path": "xyf_workbench/zynq_-pl_-simd_-verilog/docs/perf_rv32_mem_audit.md",
+      "original_sha256": "d27209133dad6f1ed0c475cf6d209c2d48a31e77bea471c85d352302f67851a9",
+      "merged_file": "docs/测试验证与问题记录.md",
+      "anchor": "doc-4276cfe85e29"
+    },
+    {
+      "original_path": "xyf_workbench/zynq_-pl_-simd_-verilog/docs/perf_rv32_optimization_plan.md",
+      "original_sha256": "12a83bdb0aa73fdebf7c60bf845e7be3ed71488adfc7c071edbd8300f7a369c1",
+      "merged_file": "docs/测试验证与问题记录.md",
+      "anchor": "doc-359c7a3ddcc4"
+    },
+    {
+      "original_path": "xyf_workbench/zynq_-pl_-simd_-verilog/docs/perf_rv32_phase_report.md",
+      "original_sha256": "86909e94dcb749e24e317587d69fcb5386657b5475266e8316ae8c338ae76428",
+      "merged_file": "docs/测试验证与问题记录.md",
+      "anchor": "doc-478b3d59fdbf"
+    },
+    {
+      "original_path": "xyf_workbench/zynq_-pl_-simd_-verilog/docs/planar8_latency_20261021.md",
+      "original_sha256": "e3430ea4ca5029463921ecfff2198070736bf41f591db6bf41ce3438e2e068ba",
+      "merged_file": "docs/测试验证与问题记录.md",
+      "anchor": "doc-ea6866d7b450"
+    },
+    {
+      "original_path": "xyf_workbench/zynq_-pl_-simd_-verilog/docs/planar8_optimization_20261021.md",
+      "original_sha256": "8e50775a37a5319587604990e31e755c8c32308ac01ac51ac09ad537f2ce4daa",
+      "merged_file": "docs/测试验证与问题记录.md",
+      "anchor": "doc-2fa2950280ba"
+    },
+    {
+      "original_path": "xyf_workbench/zynq_-pl_-simd_-verilog/docs/ps_board_replay_validation.md",
+      "original_sha256": "6bf515c906fe75d686ce349e44bbd683819b4bb7bec1dab7c67a044a1a41add8",
+      "merged_file": "docs/测试验证与问题记录.md",
+      "anchor": "doc-2923b9fda20c"
+    },
+    {
+      "original_path": "xyf_workbench/versions/dual_gui_gsc_20261101/docs/REPORT.md",
+      "original_sha256": "f2eb893294ba3280b82bd55e18fe19a7c526f5e965193e00bfb21fcb7a20dbd3",
+      "merged_file": "docs/测试验证与问题记录.md",
+      "anchor": "doc-3c5d35be407b"
+    },
+    {
+      "original_path": "xyf_workbench/zynq_-pl_-simd_-verilog/docs/system_optimization_20261014.md",
+      "original_sha256": "aaaf38b66650c5e9de3b9aff27d82740056eafee2480cb6fe03b065f81e25ebe",
+      "merged_file": "docs/测试验证与问题记录.md",
+      "anchor": "doc-80835265067f"
+    },
+    {
+      "original_path": "xyf_workbench/versions/dual_gui_gsc_20261101/docs/VALIDATION.md",
+      "original_sha256": "54fabcffa5f9435270c6b5e09c35eedd8ef3355e1bd6dbd79949b02fce8fea51",
+      "merged_file": "docs/测试验证与问题记录.md",
+      "anchor": "doc-77e72b7e58b7"
+    },
+    {
+      "original_path": "xyf_workbench/versions/dual_gui_gsc_20261101/docs/VALIDATION_REVOKED.md",
+      "original_sha256": "85cce446addbce47196f73316d3571e71be1971af12ac3e724db8cfb128b896d",
+      "merged_file": "docs/测试验证与问题记录.md",
+      "anchor": "doc-109dc1fbeaeb"
+    },
+    {
+      "original_path": "xyf_workbench/zynq_-pl_-simd_-verilog/docs/声源定位_DAS_M1-M5实施报告_2026-10-15.md",
+      "original_sha256": "60c340c860a4210d7c94f7f540c8e230f06099b5e17daf854ebcdfe3a4abd029",
+      "merged_file": "docs/测试验证与问题记录.md",
+      "anchor": "doc-2d763ca0c8fb"
+    },
+    {
+      "original_path": "docs/验证资料/README.md",
+      "original_sha256": "ea9a54f70ed7ab09f55f17e367b9e8d0a540462006e7bef3e24815d63b391b3a",
+      "merged_file": "docs/验证资料/验证说明.md",
+      "anchor": "doc-a4e822367594"
+    },
+    {
+      "original_path": "docs/验证资料/源码与指标对应.md",
+      "original_sha256": "2a830e25ca89476cf0209ded96142260da1a7182694b3414ae546139f971d4e0",
+      "merged_file": "docs/验证资料/验证说明.md",
+      "anchor": "doc-5ae7d45dd979"
+    },
+    {
+      "original_path": "docs/验证资料/performance_comparison/README.md",
+      "original_sha256": "3b59d53a3febdbc555f88d483df81ef76e2923dd3cde7db450b62f07c635e250",
+      "merged_file": "docs/验证资料/验证说明.md",
+      "anchor": "doc-b0134fd0c701"
+    },
+    {
+      "original_path": "docs/验证资料/performance_comparison/circular9_scalar/README.md",
+      "original_sha256": "bee21b35bee2951b27d081aac2f16fddba764c868559223ba43f5c19f1254092",
+      "merged_file": "docs/验证资料/验证说明.md",
+      "anchor": "doc-957604088305"
+    },
+    {
+      "original_path": "docs/验证资料/performance_comparison/pl_rtl/README.md",
+      "original_sha256": "400c8537cdb0a1c88a6fa54fb715843bf4cd58a93d76a4a04010e803c681b11e",
+      "merged_file": "docs/验证资料/验证说明.md",
+      "anchor": "doc-0d9b1131d214"
+    },
+    {
+      "original_path": "docs/验证资料/performance_comparison/ps_software/README.md",
+      "original_sha256": "79abef81f7688444aee33b08fb44438e89941eb83f1a7642a0f4440c1a2c82bc",
+      "merged_file": "docs/验证资料/验证说明.md",
+      "anchor": "doc-23a152db0468"
+    },
+    {
+      "original_path": "docs/验证资料/performance_comparison/ps_software/full_modules/README.md",
+      "original_sha256": "0686526b1ea502fc8b05a6f0aec229dbec2c1c534118362c305c94251c02f11e",
+      "merged_file": "docs/验证资料/验证说明.md",
+      "anchor": "doc-3b3d032039b8"
+    }
+  ]
+}

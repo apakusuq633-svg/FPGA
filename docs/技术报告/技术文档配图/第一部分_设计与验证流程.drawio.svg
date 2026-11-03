@@ -1,0 +1,158 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1400" height="1240" viewBox="0 0 1400 1240" content="&lt;?xml version=&quot;1.0&quot; encoding=&quot;utf-8&quot;?&gt;
+&lt;mxGraphModel pageWidth=&quot;1400&quot; pageHeight=&quot;1240&quot; page=&quot;1&quot; grid=&quot;0&quot; background=&quot;#ffffff&quot; adaptiveColors=&quot;auto&quot;&gt;
+  &lt;root&gt;
+    &lt;mxCell id=&quot;0&quot; /&gt;
+    &lt;mxCell id=&quot;1&quot; parent=&quot;0&quot; /&gt;
+    &lt;mxCell id=&quot;title&quot; value=&quot;&amp;lt;b&amp;gt;设计与验证流程&amp;lt;/b&amp;gt;&quot; style=&quot;html=1;fontFamily=Microsoft YaHei;fontColor=#172b4d;whiteSpace=wrap;text;align=left;fontSize=34;strokeColor=none;fillColor=none;&quot; vertex=&quot;1&quot; parent=&quot;1&quot;&gt;
+      &lt;mxGeometry y=&quot;20&quot; width=&quot;1250&quot; as=&quot;geometry&quot; height=&quot;55&quot; x=&quot;55&quot; /&gt;
+    &lt;/mxCell&gt;
+    &lt;mxCell id=&quot;subtitle&quot; value=&quot;需求与方案 → 软硬件并行开发 → 联调与实测；根据测试结果迭代改进。&quot; style=&quot;html=1;fontFamily=Microsoft YaHei;fontColor=#172b4d;whiteSpace=wrap;text;align=left;fontSize=21;strokeColor=none;fillColor=none;&quot; vertex=&quot;1&quot; parent=&quot;1&quot;&gt;
+      &lt;mxGeometry y=&quot;85&quot; width=&quot;1250&quot; as=&quot;geometry&quot; height=&quot;35&quot; x=&quot;55&quot; /&gt;
+    &lt;/mxCell&gt;
+    &lt;mxCell id=&quot;needs&quot; value=&quot;&amp;lt;b style=&#x27;font-size:23px&#x27;&amp;gt;需求与指标分解&amp;lt;/b&amp;gt;&amp;lt;br&amp;gt;&amp;lt;font style=&#x27;font-size:17px&#x27;&amp;gt;明确多机场景与验证目标&amp;lt;/font&amp;gt;&quot; style=&quot;html=1;fontFamily=Microsoft YaHei;fontColor=#172b4d;whiteSpace=wrap;rounded=1;fillColor=#f1f5f9;strokeColor=#94a3b8;strokeWidth=1.6;spacing=12;&quot; vertex=&quot;1&quot; parent=&quot;1&quot;&gt;
+      &lt;mxGeometry y=&quot;160&quot; width=&quot;250&quot; as=&quot;geometry&quot; height=&quot;100&quot; x=&quot;70&quot; /&gt;
+    &lt;/mxCell&gt;
+    &lt;mxCell id=&quot;array&quot; value=&quot;&amp;lt;b style=&#x27;font-size:23px&#x27;&amp;gt;阵列与同步采样&amp;lt;/b&amp;gt;&amp;lt;br&amp;gt;&amp;lt;font style=&#x27;font-size:17px&#x27;&amp;gt;确定九麦布局和采集方案&amp;lt;/font&amp;gt;&quot; style=&quot;html=1;fontFamily=Microsoft YaHei;fontColor=#172b4d;whiteSpace=wrap;rounded=1;fillColor=#eaf2ff;strokeColor=#7298c9;strokeWidth=1.6;spacing=12;&quot; vertex=&quot;1&quot; parent=&quot;1&quot;&gt;
+      &lt;mxGeometry y=&quot;160&quot; width=&quot;250&quot; as=&quot;geometry&quot; height=&quot;100&quot; x=&quot;400&quot; /&gt;
+    &lt;/mxCell&gt;
+    &lt;mxCell id=&quot;algorithm&quot; value=&quot;&amp;lt;b style=&#x27;font-size:23px&#x27;&amp;gt;算法参考与定点设计&amp;lt;/b&amp;gt;&amp;lt;br&amp;gt;&amp;lt;font style=&#x27;font-size:17px&#x27;&amp;gt;定位、分离、诊断与数值规则&amp;lt;/font&amp;gt;&quot; style=&quot;html=1;fontFamily=Microsoft YaHei;fontColor=#172b4d;whiteSpace=wrap;rounded=1;fillColor=#eef0fc;strokeColor=#919cce;strokeWidth=1.6;spacing=12;&quot; vertex=&quot;1&quot; parent=&quot;1&quot;&gt;
+      &lt;mxGeometry y=&quot;160&quot; width=&quot;330&quot; as=&quot;geometry&quot; height=&quot;100&quot; x=&quot;735&quot; /&gt;
+    &lt;/mxCell&gt;
+    &lt;mxCell id=&quot;n1&quot; source=&quot;needs&quot; value=&quot;&quot; edge=&quot;1&quot; parent=&quot;1&quot; target=&quot;array&quot; style=&quot;edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=block;endFill=1;strokeWidth=1.8;fontSize=13;fontFamily=Microsoft YaHei;fontColor=#475569;labelBackgroundColor=#ffffff;defaultLabelBackgroundColor=page;spacing=5;strokeColor=#475569;&quot;&gt;
+      &lt;mxGeometry relative=&quot;1&quot; as=&quot;geometry&quot; /&gt;
+    &lt;/mxCell&gt;
+    &lt;mxCell id=&quot;n2&quot; source=&quot;array&quot; value=&quot;&quot; edge=&quot;1&quot; parent=&quot;1&quot; target=&quot;algorithm&quot; style=&quot;edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=block;endFill=1;strokeWidth=1.8;fontSize=13;fontFamily=Microsoft YaHei;fontColor=#475569;labelBackgroundColor=#ffffff;defaultLabelBackgroundColor=page;spacing=5;strokeColor=#475569;&quot;&gt;
+      &lt;mxGeometry relative=&quot;1&quot; as=&quot;geometry&quot; /&gt;
+    &lt;/mxCell&gt;
+    &lt;mxCell id=&quot;parallel&quot; value=&quot;&amp;lt;b&amp;gt;软硬件并行开发&amp;lt;/b&amp;gt;&quot; style=&quot;html=1;fontFamily=Microsoft YaHei;fontColor=#172b4d;whiteSpace=wrap;text;align=center;fontSize=22;strokeColor=none;fillColor=none;&quot; vertex=&quot;1&quot; parent=&quot;1&quot;&gt;
+      &lt;mxGeometry y=&quot;345&quot; width=&quot;280&quot; as=&quot;geometry&quot; height=&quot;35&quot; x=&quot;760&quot; /&gt;
+    &lt;/mxCell&gt;
+    &lt;mxCell id=&quot;pl&quot; value=&quot;&amp;lt;b style=&#x27;font-size:23px&#x27;&amp;gt;PL声学处理器实现&amp;lt;/b&amp;gt;&amp;lt;br&amp;gt;&amp;lt;font style=&#x27;font-size:17px&#x27;&amp;gt;声学指令、RTL数据通路&amp;lt;br&amp;gt;与连续采样处理&amp;lt;/font&amp;gt;&quot; style=&quot;html=1;fontFamily=Microsoft YaHei;fontColor=#172b4d;whiteSpace=wrap;rounded=1;fillColor=#eaf2ff;strokeColor=#7298c9;strokeWidth=1.6;spacing=12;&quot; vertex=&quot;1&quot; parent=&quot;1&quot;&gt;
+      &lt;mxGeometry y=&quot;410&quot; width=&quot;300&quot; as=&quot;geometry&quot; height=&quot;110&quot; x=&quot;550&quot; /&gt;
+    &lt;/mxCell&gt;
+    &lt;mxCell id=&quot;ps&quot; value=&quot;&amp;lt;b style=&#x27;font-size:23px&#x27;&amp;gt;PS分析与控制实现&amp;lt;/b&amp;gt;&amp;lt;br&amp;gt;&amp;lt;font style=&#x27;font-size:17px&#x27;&amp;gt;双核任务、诊断与转向控制&amp;lt;br&amp;gt;及交互界面&amp;lt;/font&amp;gt;&quot; style=&quot;html=1;fontFamily=Microsoft YaHei;fontColor=#172b4d;whiteSpace=wrap;rounded=1;fillColor=#fff4e5;strokeColor=#d6a35c;strokeWidth=1.6;spacing=12;&quot; vertex=&quot;1&quot; parent=&quot;1&quot;&gt;
+      &lt;mxGeometry y=&quot;410&quot; width=&quot;300&quot; as=&quot;geometry&quot; height=&quot;110&quot; x=&quot;950&quot; /&gt;
+    &lt;/mxCell&gt;
+    &lt;mxCell id=&quot;splitpl&quot; source=&quot;algorithm&quot; value=&quot;&quot; edge=&quot;1&quot; parent=&quot;1&quot; target=&quot;pl&quot; style=&quot;edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=block;endFill=1;strokeWidth=1.8;fontSize=13;fontFamily=Microsoft YaHei;fontColor=#475569;labelBackgroundColor=#ffffff;defaultLabelBackgroundColor=page;spacing=5;strokeColor=#475569;exitX=0.5;exitY=1;entryX=0.5;entryY=0;exitPerimeter=0;entryPerimeter=0;&quot;&gt;
+      &lt;mxGeometry relative=&quot;1&quot; as=&quot;geometry&quot;&gt;
+        &lt;Array as=&quot;points&quot;&gt;
+          &lt;mxPoint x=&quot;900&quot; y=&quot;315&quot; /&gt;
+          &lt;mxPoint x=&quot;700&quot; y=&quot;315&quot; /&gt;
+        &lt;/Array&gt;
+      &lt;/mxGeometry&gt;
+    &lt;/mxCell&gt;
+    &lt;mxCell id=&quot;splitps&quot; source=&quot;algorithm&quot; value=&quot;&quot; edge=&quot;1&quot; parent=&quot;1&quot; target=&quot;ps&quot; style=&quot;edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=block;endFill=1;strokeWidth=1.8;fontSize=13;fontFamily=Microsoft YaHei;fontColor=#475569;labelBackgroundColor=#ffffff;defaultLabelBackgroundColor=page;spacing=5;strokeColor=#475569;exitX=0.5;exitY=1;entryX=0.5;entryY=0;exitPerimeter=0;entryPerimeter=0;&quot;&gt;
+      &lt;mxGeometry relative=&quot;1&quot; as=&quot;geometry&quot;&gt;
+        &lt;Array as=&quot;points&quot;&gt;
+          &lt;mxPoint x=&quot;900&quot; y=&quot;315&quot; /&gt;
+          &lt;mxPoint x=&quot;1100&quot; y=&quot;315&quot; /&gt;
+        &lt;/Array&gt;
+      &lt;/mxGeometry&gt;
+    &lt;/mxCell&gt;
+    &lt;mxCell id=&quot;integration&quot; value=&quot;&amp;lt;b style=&#x27;font-size:23px&#x27;&amp;gt;模块验证与软硬件联调&amp;lt;/b&amp;gt;&amp;lt;br&amp;gt;&amp;lt;font style=&#x27;font-size:17px&#x27;&amp;gt;核对参考结果，检查接口与协同&amp;lt;/font&amp;gt;&quot; style=&quot;html=1;fontFamily=Microsoft YaHei;fontColor=#172b4d;whiteSpace=wrap;rounded=1;fillColor=#eef0fc;strokeColor=#919cce;strokeWidth=1.6;spacing=12;&quot; vertex=&quot;1&quot; parent=&quot;1&quot;&gt;
+      &lt;mxGeometry y=&quot;630&quot; width=&quot;330&quot; as=&quot;geometry&quot; height=&quot;110&quot; x=&quot;735&quot; /&gt;
+    &lt;/mxCell&gt;
+    &lt;mxCell id=&quot;joinpl&quot; source=&quot;pl&quot; value=&quot;&quot; edge=&quot;1&quot; parent=&quot;1&quot; target=&quot;integration&quot; style=&quot;edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=block;endFill=1;strokeWidth=1.8;fontSize=13;fontFamily=Microsoft YaHei;fontColor=#475569;labelBackgroundColor=#ffffff;defaultLabelBackgroundColor=page;spacing=5;strokeColor=#475569;exitX=0.5;exitY=1;entryX=0.5;entryY=0;exitPerimeter=0;entryPerimeter=0;&quot;&gt;
+      &lt;mxGeometry relative=&quot;1&quot; as=&quot;geometry&quot;&gt;
+        &lt;Array as=&quot;points&quot;&gt;
+          &lt;mxPoint x=&quot;700&quot; y=&quot;575&quot; /&gt;
+          &lt;mxPoint x=&quot;900&quot; y=&quot;575&quot; /&gt;
+        &lt;/Array&gt;
+      &lt;/mxGeometry&gt;
+    &lt;/mxCell&gt;
+    &lt;mxCell id=&quot;joinps&quot; source=&quot;ps&quot; value=&quot;&quot; edge=&quot;1&quot; parent=&quot;1&quot; target=&quot;integration&quot; style=&quot;edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=block;endFill=1;strokeWidth=1.8;fontSize=13;fontFamily=Microsoft YaHei;fontColor=#475569;labelBackgroundColor=#ffffff;defaultLabelBackgroundColor=page;spacing=5;strokeColor=#475569;exitX=0.5;exitY=1;entryX=0.5;entryY=0;exitPerimeter=0;entryPerimeter=0;&quot;&gt;
+      &lt;mxGeometry relative=&quot;1&quot; as=&quot;geometry&quot;&gt;
+        &lt;Array as=&quot;points&quot;&gt;
+          &lt;mxPoint x=&quot;1100&quot; y=&quot;575&quot; /&gt;
+          &lt;mxPoint x=&quot;900&quot; y=&quot;575&quot; /&gt;
+        &lt;/Array&gt;
+      &lt;/mxGeometry&gt;
+    &lt;/mxCell&gt;
+    &lt;mxCell id=&quot;timing&quot; value=&quot;&amp;lt;b style=&#x27;font-size:23px&#x27;&amp;gt;时序检查与实板采集&amp;lt;/b&amp;gt;&amp;lt;br&amp;gt;&amp;lt;font style=&#x27;font-size:17px&#x27;&amp;gt;检查实现时序与真实采集链路&amp;lt;/font&amp;gt;&quot; style=&quot;html=1;fontFamily=Microsoft YaHei;fontColor=#172b4d;whiteSpace=wrap;rounded=1;fillColor=#eaf2ff;strokeColor=#7298c9;strokeWidth=1.6;spacing=12;&quot; vertex=&quot;1&quot; parent=&quot;1&quot;&gt;
+      &lt;mxGeometry y=&quot;820&quot; width=&quot;330&quot; as=&quot;geometry&quot; height=&quot;110&quot; x=&quot;735&quot; /&gt;
+    &lt;/mxCell&gt;
+    &lt;mxCell id=&quot;verify&quot; source=&quot;integration&quot; value=&quot;&quot; edge=&quot;1&quot; parent=&quot;1&quot; target=&quot;timing&quot; style=&quot;edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=block;endFill=1;strokeWidth=1.8;fontSize=13;fontFamily=Microsoft YaHei;fontColor=#475569;labelBackgroundColor=#ffffff;defaultLabelBackgroundColor=page;spacing=5;strokeColor=#475569;&quot;&gt;
+      &lt;mxGeometry relative=&quot;1&quot; as=&quot;geometry&quot; /&gt;
+    &lt;/mxCell&gt;
+    &lt;mxCell id=&quot;acceptance&quot; value=&quot;&amp;lt;b style=&#x27;font-size:23px&#x27;&amp;gt;物理标定与真实故障验收&amp;lt;/b&amp;gt;&amp;lt;br&amp;gt;&amp;lt;font style=&#x27;font-size:17px&#x27;&amp;gt;幅相标定、多机故障归因&amp;lt;br&amp;gt;记录与复核&amp;lt;/font&amp;gt;&quot; style=&quot;html=1;fontFamily=Microsoft YaHei;fontColor=#172b4d;whiteSpace=wrap;rounded=1;fillColor=#fff4e5;strokeColor=#d6a35c;strokeWidth=1.6;spacing=12;&quot; vertex=&quot;1&quot; parent=&quot;1&quot;&gt;
+      &lt;mxGeometry y=&quot;1010&quot; width=&quot;330&quot; as=&quot;geometry&quot; height=&quot;110&quot; x=&quot;735&quot; /&gt;
+    &lt;/mxCell&gt;
+    &lt;mxCell id=&quot;test&quot; source=&quot;timing&quot; value=&quot;&quot; edge=&quot;1&quot; parent=&quot;1&quot; target=&quot;acceptance&quot; style=&quot;edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=block;endFill=1;strokeWidth=1.8;fontSize=13;fontFamily=Microsoft YaHei;fontColor=#475569;labelBackgroundColor=#ffffff;defaultLabelBackgroundColor=page;spacing=5;strokeColor=#475569;&quot;&gt;
+      &lt;mxGeometry relative=&quot;1&quot; as=&quot;geometry&quot; /&gt;
+    &lt;/mxCell&gt;
+    &lt;mxCell id=&quot;feedback&quot; source=&quot;acceptance&quot; value=&quot;&quot; edge=&quot;1&quot; parent=&quot;1&quot; target=&quot;array&quot; style=&quot;edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=block;endFill=1;strokeWidth=1.8;fontSize=13;fontFamily=Microsoft YaHei;fontColor=#475569;labelBackgroundColor=#ffffff;defaultLabelBackgroundColor=page;spacing=5;strokeColor=#b45309;dashed=1;dashPattern=8 5;exitX=0;exitY=0.5;entryX=0.5;entryY=1;exitPerimeter=0;entryPerimeter=0;&quot;&gt;
+      &lt;mxGeometry relative=&quot;1&quot; as=&quot;geometry&quot;&gt;
+        &lt;Array as=&quot;points&quot;&gt;
+          &lt;mxPoint x=&quot;70&quot; y=&quot;1065&quot; /&gt;
+          &lt;mxPoint x=&quot;70&quot; y=&quot;290&quot; /&gt;
+          &lt;mxPoint x=&quot;525&quot; y=&quot;290&quot; /&gt;
+        &lt;/Array&gt;
+      &lt;/mxGeometry&gt;
+    &lt;/mxCell&gt;
+    &lt;mxCell id=&quot;revise&quot; source=&quot;acceptance&quot; value=&quot;&quot; edge=&quot;1&quot; parent=&quot;1&quot; target=&quot;algorithm&quot; style=&quot;edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=block;endFill=1;strokeWidth=1.8;fontSize=13;fontFamily=Microsoft YaHei;fontColor=#475569;labelBackgroundColor=#ffffff;defaultLabelBackgroundColor=page;spacing=5;strokeColor=#b45309;dashed=1;dashPattern=8 5;exitX=1;exitY=0.5;entryX=1;entryY=0.5;exitPerimeter=0;entryPerimeter=0;&quot;&gt;
+      &lt;mxGeometry relative=&quot;1&quot; as=&quot;geometry&quot;&gt;
+        &lt;Array as=&quot;points&quot;&gt;
+          &lt;mxPoint x=&quot;1280&quot; y=&quot;1065&quot; /&gt;
+          &lt;mxPoint x=&quot;1280&quot; y=&quot;210&quot; /&gt;
+        &lt;/Array&gt;
+      &lt;/mxGeometry&gt;
+    &lt;/mxCell&gt;
+    &lt;mxCell id=&quot;feedbacktext&quot; value=&quot;&amp;lt;b&amp;gt;返回：阵列与同步采样&amp;lt;/b&amp;gt;&amp;lt;br&amp;gt;依据测试结果修正采集方案&quot; style=&quot;html=1;fontFamily=Microsoft YaHei;fontColor=#172b4d;whiteSpace=wrap;text;align=left;fontSize=21;strokeColor=none;fillColor=none;&quot; vertex=&quot;1&quot; parent=&quot;1&quot;&gt;
+      &lt;mxGeometry y=&quot;780&quot; width=&quot;400&quot; as=&quot;geometry&quot; height=&quot;75&quot; x=&quot;110&quot; /&gt;
+    &lt;/mxCell&gt;
+    &lt;mxCell id=&quot;revisetext&quot; value=&quot;&amp;lt;b&amp;gt;返回：算法设计&amp;lt;/b&amp;gt;&amp;lt;br&amp;gt;修正算法与双核调度&quot; style=&quot;html=1;fontFamily=Microsoft YaHei;fontColor=#172b4d;whiteSpace=wrap;text;align=left;fontSize=17;strokeColor=none;fillColor=none;&quot; vertex=&quot;1&quot; parent=&quot;1&quot;&gt;
+      &lt;mxGeometry y=&quot;755&quot; width=&quot;185&quot; as=&quot;geometry&quot; height=&quot;75&quot; x=&quot;1085&quot; /&gt;
+    &lt;/mxCell&gt;
+    &lt;mxCell id=&quot;legend&quot; value=&quot;实线：设计与验证步骤　　橙色虚线：测试反馈与改进　　各环节的验证记录见第三部分与文末附录&quot; style=&quot;html=1;fontFamily=Microsoft YaHei;fontColor=#172b4d;whiteSpace=wrap;text;align=left;fontSize=18;strokeColor=none;fillColor=none;&quot; vertex=&quot;1&quot; parent=&quot;1&quot;&gt;
+      &lt;mxGeometry y=&quot;1170&quot; width=&quot;1290&quot; as=&quot;geometry&quot; height=&quot;40&quot; x=&quot;55&quot; /&gt;
+    &lt;/mxCell&gt;
+  &lt;/root&gt;
+&lt;/mxGraphModel&gt;">
+<title>设计与验证流程</title><rect width='1400' height='1240' fill='white'/>
+<defs><marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0 L10 5 L0 10Z" fill="#475569"/></marker><marker id="control" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0 L10 5 L0 10Z" fill="#b45309"/></marker></defs>
+<path d='M320,210 H360 V210 H400' fill='none' stroke='#475569' stroke-width='1.8' stroke-linejoin='round'  marker-end='url(#arrow)'/>
+<path d='M650,210 H692.5 V210 H735' fill='none' stroke='#475569' stroke-width='1.8' stroke-linejoin='round'  marker-end='url(#arrow)'/>
+<path d='M900,260 L900,315 L700,315 L700,410' fill='none' stroke='#475569' stroke-width='1.8' stroke-linejoin='round'  marker-end='url(#arrow)'/>
+<path d='M900,260 L900,315 L1100,315 L1100,410' fill='none' stroke='#475569' stroke-width='1.8' stroke-linejoin='round'  marker-end='url(#arrow)'/>
+<path d='M700,520 L700,575 L900,575 L900,630' fill='none' stroke='#475569' stroke-width='1.8' stroke-linejoin='round'  marker-end='url(#arrow)'/>
+<path d='M1100,520 L1100,575 L900,575 L900,630' fill='none' stroke='#475569' stroke-width='1.8' stroke-linejoin='round'  marker-end='url(#arrow)'/>
+<path d='M900,740 V780 H900 V820' fill='none' stroke='#475569' stroke-width='1.8' stroke-linejoin='round'  marker-end='url(#arrow)'/>
+<path d='M900,930 V970 H900 V1010' fill='none' stroke='#475569' stroke-width='1.8' stroke-linejoin='round'  marker-end='url(#arrow)'/>
+<path d='M735,1065 L70,1065 L70,290 L525,290 L525,260' fill='none' stroke='#b45309' stroke-width='1.8' stroke-linejoin='round' stroke-dasharray="8 5" marker-end='url(#control)'/>
+<path d='M1065,1065 L1280,1065 L1280,210 L1065,210' fill='none' stroke='#b45309' stroke-width='1.8' stroke-linejoin='round' stroke-dasharray="8 5" marker-end='url(#control)'/>
+<text x='59' y='54.5' text-anchor='start' font-family='Microsoft YaHei,Noto Sans CJK SC,sans-serif' font-size='34' font-weight='700' fill='#172b4d'>设计与验证流程</text>
+<text x='59' y='109.5' text-anchor='start' font-family='Microsoft YaHei,Noto Sans CJK SC,sans-serif' font-size='21' font-weight='400' fill='#172b4d'>需求与方案 → 软硬件并行开发 → 联调与实测；根据测试结果迭代改进。</text>
+<rect x='70' y='160' width='250' height='100' rx='12' fill='#f1f5f9' stroke='#94a3b8' stroke-width='1.5'/>
+<text x='195' y='202.5' text-anchor='middle' font-family='Microsoft YaHei,Noto Sans CJK SC,sans-serif' font-size='23' font-weight='700' fill='#172b4d'>需求与指标分解</text>
+<text x='195' y='231.5' text-anchor='middle' font-family='Microsoft YaHei,Noto Sans CJK SC,sans-serif' font-size='17' font-weight='400' fill='#172b4d'>明确多机场景与验证目标</text>
+<rect x='400' y='160' width='250' height='100' rx='12' fill='#eaf2ff' stroke='#7298c9' stroke-width='1.5'/>
+<text x='525' y='202.5' text-anchor='middle' font-family='Microsoft YaHei,Noto Sans CJK SC,sans-serif' font-size='23' font-weight='700' fill='#172b4d'>阵列与同步采样</text>
+<text x='525' y='231.5' text-anchor='middle' font-family='Microsoft YaHei,Noto Sans CJK SC,sans-serif' font-size='17' font-weight='400' fill='#172b4d'>确定九麦布局和采集方案</text>
+<rect x='735' y='160' width='330' height='100' rx='12' fill='#eef0fc' stroke='#919cce' stroke-width='1.5'/>
+<text x='900' y='202.5' text-anchor='middle' font-family='Microsoft YaHei,Noto Sans CJK SC,sans-serif' font-size='23' font-weight='700' fill='#172b4d'>算法参考与定点设计</text>
+<text x='900' y='231.5' text-anchor='middle' font-family='Microsoft YaHei,Noto Sans CJK SC,sans-serif' font-size='17' font-weight='400' fill='#172b4d'>定位、分离、诊断与数值规则</text>
+<text x='900' y='369.5' text-anchor='middle' font-family='Microsoft YaHei,Noto Sans CJK SC,sans-serif' font-size='22' font-weight='700' fill='#172b4d'>软硬件并行开发</text>
+<rect x='550' y='410' width='300' height='110' rx='12' fill='#eaf2ff' stroke='#7298c9' stroke-width='1.5'/>
+<text x='700' y='443' text-anchor='middle' font-family='Microsoft YaHei,Noto Sans CJK SC,sans-serif' font-size='23' font-weight='700' fill='#172b4d'>PL声学处理器实现</text>
+<text x='700' y='472' text-anchor='middle' font-family='Microsoft YaHei,Noto Sans CJK SC,sans-serif' font-size='17' font-weight='400' fill='#172b4d'>声学指令、RTL数据通路</text>
+<text x='700' y='501' text-anchor='middle' font-family='Microsoft YaHei,Noto Sans CJK SC,sans-serif' font-size='16' font-weight='400' fill='#172b4d'>与连续采样处理</text>
+<rect x='950' y='410' width='300' height='110' rx='12' fill='#fff4e5' stroke='#d6a35c' stroke-width='1.5'/>
+<text x='1100' y='443' text-anchor='middle' font-family='Microsoft YaHei,Noto Sans CJK SC,sans-serif' font-size='23' font-weight='700' fill='#172b4d'>PS分析与控制实现</text>
+<text x='1100' y='472' text-anchor='middle' font-family='Microsoft YaHei,Noto Sans CJK SC,sans-serif' font-size='17' font-weight='400' fill='#172b4d'>双核任务、诊断与转向控制</text>
+<text x='1100' y='501' text-anchor='middle' font-family='Microsoft YaHei,Noto Sans CJK SC,sans-serif' font-size='16' font-weight='400' fill='#172b4d'>及交互界面</text>
+<rect x='735' y='630' width='330' height='110' rx='12' fill='#eef0fc' stroke='#919cce' stroke-width='1.5'/>
+<text x='900' y='677.5' text-anchor='middle' font-family='Microsoft YaHei,Noto Sans CJK SC,sans-serif' font-size='23' font-weight='700' fill='#172b4d'>模块验证与软硬件联调</text>
+<text x='900' y='706.5' text-anchor='middle' font-family='Microsoft YaHei,Noto Sans CJK SC,sans-serif' font-size='17' font-weight='400' fill='#172b4d'>核对参考结果，检查接口与协同</text>
+<rect x='735' y='820' width='330' height='110' rx='12' fill='#eaf2ff' stroke='#7298c9' stroke-width='1.5'/>
+<text x='900' y='867.5' text-anchor='middle' font-family='Microsoft YaHei,Noto Sans CJK SC,sans-serif' font-size='23' font-weight='700' fill='#172b4d'>时序检查与实板采集</text>
+<text x='900' y='896.5' text-anchor='middle' font-family='Microsoft YaHei,Noto Sans CJK SC,sans-serif' font-size='17' font-weight='400' fill='#172b4d'>检查实现时序与真实采集链路</text>
+<rect x='735' y='1010' width='330' height='110' rx='12' fill='#fff4e5' stroke='#d6a35c' stroke-width='1.5'/>
+<text x='900' y='1043' text-anchor='middle' font-family='Microsoft YaHei,Noto Sans CJK SC,sans-serif' font-size='23' font-weight='700' fill='#172b4d'>物理标定与真实故障验收</text>
+<text x='900' y='1072' text-anchor='middle' font-family='Microsoft YaHei,Noto Sans CJK SC,sans-serif' font-size='17' font-weight='400' fill='#172b4d'>幅相标定、多机故障归因</text>
+<text x='900' y='1101' text-anchor='middle' font-family='Microsoft YaHei,Noto Sans CJK SC,sans-serif' font-size='16' font-weight='400' fill='#172b4d'>记录与复核</text>
+<text x='114' y='810' text-anchor='start' font-family='Microsoft YaHei,Noto Sans CJK SC,sans-serif' font-size='21' font-weight='700' fill='#172b4d'>返回：阵列与同步采样</text>
+<text x='114' y='839' text-anchor='start' font-family='Microsoft YaHei,Noto Sans CJK SC,sans-serif' font-size='21' font-weight='400' fill='#172b4d'>依据测试结果修正采集方案</text>
+<text x='1089' y='785' text-anchor='start' font-family='Microsoft YaHei,Noto Sans CJK SC,sans-serif' font-size='17' font-weight='700' fill='#172b4d'>返回：算法设计</text>
+<text x='1089' y='814' text-anchor='start' font-family='Microsoft YaHei,Noto Sans CJK SC,sans-serif' font-size='17' font-weight='400' fill='#172b4d'>修正算法与双核调度</text>
+<text x='59' y='1197' text-anchor='start' font-family='Microsoft YaHei,Noto Sans CJK SC,sans-serif' font-size='18' font-weight='400' fill='#172b4d'>实线：设计与验证步骤　　橙色虚线：测试反馈与改进　　各环节的验证记录见第三部分与文末附录</text>
+</svg>

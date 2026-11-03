@@ -1,0 +1,2 @@
+$ C:\Users\lenovo\Desktop\FPGA_PDM\performance_comparison\circular9_scalar\c9_scalar_host.exe C:\Users\lenovo\Desktop\FPGA_PDM\performance_comparison\circular9_scalar\host_windows\window_18\input.pcm C:\Users\lenovo\Desktop\FPGA_PDM\performance_comparison\circular9_scalar\srp_lut10.bin C:\Users\lenovo\Desktop\FPGA_PDM\performance_comparison\circular9_scalar\host_windows\window_18 0
+C9_SCALAR_OUTPUT best_grid=659 score=40734 channels=9 pairs=36 grid=1024 workspace_bytes=6712

@@ -1,0 +1,5 @@
+$ C:\Users\lenovo\Desktop\FPGA_PDM\performance_comparison\pl_rtl\micro_model\Vtb_pl_microbench.exe +FW=C:/Users/lenovo/Desktop/FPGA_PDM/performance_comparison/pl_rtl/micro_fw +DUMP=C:/Users/lenovo/Desktop/FPGA_PDM/performance_comparison/pl_rtl/micro_dump +FIR_TRACE_PC=6cc
+MICRO_FFT_ENGINE cycles=917
+[12044413000] %Fatal: tb_pl_microbench.sv:49: Assertion failed in tb_pl_microbench: FIR observation instruction changed
+%Error: C:\Users\lenovo\Desktop\FPGA_PDM\performance_comparison\pl_rtl\source\tb\tb_pl_microbench.sv:49: Verilog $stop
+Aborting...

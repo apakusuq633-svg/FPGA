@@ -1,0 +1,8 @@
+**/build/
+**/.Xil/
+**/__pycache__/
+*.pyc
+~$*.docx
+*.tmp
+.DS_Store
+Thumbs.db

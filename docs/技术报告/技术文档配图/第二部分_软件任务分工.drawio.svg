@@ -1,0 +1,133 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="1050" viewBox="0 0 1200 1050" content="&lt;mxGraphModel adaptiveColors=&quot;auto&quot; page=&quot;1&quot; pageWidth=&quot;1200&quot; pageHeight=&quot;1050&quot; grid=&quot;1&quot; gridSize=&quot;10&quot;&gt;
+  &lt;root&gt;
+    &lt;mxCell id=&quot;0&quot; /&gt;
+    &lt;mxCell id=&quot;1&quot; parent=&quot;0&quot; /&gt;
+    &lt;mxCell id=&quot;title&quot; value=&quot;软件任务分工与共享数据&quot; style=&quot;text;html=1;whiteSpace=wrap;align=left;verticalAlign=middle;fontFamily=Microsoft YaHei;fontSize=32;fontColor=#20384e;strokeColor=none;fillColor=none;fontStyle=1;&quot; vertex=&quot;1&quot; parent=&quot;1&quot;&gt;
+      &lt;mxGeometry x=&quot;50&quot; y=&quot;24&quot; width=&quot;1100&quot; height=&quot;48&quot; as=&quot;geometry&quot; /&gt;
+    &lt;/mxCell&gt;
+    &lt;mxCell id=&quot;subtitle&quot; value=&quot;上排发现候选，中排完成同窗分析，下排显示结果并更新拾音方向。&quot; style=&quot;text;html=1;whiteSpace=wrap;align=left;verticalAlign=middle;fontFamily=Microsoft YaHei;fontSize=21;fontColor=#62788c;strokeColor=none;fillColor=none;&quot; vertex=&quot;1&quot; parent=&quot;1&quot;&gt;
+      &lt;mxGeometry x=&quot;50&quot; y=&quot;78&quot; width=&quot;1100&quot; height=&quot;38&quot; as=&quot;geometry&quot; /&gt;
+    &lt;/mxCell&gt;
+    &lt;mxCell id=&quot;hist_search&quot; edge=&quot;1&quot; source=&quot;history&quot; target=&quot;search&quot; parent=&quot;1&quot; style=&quot;edgeStyle=orthogonalEdgeStyle;html=1;rounded=1;arcSize=12;strokeWidth=1.8;strokeColor=#62788c;endArrow=block;endSize=7;endFill=1;exitX=1.0;exitY=0.5;entryX=0.0;entryY=0.5;exitPerimeter=0;entryPerimeter=0;&quot;&gt;
+      &lt;mxGeometry relative=&quot;1&quot; as=&quot;geometry&quot; /&gt;
+    &lt;/mxCell&gt;
+    &lt;mxCell id=&quot;search_tracks&quot; edge=&quot;1&quot; source=&quot;search&quot; target=&quot;tracks&quot; parent=&quot;1&quot; style=&quot;edgeStyle=orthogonalEdgeStyle;html=1;rounded=1;arcSize=12;strokeWidth=1.8;strokeColor=#62788c;endArrow=block;endSize=7;endFill=1;exitX=1.0;exitY=0.5;entryX=0.0;entryY=0.5;exitPerimeter=0;entryPerimeter=0;&quot;&gt;
+      &lt;mxGeometry relative=&quot;1&quot; as=&quot;geometry&quot; /&gt;
+    &lt;/mxCell&gt;
+    &lt;mxCell id=&quot;tracks_job&quot; edge=&quot;1&quot; source=&quot;tracks&quot; target=&quot;job&quot; parent=&quot;1&quot; style=&quot;edgeStyle=orthogonalEdgeStyle;html=1;rounded=1;arcSize=12;strokeWidth=1.8;strokeColor=#62788c;endArrow=block;endSize=7;endFill=1;exitX=0.5;exitY=1.0;entryX=0.5;entryY=0.0;exitPerimeter=0;entryPerimeter=0;&quot;&gt;
+      &lt;mxGeometry relative=&quot;1&quot; as=&quot;geometry&quot; /&gt;
+    &lt;/mxCell&gt;
+    &lt;mxCell id=&quot;job_diag&quot; edge=&quot;1&quot; source=&quot;job&quot; target=&quot;diagnose&quot; parent=&quot;1&quot; style=&quot;edgeStyle=orthogonalEdgeStyle;html=1;rounded=1;arcSize=12;strokeWidth=1.8;strokeColor=#62788c;endArrow=block;endSize=7;endFill=1;exitX=0.0;exitY=0.5;entryX=1.0;entryY=0.5;exitPerimeter=0;entryPerimeter=0;&quot;&gt;
+      &lt;mxGeometry relative=&quot;1&quot; as=&quot;geometry&quot; /&gt;
+    &lt;/mxCell&gt;
+    &lt;mxCell id=&quot;diag_result&quot; edge=&quot;1&quot; source=&quot;diagnose&quot; target=&quot;result&quot; parent=&quot;1&quot; style=&quot;edgeStyle=orthogonalEdgeStyle;html=1;rounded=1;arcSize=12;strokeWidth=1.8;strokeColor=#62788c;endArrow=block;endSize=7;endFill=1;exitX=0.0;exitY=0.5;entryX=1.0;entryY=0.5;exitPerimeter=0;entryPerimeter=0;&quot;&gt;
+      &lt;mxGeometry relative=&quot;1&quot; as=&quot;geometry&quot; /&gt;
+    &lt;/mxCell&gt;
+    &lt;mxCell id=&quot;snapshot&quot; edge=&quot;1&quot; source=&quot;history&quot; target=&quot;diagnose&quot; parent=&quot;1&quot; style=&quot;edgeStyle=orthogonalEdgeStyle;html=1;rounded=1;arcSize=12;strokeWidth=1.8;strokeColor=#62788c;endArrow=block;endSize=7;endFill=1;exitX=0.5;exitY=1.0;entryX=0.5;entryY=0.0;exitPerimeter=0;entryPerimeter=0;&quot;&gt;
+      &lt;mxGeometry relative=&quot;1&quot; as=&quot;geometry&quot;&gt;
+        &lt;Array as=&quot;points&quot;&gt;
+          &lt;mxPoint x=&quot;210.0&quot; y=&quot;450.0&quot; /&gt;
+          &lt;mxPoint x=&quot;600.0&quot; y=&quot;450.0&quot; /&gt;
+        &lt;/Array&gt;
+      &lt;/mxGeometry&gt;
+    &lt;/mxCell&gt;
+    &lt;mxCell id=&quot;result_display&quot; edge=&quot;1&quot; source=&quot;result&quot; target=&quot;display&quot; parent=&quot;1&quot; style=&quot;edgeStyle=orthogonalEdgeStyle;html=1;rounded=1;arcSize=12;strokeWidth=1.8;strokeColor=#62788c;endArrow=block;endSize=7;endFill=1;exitX=0.5;exitY=1.0;entryX=0.32967032967032966;entryY=0.0;exitPerimeter=0;entryPerimeter=0;&quot;&gt;
+      &lt;mxGeometry relative=&quot;1&quot; as=&quot;geometry&quot; /&gt;
+    &lt;/mxCell&gt;
+    &lt;mxCell id=&quot;result_steer&quot; edge=&quot;1&quot; source=&quot;result&quot; target=&quot;steer&quot; parent=&quot;1&quot; style=&quot;edgeStyle=orthogonalEdgeStyle;html=1;rounded=1;arcSize=12;strokeWidth=1.8;strokeColor=#62788c;endArrow=block;endSize=7;endFill=1;exitX=0.8;exitY=1.0;entryX=0.5;entryY=0.0;exitPerimeter=0;entryPerimeter=0;&quot;&gt;
+      &lt;mxGeometry relative=&quot;1&quot; as=&quot;geometry&quot;&gt;
+        &lt;Array as=&quot;points&quot;&gt;
+          &lt;mxPoint x=&quot;300.0&quot; y=&quot;785.0&quot; /&gt;
+          &lt;mxPoint x=&quot;912.5&quot; y=&quot;785.0&quot; /&gt;
+        &lt;/Array&gt;
+      &lt;/mxGeometry&gt;
+    &lt;/mxCell&gt;
+    &lt;mxCell id=&quot;history&quot; value=&quot;&amp;lt;b style=&amp;quot;font-size:26.0px&amp;quot;&amp;gt;接收与历史缓存&amp;lt;/b&amp;gt;&amp;lt;br&amp;gt;&amp;lt;font style=&amp;quot;font-size:22px&amp;quot;&amp;gt;CPU0：校验DMA&amp;lt;br&amp;gt;保存九路同序号PCM&amp;lt;/font&amp;gt;&quot; style=&quot;rounded=1;arcSize=12;html=1;whiteSpace=wrap;fontFamily=Microsoft YaHei;fontColor=#20384e;fontSize=22;spacing=10;fillColor=#fff5e7;strokeColor=#cda56e;strokeWidth=1.5;&quot; vertex=&quot;1&quot; parent=&quot;1&quot;&gt;
+      &lt;mxGeometry x=&quot;60.0&quot; y=&quot;235.0&quot; width=&quot;300.0&quot; height=&quot;130.0&quot; as=&quot;geometry&quot; /&gt;
+    &lt;/mxCell&gt;
+    &lt;mxCell id=&quot;search&quot; value=&quot;&amp;lt;b style=&amp;quot;font-size:26.0px&amp;quot;&amp;gt;多频带联合搜索&amp;lt;/b&amp;gt;&amp;lt;br&amp;gt;&amp;lt;font style=&amp;quot;font-size:22px&amp;quot;&amp;gt;CPU1：有效频带同网格评分&amp;lt;br&amp;gt;统一找峰并核对真实支持&amp;lt;/font&amp;gt;&quot; style=&quot;rounded=1;arcSize=12;html=1;whiteSpace=wrap;fontFamily=Microsoft YaHei;fontColor=#20384e;fontSize=22;spacing=10;fillColor=#ebf6f0;strokeColor=#7baa95;strokeWidth=1.5;&quot; vertex=&quot;1&quot; parent=&quot;1&quot;&gt;
+      &lt;mxGeometry x=&quot;450.0&quot; y=&quot;235.0&quot; width=&quot;300.0&quot; height=&quot;130.0&quot; as=&quot;geometry&quot; /&gt;
+    &lt;/mxCell&gt;
+    &lt;mxCell id=&quot;tracks&quot; value=&quot;&amp;lt;b style=&amp;quot;font-size:26.0px&amp;quot;&amp;gt;管理候选与轨迹&amp;lt;/b&amp;gt;&amp;lt;br&amp;gt;&amp;lt;font style=&amp;quot;font-size:22px&amp;quot;&amp;gt;CPU0：融合PL方向图&amp;lt;br&amp;gt;及多频带搜索反馈&amp;lt;/font&amp;gt;&quot; style=&quot;rounded=1;arcSize=12;html=1;whiteSpace=wrap;fontFamily=Microsoft YaHei;fontColor=#20384e;fontSize=22;spacing=10;fillColor=#fff5e7;strokeColor=#cda56e;strokeWidth=1.5;&quot; vertex=&quot;1&quot; parent=&quot;1&quot;&gt;
+      &lt;mxGeometry x=&quot;840.0&quot; y=&quot;235.0&quot; width=&quot;300.0&quot; height=&quot;130.0&quot; as=&quot;geometry&quot; /&gt;
+    &lt;/mxCell&gt;
+    &lt;mxCell id=&quot;result&quot; value=&quot;&amp;lt;b style=&amp;quot;font-size:26.0px&amp;quot;&amp;gt;接收与复核结果&amp;lt;/b&amp;gt;&amp;lt;br&amp;gt;&amp;lt;font style=&amp;quot;font-size:22px&amp;quot;&amp;gt;CPU0：固定持有结果槽&amp;lt;br&amp;gt;时效、轨迹、工况与模型&amp;lt;/font&amp;gt;&quot; style=&quot;rounded=1;arcSize=12;html=1;whiteSpace=wrap;fontFamily=Microsoft YaHei;fontColor=#20384e;fontSize=22;spacing=10;fillColor=#fff5e7;strokeColor=#cda56e;strokeWidth=1.5;&quot; vertex=&quot;1&quot; parent=&quot;1&quot;&gt;
+      &lt;mxGeometry x=&quot;60.0&quot; y=&quot;565.0&quot; width=&quot;300.0&quot; height=&quot;140.0&quot; as=&quot;geometry&quot; /&gt;
+    &lt;/mxCell&gt;
+    &lt;mxCell id=&quot;diagnose&quot; value=&quot;&amp;lt;b style=&amp;quot;font-size:26.0px&amp;quot;&amp;gt;同窗分离与诊断&amp;lt;/b&amp;gt;&amp;lt;br&amp;gt;&amp;lt;font style=&amp;quot;font-size:22px&amp;quot;&amp;gt;CPU1：复制快照并分离&amp;lt;br&amp;gt;提取包络、阶次及诊断&amp;lt;/font&amp;gt;&quot; style=&quot;rounded=1;arcSize=12;html=1;whiteSpace=wrap;fontFamily=Microsoft YaHei;fontColor=#20384e;fontSize=22;spacing=10;fillColor=#ebf6f0;strokeColor=#7baa95;strokeWidth=1.5;&quot; vertex=&quot;1&quot; parent=&quot;1&quot;&gt;
+      &lt;mxGeometry x=&quot;450.0&quot; y=&quot;565.0&quot; width=&quot;300.0&quot; height=&quot;140.0&quot; as=&quot;geometry&quot; /&gt;
+    &lt;/mxCell&gt;
+    &lt;mxCell id=&quot;job&quot; value=&quot;&amp;lt;b style=&amp;quot;font-size:26.0px&amp;quot;&amp;gt;发布诊断任务&amp;lt;/b&amp;gt;&amp;lt;br&amp;gt;&amp;lt;font style=&amp;quot;font-size:22px&amp;quot;&amp;gt;CPU0：固定快照终点&amp;lt;br&amp;gt;绑定候选身份和转速代号&amp;lt;/font&amp;gt;&quot; style=&quot;rounded=1;arcSize=12;html=1;whiteSpace=wrap;fontFamily=Microsoft YaHei;fontColor=#20384e;fontSize=22;spacing=10;fillColor=#fff5e7;strokeColor=#cda56e;strokeWidth=1.5;&quot; vertex=&quot;1&quot; parent=&quot;1&quot;&gt;
+      &lt;mxGeometry x=&quot;840.0&quot; y=&quot;565.0&quot; width=&quot;300.0&quot; height=&quot;140.0&quot; as=&quot;geometry&quot; /&gt;
+    &lt;/mxCell&gt;
+    &lt;mxCell id=&quot;display&quot; value=&quot;&amp;lt;b style=&amp;quot;font-size:26.0px&amp;quot;&amp;gt;演示总览与高级调试&amp;lt;/b&amp;gt;&amp;lt;br&amp;gt;&amp;lt;font style=&amp;quot;font-size:22px&amp;quot;&amp;gt;方向、诊断双谱、状态及事件&amp;lt;/font&amp;gt;&quot; style=&quot;rounded=1;arcSize=12;html=1;whiteSpace=wrap;fontFamily=Microsoft YaHei;fontColor=#20384e;fontSize=22;spacing=10;fillColor=#f3f6f9;strokeColor=#9babbc;strokeWidth=1.5;&quot; vertex=&quot;1&quot; parent=&quot;1&quot;&gt;
+      &lt;mxGeometry x=&quot;60.0&quot; y=&quot;855.0&quot; width=&quot;455.0&quot; height=&quot;110.0&quot; as=&quot;geometry&quot; /&gt;
+    &lt;/mxCell&gt;
+    &lt;mxCell id=&quot;steer&quot; value=&quot;&amp;lt;b style=&amp;quot;font-size:26.0px&amp;quot;&amp;gt;正式PL转向控制&amp;lt;/b&amp;gt;&amp;lt;br&amp;gt;&amp;lt;font style=&amp;quot;font-size:22px&amp;quot;&amp;gt;唯一可信故障目标 → 九路延迟提交&amp;lt;/font&amp;gt;&quot; style=&quot;rounded=1;arcSize=12;html=1;whiteSpace=wrap;fontFamily=Microsoft YaHei;fontColor=#20384e;fontSize=22;spacing=10;fillColor=#fff5e7;strokeColor=#cda56e;strokeWidth=1.5;&quot; vertex=&quot;1&quot; parent=&quot;1&quot;&gt;
+      &lt;mxGeometry x=&quot;685.0&quot; y=&quot;855.0&quot; width=&quot;455.0&quot; height=&quot;110.0&quot; as=&quot;geometry&quot; /&gt;
+    &lt;/mxCell&gt;
+    &lt;mxCell id=&quot;owners&quot; value=&quot;颜色分工：CPU0接收与控制　　CPU1搜索与分析　　灰色为浏览器与PC&quot; style=&quot;text;html=1;whiteSpace=wrap;align=left;verticalAlign=middle;fontFamily=Microsoft YaHei;fontSize=20.0;fontColor=#62788c;strokeColor=none;fillColor=none;&quot; vertex=&quot;1&quot; parent=&quot;1&quot;&gt;
+      &lt;mxGeometry x=&quot;60.0&quot; y=&quot;145.0&quot; width=&quot;1080.0&quot; height=&quot;35.0&quot; as=&quot;geometry&quot; /&gt;
+    &lt;/mxCell&gt;
+    &lt;mxCell id=&quot;snapshot_label&quot; value=&quot;同一时段九路快照&quot; style=&quot;text;html=1;whiteSpace=wrap;align=center;verticalAlign=middle;fontFamily=Microsoft YaHei;fontSize=21.0;fontColor=#62788c;strokeColor=none;fillColor=#ffffff;&quot; vertex=&quot;1&quot; parent=&quot;1&quot;&gt;
+      &lt;mxGeometry x=&quot;240.0&quot; y=&quot;414.0&quot; width=&quot;300.0&quot; height=&quot;33.0&quot; as=&quot;geometry&quot; /&gt;
+    &lt;/mxCell&gt;
+    &lt;mxCell id=&quot;target_label&quot; value=&quot;通过复核的唯一故障目标&quot; style=&quot;text;html=1;whiteSpace=wrap;align=center;verticalAlign=middle;fontFamily=Microsoft YaHei;fontSize=21.0;fontColor=#62788c;strokeColor=none;fillColor=#ffffff;&quot; vertex=&quot;1&quot; parent=&quot;1&quot;&gt;
+      &lt;mxGeometry x=&quot;485.0&quot; y=&quot;750.0&quot; width=&quot;330.0&quot; height=&quot;33.0&quot; as=&quot;geometry&quot; /&gt;
+    &lt;/mxCell&gt;
+    &lt;mxCell id=&quot;note&quot; value=&quot;手动GSC另走CPU0独立音频支路；不以诊断结果自动配置试听目标。&quot; style=&quot;text;html=1;whiteSpace=wrap;align=left;verticalAlign=middle;fontFamily=Microsoft YaHei;fontSize=20.0;fontColor=#62788c;strokeColor=none;fillColor=none;&quot; vertex=&quot;1&quot; parent=&quot;1&quot;&gt;
+      &lt;mxGeometry x=&quot;50.0&quot; y=&quot;985.0&quot; width=&quot;1100.0&quot; height=&quot;40.0&quot; as=&quot;geometry&quot; /&gt;
+    &lt;/mxCell&gt;
+  &lt;/root&gt;
+&lt;/mxGraphModel&gt;">
+<title>软件任务分工与共享数据</title>
+<rect width="1200" height="1050" fill="white"/>
+<defs><marker id="data-arrow" markerUnits="userSpaceOnUse" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="10" markerHeight="10" orient="auto-start-reverse"><path d="M1 1 L9 5 L1 9 Z" fill="#62788c"/></marker><marker id="control-arrow" markerUnits="userSpaceOnUse" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="10" markerHeight="10" orient="auto-start-reverse"><path d="M1 1 L9 5 L1 9 Z" fill="#bb772d"/></marker></defs>
+<text x="52" y="59.2" font-family="Microsoft YaHei,SimHei,sans-serif" font-size="32" font-weight="700" text-anchor="start" fill="#20384e">软件任务分工与共享数据</text>
+<text x="52" y="104.35" font-family="Microsoft YaHei,SimHei,sans-serif" font-size="21" font-weight="400" text-anchor="start" fill="#62788c">上排发现候选，中排完成同窗分析，下排显示结果并更新拾音方向。</text>
+<path d="M50 130 H1150" stroke="#dce5ec" stroke-width="1"/>
+<path d="M360.0,300.0 L450.0,300.0" fill="none" stroke="#62788c" stroke-width="1.8" stroke-linejoin="round" marker-end="url(#data-arrow)"/>
+<path d="M750.0,300.0 L840.0,300.0" fill="none" stroke="#62788c" stroke-width="1.8" stroke-linejoin="round" marker-end="url(#data-arrow)"/>
+<path d="M990.0,365.0 L990.0,565.0" fill="none" stroke="#62788c" stroke-width="1.8" stroke-linejoin="round" marker-end="url(#data-arrow)"/>
+<path d="M840.0,635.0 L750.0,635.0" fill="none" stroke="#62788c" stroke-width="1.8" stroke-linejoin="round" marker-end="url(#data-arrow)"/>
+<path d="M450.0,635.0 L360.0,635.0" fill="none" stroke="#62788c" stroke-width="1.8" stroke-linejoin="round" marker-end="url(#data-arrow)"/>
+<path d="M210.0,365.0 L210.0,442.0 Q210.0,450.0 218.0,450.0 L592.0,450.0 Q600.0,450.0 600.0,458.0 L600.0,565.0" fill="none" stroke="#62788c" stroke-width="1.8" stroke-linejoin="round" marker-end="url(#data-arrow)"/>
+<path d="M210.0,705.0 L210.0,855.0" fill="none" stroke="#62788c" stroke-width="1.8" stroke-linejoin="round" marker-end="url(#data-arrow)"/>
+<path d="M300.0,705.0 L300.0,777.0 Q300.0,785.0 308.0,785.0 L904.5,785.0 Q912.5,785.0 912.5,793.0 L912.5,855.0" fill="none" stroke="#62788c" stroke-width="1.8" stroke-linejoin="round" marker-end="url(#data-arrow)"/>
+<rect x="60.0" y="235.0" width="300.0" height="130.0" rx="11" fill="#fff5e7" stroke="#cda56e" stroke-width="1.5"/>
+<text x="210.0" y="274.0" font-family="Microsoft YaHei,SimHei,sans-serif" text-anchor="middle" font-size="26" font-weight="700" fill="#20384e">接收与历史缓存</text>
+<text x="210.0" y="308.0" font-family="Microsoft YaHei,SimHei,sans-serif" text-anchor="middle" font-size="22" font-weight="400" fill="#20384e">CPU0：校验DMA</text>
+<text x="210.0" y="342.0" font-family="Microsoft YaHei,SimHei,sans-serif" text-anchor="middle" font-size="22" font-weight="400" fill="#20384e">保存九路同序号PCM</text>
+<rect x="450.0" y="235.0" width="300.0" height="130.0" rx="11" fill="#ebf6f0" stroke="#7baa95" stroke-width="1.5"/>
+<text x="600.0" y="274.0" font-family="Microsoft YaHei,SimHei,sans-serif" text-anchor="middle" font-size="26" font-weight="700" fill="#20384e">多频带联合搜索</text>
+<text x="600.0" y="308.0" font-family="Microsoft YaHei,SimHei,sans-serif" text-anchor="middle" font-size="22" font-weight="400" fill="#20384e">CPU1：有效频带同网格评分</text>
+<text x="600.0" y="342.0" font-family="Microsoft YaHei,SimHei,sans-serif" text-anchor="middle" font-size="22" font-weight="400" fill="#20384e">统一找峰并核对真实支持</text>
+<rect x="840.0" y="235.0" width="300.0" height="130.0" rx="11" fill="#fff5e7" stroke="#cda56e" stroke-width="1.5"/>
+<text x="990.0" y="274.0" font-family="Microsoft YaHei,SimHei,sans-serif" text-anchor="middle" font-size="26" font-weight="700" fill="#20384e">管理候选与轨迹</text>
+<text x="990.0" y="308.0" font-family="Microsoft YaHei,SimHei,sans-serif" text-anchor="middle" font-size="22" font-weight="400" fill="#20384e">CPU0：融合PL方向图</text>
+<text x="990.0" y="342.0" font-family="Microsoft YaHei,SimHei,sans-serif" text-anchor="middle" font-size="22" font-weight="400" fill="#20384e">及多频带搜索反馈</text>
+<rect x="60.0" y="565.0" width="300.0" height="140.0" rx="11" fill="#fff5e7" stroke="#cda56e" stroke-width="1.5"/>
+<text x="210.0" y="609.0" font-family="Microsoft YaHei,SimHei,sans-serif" text-anchor="middle" font-size="26" font-weight="700" fill="#20384e">接收与复核结果</text>
+<text x="210.0" y="643.0" font-family="Microsoft YaHei,SimHei,sans-serif" text-anchor="middle" font-size="22" font-weight="400" fill="#20384e">CPU0：固定持有结果槽</text>
+<text x="210.0" y="677.0" font-family="Microsoft YaHei,SimHei,sans-serif" text-anchor="middle" font-size="22" font-weight="400" fill="#20384e">时效、轨迹、工况与模型</text>
+<rect x="450.0" y="565.0" width="300.0" height="140.0" rx="11" fill="#ebf6f0" stroke="#7baa95" stroke-width="1.5"/>
+<text x="600.0" y="609.0" font-family="Microsoft YaHei,SimHei,sans-serif" text-anchor="middle" font-size="26" font-weight="700" fill="#20384e">同窗分离与诊断</text>
+<text x="600.0" y="643.0" font-family="Microsoft YaHei,SimHei,sans-serif" text-anchor="middle" font-size="22" font-weight="400" fill="#20384e">CPU1：复制快照并分离</text>
+<text x="600.0" y="677.0" font-family="Microsoft YaHei,SimHei,sans-serif" text-anchor="middle" font-size="22" font-weight="400" fill="#20384e">提取包络、阶次及诊断</text>
+<rect x="840.0" y="565.0" width="300.0" height="140.0" rx="11" fill="#fff5e7" stroke="#cda56e" stroke-width="1.5"/>
+<text x="990.0" y="609.0" font-family="Microsoft YaHei,SimHei,sans-serif" text-anchor="middle" font-size="26" font-weight="700" fill="#20384e">发布诊断任务</text>
+<text x="990.0" y="643.0" font-family="Microsoft YaHei,SimHei,sans-serif" text-anchor="middle" font-size="22" font-weight="400" fill="#20384e">CPU0：固定快照终点</text>
+<text x="990.0" y="677.0" font-family="Microsoft YaHei,SimHei,sans-serif" text-anchor="middle" font-size="22" font-weight="400" fill="#20384e">绑定候选身份和转速代号</text>
+<rect x="60.0" y="855.0" width="455.0" height="110.0" rx="11" fill="#f3f6f9" stroke="#9babbc" stroke-width="1.5"/>
+<text x="287.5" y="901.0" font-family="Microsoft YaHei,SimHei,sans-serif" text-anchor="middle" font-size="26" font-weight="700" fill="#20384e">演示总览与高级调试</text>
+<text x="287.5" y="935.0" font-family="Microsoft YaHei,SimHei,sans-serif" text-anchor="middle" font-size="22" font-weight="400" fill="#20384e">方向、诊断双谱、状态及事件</text>
+<rect x="685.0" y="855.0" width="455.0" height="110.0" rx="11" fill="#fff5e7" stroke="#cda56e" stroke-width="1.5"/>
+<text x="912.5" y="901.0" font-family="Microsoft YaHei,SimHei,sans-serif" text-anchor="middle" font-size="26" font-weight="700" fill="#20384e">正式PL转向控制</text>
+<text x="912.5" y="935.0" font-family="Microsoft YaHei,SimHei,sans-serif" text-anchor="middle" font-size="22" font-weight="400" fill="#20384e">唯一可信故障目标 → 九路延迟提交</text>
+<text x="62.0" y="169.5" font-family="Microsoft YaHei,SimHei,sans-serif" font-size="20.0" font-weight="400" text-anchor="start" fill="#62788c">颜色分工：CPU0接收与控制　　CPU1搜索与分析　　灰色为浏览器与PC</text>
+<rect x="240.0" y="414.0" width="300.0" height="33.0" rx="3" fill="white"/>
+<text x="390.0" y="437.85" font-family="Microsoft YaHei,SimHei,sans-serif" font-size="21.0" font-weight="400" text-anchor="middle" fill="#62788c">同一时段九路快照</text>
+<rect x="485.0" y="750.0" width="330.0" height="33.0" rx="3" fill="white"/>
+<text x="650.0" y="773.85" font-family="Microsoft YaHei,SimHei,sans-serif" font-size="21.0" font-weight="400" text-anchor="middle" fill="#62788c">通过复核的唯一故障目标</text>
+<text x="52.0" y="1012.0" font-family="Microsoft YaHei,SimHei,sans-serif" font-size="20.0" font-weight="400" text-anchor="start" fill="#62788c">手动GSC另走CPU0独立音频支路；不以诊断结果自动配置试听目标。</text>
+</svg>

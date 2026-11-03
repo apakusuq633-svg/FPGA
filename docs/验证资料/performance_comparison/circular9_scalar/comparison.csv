@@ -1,0 +1,5 @@
+﻿scheme,environment,optimization,cycles,ms
+RV32 scalar nine-mic map,40MHz SoC RTL,Os primary,11049372,276.2343
+PL accelerated nine-mic map,40MHz SoC RTL,production Os plus hardware,82354,2.05885
+RV32 scalar nine-mic map,40MHz SoC RTL,O2 auxiliary,9806381,245.159525
+Portable scalar nine-mic map,x86_64 host QPC; NOT A9,"O2, auto-vectorization disabled",,0.33411718749999997

@@ -15,6 +15,8 @@ import struct
 import zipfile
 
 ROOT = Path(__file__).resolve().parents[1]
+# Consolidated repository documentation; resolved after clone, without machine paths.
+DOCS = next(parent / 'docs' for parent in Path(__file__).resolve().parents if (parent / 'docs' / '工程设计与接口.md').is_file())
 PRODUCTION_UNITS = ("ps_ui", "gsc9", "pdm_stream", "circular9_stream",
                     "circular9_audio", "circular9_candidates", "circular9_diagnosis")
 EVIDENCE = {
@@ -55,25 +57,14 @@ LIVE_COPIES = {
     "utilization.rpt": "build/circular9_optimized_hw/util_zynq.rpt",
     "io.rpt": "build/circular9_optimized_hw/io_zynq.rpt",
     "circular9_dataset.py": "pc/circular9_dataset.py",
-    "latency_contract.md": "docs/circular9_latency_contract_20261023.md",
-    "original_plan.md": "docs/circular9_fault_localization_plan_20261022.md",
-    "board_bringup.md": "docs/circular9_board_bringup_20261024.md",
-    "direction_scan.md": "docs/circular9_direction_scan_20261025.md",
-    "diagnosis_workflow.md": "docs/circular9_diagnosis_data_workflow_20261025.md",
-    "direction_separation.md": "docs/circular9_direction_separation_20261025.md",
-    "optimization.md": "docs/circular9_optimization_20261025.md",
-    "optimization_completion.md": "docs/circular9_optimization_completion_20261025.md",
-    "gsc_hotpath_guard.md": "docs/gsc9_hotpath_guard_20261025.md",
-    "spectral_covariance.md": "docs/circular9_spectral_covariance_20261025.md",
     "circular9_receive.py": "pc/circular9_receive.py",
     "circular9_capture.py": "pc/circular9_capture.py",
     "circular9_preflight.py": "pc/circular9_preflight.py",
     "circular9_calibration.py": "scripts/circular9_calibration.py",
     "build_circular9.py": "scripts/build_circular9.py",
-    "preflight_workflow.md": "docs/circular9_preflight_20261025.md",
-    "calibration_workflow.md": "docs/circular9_calibration_input_20261025.md",
-    "packet_capture.md": "docs/circular9_packet_capture_20261025.md",
-    "readiness.md": "docs/circular9_readiness_20261025.md",
+    'engineering.md': str(DOCS / '工程设计与接口.md'),
+    'deployment.md': str(DOCS / '构建部署与操作.md'),
+    'verification.md': str(DOCS / '测试验证与问题记录.md'),
 }
 
 

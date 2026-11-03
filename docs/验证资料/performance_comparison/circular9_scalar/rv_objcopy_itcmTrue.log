@@ -1,0 +1,1 @@
+$ D:/AMDDesignTools/2025.2/gnu/riscv/nt/bin/riscv64-unknown-elf-objcopy.exe -O binary --only-section=.text C:\Users\lenovo\Desktop\FPGA_PDM\performance_comparison\circular9_scalar\rv_profile_Os\scalar.elf C:\Users\lenovo\Desktop\FPGA_PDM\performance_comparison\circular9_scalar\rv_profile_Os\itcm.bin

@@ -1,0 +1,125 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="1160" viewBox="0 0 1200 1160" content="&lt;mxGraphModel adaptiveColors=&quot;auto&quot; page=&quot;1&quot; pageWidth=&quot;1200&quot; pageHeight=&quot;1160&quot; grid=&quot;1&quot; gridSize=&quot;10&quot;&gt;
+  &lt;root&gt;
+    &lt;mxCell id=&quot;0&quot; /&gt;
+    &lt;mxCell id=&quot;1&quot; parent=&quot;0&quot; /&gt;
+    &lt;mxCell id=&quot;title&quot; value=&quot;固定目标GSC残差反馈与保护回退&quot; style=&quot;text;html=1;whiteSpace=wrap;align=left;verticalAlign=middle;fontFamily=Microsoft YaHei;fontSize=32;fontColor=#20384e;strokeColor=none;fillColor=none;fontStyle=1;&quot; vertex=&quot;1&quot; parent=&quot;1&quot;&gt;
+      &lt;mxGeometry x=&quot;50&quot; y=&quot;24&quot; width=&quot;1100&quot; height=&quot;48&quot; as=&quot;geometry&quot; /&gt;
+    &lt;/mxCell&gt;
+    &lt;mxCell id=&quot;subtitle&quot; value=&quot;手动目标，19531.25 Hz音频；PS自建DAS，不接入正式故障诊断。&quot; style=&quot;text;html=1;whiteSpace=wrap;align=left;verticalAlign=middle;fontFamily=Microsoft YaHei;fontSize=21;fontColor=#62788c;strokeColor=none;fillColor=none;&quot; vertex=&quot;1&quot; parent=&quot;1&quot;&gt;
+      &lt;mxGeometry x=&quot;50&quot; y=&quot;78&quot; width=&quot;1100&quot; height=&quot;38&quot; as=&quot;geometry&quot; /&gt;
+    &lt;/mxCell&gt;
+    &lt;mxCell id=&quot;branch_main&quot; edge=&quot;1&quot; source=&quot;align&quot; target=&quot;main&quot; parent=&quot;1&quot; style=&quot;edgeStyle=orthogonalEdgeStyle;html=1;rounded=1;arcSize=12;strokeWidth=1.8;strokeColor=#62788c;endArrow=block;endSize=7;endFill=1;exitX=0.5;exitY=1.0;entryX=0.5;entryY=0.0;exitPerimeter=0;entryPerimeter=0;&quot;&gt;
+      &lt;mxGeometry relative=&quot;1&quot; as=&quot;geometry&quot;&gt;
+        &lt;Array as=&quot;points&quot;&gt;
+          &lt;mxPoint x=&quot;600.0&quot; y=&quot;325.0&quot; /&gt;
+          &lt;mxPoint x=&quot;300.0&quot; y=&quot;325.0&quot; /&gt;
+        &lt;/Array&gt;
+      &lt;/mxGeometry&gt;
+    &lt;/mxCell&gt;
+    &lt;mxCell id=&quot;branch_ref&quot; edge=&quot;1&quot; source=&quot;align&quot; target=&quot;reference&quot; parent=&quot;1&quot; style=&quot;edgeStyle=orthogonalEdgeStyle;html=1;rounded=1;arcSize=12;strokeWidth=1.8;strokeColor=#62788c;endArrow=block;endSize=7;endFill=1;exitX=0.5;exitY=1.0;entryX=0.5;entryY=0.0;exitPerimeter=0;entryPerimeter=0;&quot;&gt;
+      &lt;mxGeometry relative=&quot;1&quot; as=&quot;geometry&quot;&gt;
+        &lt;Array as=&quot;points&quot;&gt;
+          &lt;mxPoint x=&quot;600.0&quot; y=&quot;325.0&quot; /&gt;
+          &lt;mxPoint x=&quot;900.0&quot; y=&quot;325.0&quot; /&gt;
+        &lt;/Array&gt;
+      &lt;/mxGeometry&gt;
+    &lt;/mxCell&gt;
+    &lt;mxCell id=&quot;main_residual&quot; edge=&quot;1&quot; source=&quot;main&quot; target=&quot;residual&quot; parent=&quot;1&quot; style=&quot;edgeStyle=orthogonalEdgeStyle;html=1;rounded=1;arcSize=12;strokeWidth=1.8;strokeColor=#62788c;endArrow=block;endSize=7;endFill=1;exitX=0.5;exitY=1.0;entryX=0.5;entryY=0.0;exitPerimeter=0;entryPerimeter=0;&quot;&gt;
+      &lt;mxGeometry relative=&quot;1&quot; as=&quot;geometry&quot; /&gt;
+    &lt;/mxCell&gt;
+    &lt;mxCell id=&quot;reference_adaptive&quot; edge=&quot;1&quot; source=&quot;reference&quot; target=&quot;adaptive&quot; parent=&quot;1&quot; style=&quot;edgeStyle=orthogonalEdgeStyle;html=1;rounded=1;arcSize=12;strokeWidth=1.8;strokeColor=#62788c;endArrow=block;endSize=7;endFill=1;exitX=0.5;exitY=1.0;entryX=0.5;entryY=0.0;exitPerimeter=0;entryPerimeter=0;&quot;&gt;
+      &lt;mxGeometry relative=&quot;1&quot; as=&quot;geometry&quot; /&gt;
+    &lt;/mxCell&gt;
+    &lt;mxCell id=&quot;estimate&quot; edge=&quot;1&quot; source=&quot;adaptive&quot; target=&quot;residual&quot; parent=&quot;1&quot; style=&quot;edgeStyle=orthogonalEdgeStyle;html=1;rounded=1;arcSize=12;strokeWidth=1.8;strokeColor=#62788c;endArrow=block;endSize=7;endFill=1;exitX=0.0;exitY=0.3333333333333333;entryX=1.0;entryY=0.26666666666666666;exitPerimeter=0;entryPerimeter=0;&quot;&gt;
+      &lt;mxGeometry relative=&quot;1&quot; as=&quot;geometry&quot; /&gt;
+    &lt;/mxCell&gt;
+    &lt;mxCell id=&quot;feedback&quot; edge=&quot;1&quot; source=&quot;residual&quot; target=&quot;adaptive&quot; parent=&quot;1&quot; style=&quot;edgeStyle=orthogonalEdgeStyle;html=1;rounded=1;arcSize=12;strokeWidth=1.8;strokeColor=#bb772d;endArrow=block;endSize=7;endFill=1;exitX=1.0;exitY=0.8;entryX=0.0;entryY=0.7142857142857143;exitPerimeter=0;entryPerimeter=0;dashed=1;dashPattern=5 4;&quot;&gt;
+      &lt;mxGeometry relative=&quot;1&quot; as=&quot;geometry&quot; /&gt;
+    &lt;/mxCell&gt;
+    &lt;mxCell id=&quot;output&quot; edge=&quot;1&quot; source=&quot;residual&quot; target=&quot;select&quot; parent=&quot;1&quot; style=&quot;edgeStyle=orthogonalEdgeStyle;html=1;rounded=1;arcSize=12;strokeWidth=1.8;strokeColor=#62788c;endArrow=block;endSize=7;endFill=1;exitX=0.5;exitY=1.0;entryX=0.06285714285714286;entryY=0.0;exitPerimeter=0;entryPerimeter=0;&quot;&gt;
+      &lt;mxGeometry relative=&quot;1&quot; as=&quot;geometry&quot; /&gt;
+    &lt;/mxCell&gt;
+    &lt;mxCell id=&quot;fallback&quot; edge=&quot;1&quot; source=&quot;main&quot; target=&quot;select&quot; parent=&quot;1&quot; style=&quot;edgeStyle=orthogonalEdgeStyle;html=1;rounded=1;arcSize=12;strokeWidth=1.8;strokeColor=#62788c;endArrow=block;endSize=7;endFill=1;exitX=0.0;exitY=0.5;entryX=0.0;entryY=0.5;exitPerimeter=0;entryPerimeter=0;&quot;&gt;
+      &lt;mxGeometry relative=&quot;1&quot; as=&quot;geometry&quot;&gt;
+        &lt;Array as=&quot;points&quot;&gt;
+          &lt;mxPoint x=&quot;40.0&quot; y=&quot;445.0&quot; /&gt;
+          &lt;mxPoint x=&quot;40.0&quot; y=&quot;1005.0&quot; /&gt;
+        &lt;/Array&gt;
+      &lt;/mxGeometry&gt;
+    &lt;/mxCell&gt;
+    &lt;mxCell id=&quot;align&quot; value=&quot;&amp;lt;b style=&amp;quot;font-size:26.0px&amp;quot;&amp;gt;音频抽取与目标补偿&amp;lt;/b&amp;gt;&amp;lt;br&amp;gt;&amp;lt;font style=&amp;quot;font-size:22px&amp;quot;&amp;gt;九路127抽头低通 / 8；按手动方向补偿&amp;lt;/font&amp;gt;&quot; style=&quot;rounded=1;arcSize=12;html=1;whiteSpace=wrap;fontFamily=Microsoft YaHei;fontColor=#20384e;fontSize=22;spacing=10;fillColor=#fff5e7;strokeColor=#cda56e;strokeWidth=1.5;&quot; vertex=&quot;1&quot; parent=&quot;1&quot;&gt;
+      &lt;mxGeometry x=&quot;380.0&quot; y=&quot;165.0&quot; width=&quot;440.0&quot; height=&quot;100.0&quot; as=&quot;geometry&quot; /&gt;
+    &lt;/mxCell&gt;
+    &lt;mxCell id=&quot;main&quot; value=&quot;&amp;lt;b style=&amp;quot;font-size:26.0px&amp;quot;&amp;gt;PS等权DAS主支路&amp;lt;/b&amp;gt;&amp;lt;br&amp;gt;&amp;lt;font style=&amp;quot;font-size:22px&amp;quot;&amp;gt;单位脉冲FIR；不作PL逐样匹配&amp;lt;/font&amp;gt;&quot; style=&quot;rounded=1;arcSize=12;html=1;whiteSpace=wrap;fontFamily=Microsoft YaHei;fontColor=#20384e;fontSize=22;spacing=10;fillColor=#fff5e7;strokeColor=#cda56e;strokeWidth=1.5;&quot; vertex=&quot;1&quot; parent=&quot;1&quot;&gt;
+      &lt;mxGeometry x=&quot;80.0&quot; y=&quot;390.0&quot; width=&quot;440.0&quot; height=&quot;110.0&quot; as=&quot;geometry&quot; /&gt;
+    &lt;/mxCell&gt;
+    &lt;mxCell id=&quot;reference&quot; value=&quot;&amp;lt;b style=&amp;quot;font-size:26.0px&amp;quot;&amp;gt;八路阻塞参考&amp;lt;/b&amp;gt;&amp;lt;br&amp;gt;&amp;lt;font style=&amp;quot;font-size:22px&amp;quot;&amp;gt;外围麦减中心麦&amp;lt;br&amp;gt;调理后形成32维参考&amp;lt;/font&amp;gt;&quot; style=&quot;rounded=1;arcSize=12;html=1;whiteSpace=wrap;fontFamily=Microsoft YaHei;fontColor=#20384e;fontSize=22;spacing=10;fillColor=#fff5e7;strokeColor=#cda56e;strokeWidth=1.5;&quot; vertex=&quot;1&quot; parent=&quot;1&quot;&gt;
+      &lt;mxGeometry x=&quot;680.0&quot; y=&quot;380.0&quot; width=&quot;440.0&quot; height=&quot;130.0&quot; as=&quot;geometry&quot; /&gt;
+    &lt;/mxCell&gt;
+    &lt;mxCell id=&quot;residual&quot; value=&quot;&amp;lt;b style=&amp;quot;font-size:26.0px&amp;quot;&amp;gt;计算输出残差&amp;lt;/b&amp;gt;&amp;lt;br&amp;gt;&amp;lt;font style=&amp;quot;font-size:22px&amp;quot;&amp;gt;主支路减去干扰估计&amp;lt;br&amp;gt;e = d − 干扰估计&amp;lt;/font&amp;gt;&quot; style=&quot;rounded=1;arcSize=12;html=1;whiteSpace=wrap;fontFamily=Microsoft YaHei;fontColor=#20384e;fontSize=22;spacing=10;fillColor=#fff5e7;strokeColor=#cda56e;strokeWidth=1.5;&quot; vertex=&quot;1&quot; parent=&quot;1&quot;&gt;
+      &lt;mxGeometry x=&quot;80.0&quot; y=&quot;655.0&quot; width=&quot;440.0&quot; height=&quot;150.0&quot; as=&quot;geometry&quot; /&gt;
+    &lt;/mxCell&gt;
+    &lt;mxCell id=&quot;adaptive&quot; value=&quot;&amp;lt;b style=&amp;quot;font-size:26.0px&amp;quot;&amp;gt;干扰估计与权值更新&amp;lt;/b&amp;gt;&amp;lt;br&amp;gt;&amp;lt;font style=&amp;quot;font-size:22px&amp;quot;&amp;gt;32维NLMS：估计干扰与更新权值&amp;lt;br&amp;gt;每4个音频点更新一次&amp;lt;br&amp;gt;即每32个原始PCM点&amp;lt;/font&amp;gt;&quot; style=&quot;rounded=1;arcSize=12;html=1;whiteSpace=wrap;fontFamily=Microsoft YaHei;fontColor=#20384e;fontSize=22;spacing=10;fillColor=#fff5e7;strokeColor=#cda56e;strokeWidth=1.5;&quot; vertex=&quot;1&quot; parent=&quot;1&quot;&gt;
+      &lt;mxGeometry x=&quot;680.0&quot; y=&quot;625.0&quot; width=&quot;440.0&quot; height=&quot;210.0&quot; as=&quot;geometry&quot; /&gt;
+    &lt;/mxCell&gt;
+    &lt;mxCell id=&quot;select&quot; value=&quot;&amp;lt;b style=&amp;quot;font-size:26.0px&amp;quot;&amp;gt;输出选择与保护&amp;lt;/b&amp;gt;&amp;lt;br&amp;gt;&amp;lt;font style=&amp;quot;font-size:22px&amp;quot;&amp;gt;正常时输出残差；保护活动时回退PS DAS&amp;lt;/font&amp;gt;&quot; style=&quot;rounded=1;arcSize=12;html=1;whiteSpace=wrap;fontFamily=Microsoft YaHei;fontColor=#20384e;fontSize=22;spacing=10;fillColor=#fff5e7;strokeColor=#cda56e;strokeWidth=1.5;&quot; vertex=&quot;1&quot; parent=&quot;1&quot;&gt;
+      &lt;mxGeometry x=&quot;245.0&quot; y=&quot;955.0&quot; width=&quot;875.0&quot; height=&quot;100.0&quot; as=&quot;geometry&quot; /&gt;
+    &lt;/mxCell&gt;
+    &lt;mxCell id=&quot;estimate_label&quot; value=&quot;干扰估计&quot; style=&quot;text;html=1;whiteSpace=wrap;align=center;verticalAlign=middle;fontFamily=Microsoft YaHei;fontSize=21.0;fontColor=#62788c;strokeColor=none;fillColor=#ffffff;&quot; vertex=&quot;1&quot; parent=&quot;1&quot;&gt;
+      &lt;mxGeometry x=&quot;530.0&quot; y=&quot;652.0&quot; width=&quot;140.0&quot; height=&quot;33.0&quot; as=&quot;geometry&quot; /&gt;
+    &lt;/mxCell&gt;
+    &lt;mxCell id=&quot;feedback_label&quot; value=&quot;残差反馈&quot; style=&quot;text;html=1;whiteSpace=wrap;align=center;verticalAlign=middle;fontFamily=Microsoft YaHei;fontSize=21.0;fontColor=#bb772d;strokeColor=none;fillColor=#ffffff;&quot; vertex=&quot;1&quot; parent=&quot;1&quot;&gt;
+      &lt;mxGeometry x=&quot;530.0&quot; y=&quot;783.0&quot; width=&quot;140.0&quot; height=&quot;33.0&quot; as=&quot;geometry&quot; /&gt;
+    &lt;/mxCell&gt;
+    &lt;mxCell id=&quot;fallback_label&quot; value=&quot;PS DAS主支路回退&quot; style=&quot;text;html=1;whiteSpace=wrap;align=center;verticalAlign=middle;fontFamily=Microsoft YaHei;fontSize=21.0;fontColor=#62788c;strokeColor=none;fillColor=#ffffff;&quot; vertex=&quot;1&quot; parent=&quot;1&quot;&gt;
+      &lt;mxGeometry x=&quot;55.0&quot; y=&quot;872.0&quot; width=&quot;235.0&quot; height=&quot;34.0&quot; as=&quot;geometry&quot; /&gt;
+    &lt;/mxCell&gt;
+    &lt;mxCell id=&quot;note&quot; value=&quot;固定目标音频：冻结仅停止权值更新；保护触发时回退PS DAS。测试记录见第三部分与附录。&quot; style=&quot;text;html=1;whiteSpace=wrap;align=left;verticalAlign=middle;fontFamily=Microsoft YaHei;fontSize=20.0;fontColor=#62788c;strokeColor=none;fillColor=none;&quot; vertex=&quot;1&quot; parent=&quot;1&quot;&gt;
+      &lt;mxGeometry x=&quot;50.0&quot; y=&quot;1095.0&quot; width=&quot;1100.0&quot; height=&quot;40.0&quot; as=&quot;geometry&quot; /&gt;
+    &lt;/mxCell&gt;
+  &lt;/root&gt;
+&lt;/mxGraphModel&gt;">
+<title>固定目标GSC残差反馈与保护回退</title>
+<rect width="1200" height="1160" fill="white"/>
+<defs><marker id="data-arrow" markerUnits="userSpaceOnUse" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="10" markerHeight="10" orient="auto-start-reverse"><path d="M1 1 L9 5 L1 9 Z" fill="#62788c"/></marker><marker id="control-arrow" markerUnits="userSpaceOnUse" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="10" markerHeight="10" orient="auto-start-reverse"><path d="M1 1 L9 5 L1 9 Z" fill="#bb772d"/></marker></defs>
+<text x="52" y="59.2" font-family="Microsoft YaHei,SimHei,sans-serif" font-size="32" font-weight="700" text-anchor="start" fill="#20384e">固定目标GSC残差反馈与保护回退</text>
+<text x="52" y="104.35" font-family="Microsoft YaHei,SimHei,sans-serif" font-size="21" font-weight="400" text-anchor="start" fill="#62788c">手动目标，19531.25 Hz音频；PS自建DAS，不接入正式故障诊断。</text>
+<path d="M50 130 H1150" stroke="#dce5ec" stroke-width="1"/>
+<path d="M600.0,265.0 L600.0,317.0 Q600.0,325.0 592.0,325.0 L308.0,325.0 Q300.0,325.0 300.0,333.0 L300.0,390.0" fill="none" stroke="#62788c" stroke-width="1.8" stroke-linejoin="round" marker-end="url(#data-arrow)"/>
+<path d="M600.0,265.0 L600.0,317.0 Q600.0,325.0 608.0,325.0 L892.0,325.0 Q900.0,325.0 900.0,333.0 L900.0,380.0" fill="none" stroke="#62788c" stroke-width="1.8" stroke-linejoin="round" marker-end="url(#data-arrow)"/>
+<path d="M300.0,500.0 L300.0,655.0" fill="none" stroke="#62788c" stroke-width="1.8" stroke-linejoin="round" marker-end="url(#data-arrow)"/>
+<path d="M900.0,510.0 L900.0,625.0" fill="none" stroke="#62788c" stroke-width="1.8" stroke-linejoin="round" marker-end="url(#data-arrow)"/>
+<path d="M680.0,695.0 L520.0,695.0" fill="none" stroke="#62788c" stroke-width="1.8" stroke-linejoin="round" marker-end="url(#data-arrow)"/>
+<path d="M520.0,775.0 L680.0,775.0" fill="none" stroke="#bb772d" stroke-width="1.8" stroke-linejoin="round" stroke-dasharray="7 6" marker-end="url(#control-arrow)"/>
+<path d="M300.0,805.0 L300.0,955.0" fill="none" stroke="#62788c" stroke-width="1.8" stroke-linejoin="round" marker-end="url(#data-arrow)"/>
+<path d="M80.0,445.0 L48.0,445.0 Q40.0,445.0 40.0,453.0 L40.0,997.0 Q40.0,1005.0 48.0,1005.0 L245.0,1005.0" fill="none" stroke="#62788c" stroke-width="1.8" stroke-linejoin="round" marker-end="url(#data-arrow)"/>
+<rect x="380.0" y="165.0" width="440.0" height="100.0" rx="11" fill="#fff5e7" stroke="#cda56e" stroke-width="1.5"/>
+<text x="600.0" y="206.0" font-family="Microsoft YaHei,SimHei,sans-serif" text-anchor="middle" font-size="26" font-weight="700" fill="#20384e">音频抽取与目标补偿</text>
+<text x="600.0" y="240.0" font-family="Microsoft YaHei,SimHei,sans-serif" text-anchor="middle" font-size="22" font-weight="400" fill="#20384e">九路127抽头低通 / 8；按手动方向补偿</text>
+<rect x="80.0" y="390.0" width="440.0" height="110.0" rx="11" fill="#fff5e7" stroke="#cda56e" stroke-width="1.5"/>
+<text x="300.0" y="436.0" font-family="Microsoft YaHei,SimHei,sans-serif" text-anchor="middle" font-size="26" font-weight="700" fill="#20384e">PS等权DAS主支路</text>
+<text x="300.0" y="470.0" font-family="Microsoft YaHei,SimHei,sans-serif" text-anchor="middle" font-size="22" font-weight="400" fill="#20384e">单位脉冲FIR；不作PL逐样匹配</text>
+<rect x="680.0" y="380.0" width="440.0" height="130.0" rx="11" fill="#fff5e7" stroke="#cda56e" stroke-width="1.5"/>
+<text x="900.0" y="419.0" font-family="Microsoft YaHei,SimHei,sans-serif" text-anchor="middle" font-size="26" font-weight="700" fill="#20384e">八路阻塞参考</text>
+<text x="900.0" y="453.0" font-family="Microsoft YaHei,SimHei,sans-serif" text-anchor="middle" font-size="22" font-weight="400" fill="#20384e">外围麦减中心麦</text>
+<text x="900.0" y="487.0" font-family="Microsoft YaHei,SimHei,sans-serif" text-anchor="middle" font-size="22" font-weight="400" fill="#20384e">调理后形成32维参考</text>
+<rect x="80.0" y="655.0" width="440.0" height="150.0" rx="11" fill="#fff5e7" stroke="#cda56e" stroke-width="1.5"/>
+<text x="300.0" y="704.0" font-family="Microsoft YaHei,SimHei,sans-serif" text-anchor="middle" font-size="26" font-weight="700" fill="#20384e">计算输出残差</text>
+<text x="300.0" y="738.0" font-family="Microsoft YaHei,SimHei,sans-serif" text-anchor="middle" font-size="22" font-weight="400" fill="#20384e">主支路减去干扰估计</text>
+<text x="300.0" y="772.0" font-family="Microsoft YaHei,SimHei,sans-serif" text-anchor="middle" font-size="22" font-weight="400" fill="#20384e">e = d − 干扰估计</text>
+<rect x="680.0" y="625.0" width="440.0" height="210.0" rx="11" fill="#fff5e7" stroke="#cda56e" stroke-width="1.5"/>
+<text x="900.0" y="687.0" font-family="Microsoft YaHei,SimHei,sans-serif" text-anchor="middle" font-size="26" font-weight="700" fill="#20384e">干扰估计与权值更新</text>
+<text x="900.0" y="721.0" font-family="Microsoft YaHei,SimHei,sans-serif" text-anchor="middle" font-size="22" font-weight="400" fill="#20384e">32维NLMS：估计干扰与更新权值</text>
+<text x="900.0" y="755.0" font-family="Microsoft YaHei,SimHei,sans-serif" text-anchor="middle" font-size="22" font-weight="400" fill="#20384e">每4个音频点更新一次</text>
+<text x="900.0" y="789.0" font-family="Microsoft YaHei,SimHei,sans-serif" text-anchor="middle" font-size="22" font-weight="400" fill="#20384e">即每32个原始PCM点</text>
+<rect x="245.0" y="955.0" width="875.0" height="100.0" rx="11" fill="#fff5e7" stroke="#cda56e" stroke-width="1.5"/>
+<text x="682.5" y="996.0" font-family="Microsoft YaHei,SimHei,sans-serif" text-anchor="middle" font-size="26" font-weight="700" fill="#20384e">输出选择与保护</text>
+<text x="682.5" y="1030.0" font-family="Microsoft YaHei,SimHei,sans-serif" text-anchor="middle" font-size="22" font-weight="400" fill="#20384e">正常时输出残差；保护活动时回退PS DAS</text>
+<rect x="530.0" y="652.0" width="140.0" height="33.0" rx="3" fill="white"/>
+<text x="600.0" y="675.85" font-family="Microsoft YaHei,SimHei,sans-serif" font-size="21.0" font-weight="400" text-anchor="middle" fill="#62788c">干扰估计</text>
+<rect x="530.0" y="783.0" width="140.0" height="33.0" rx="3" fill="white"/>
+<text x="600.0" y="806.85" font-family="Microsoft YaHei,SimHei,sans-serif" font-size="21.0" font-weight="400" text-anchor="middle" fill="#bb772d">残差反馈</text>
+<rect x="55.0" y="872.0" width="235.0" height="34.0" rx="3" fill="white"/>
+<text x="172.5" y="896.35" font-family="Microsoft YaHei,SimHei,sans-serif" font-size="21.0" font-weight="400" text-anchor="middle" fill="#62788c">PS DAS主支路回退</text>
+<text x="52.0" y="1122.0" font-family="Microsoft YaHei,SimHei,sans-serif" font-size="20.0" font-weight="400" text-anchor="start" fill="#62788c">固定目标音频：冻结仅停止权值更新；保护触发时回退PS DAS。测试记录见第三部分与附录。</text>
+</svg>

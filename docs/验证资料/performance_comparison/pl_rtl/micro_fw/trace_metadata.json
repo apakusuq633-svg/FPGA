@@ -1,0 +1,5 @@
+{
+  "fir_checksum_add_pc": 1704,
+  "instruction": "00f80833",
+  "observation": "retired ck_new-ck_previous yields each already-clipped y, without modifying function"
+}

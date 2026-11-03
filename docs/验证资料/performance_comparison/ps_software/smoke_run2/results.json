@@ -1,0 +1,855 @@
+{
+  "schema": "PS_HOST_PERFORMANCE_V1",
+  "started_utc": "2026-10-28T05:13:57.600920+00:00",
+  "scope": "Windows x86_64 native host; NOT Cortex-A9/ARM, NOT FPGA, NOT three-architecture system speedup",
+  "host": {
+    "platform": "Windows-11-10.0.26200-SP0",
+    "machine": "AMD64",
+    "processor": "Intel(R) Core(TM) Ultra 5 338H",
+    "logical_cpus": 12
+  },
+  "tools": {
+    "gcc": {
+      "path": "C:\\msys64\\ucrt64\\bin\\gcc.exe",
+      "sha256": "70325d325c126905fc04c5bc57727969f4529173a139c129e3ff92b7adc2941e",
+      "version": "gcc.exe (Rev6, Built by MSYS2 project) 16.2.0\nCopyright (C) 2026 Free Software Foundation, Inc.\nThis is free software; see the source for copying conditions.  There is NO\nwarranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE."
+    },
+    "python": {
+      "path": "C:\\msys64\\ucrt64\\bin\\python.exe",
+      "sha256": "a8fd6ecea422ccf9e3a8b23394a8a0376689f355e08d99bb1686e3038b65df19",
+      "version": "Python 3.14.8"
+    },
+    "cc1": {
+      "path": "C:\\msys64\\ucrt64\\lib\\gcc\\x86_64-w64-mingw32\\16.2.0\\cc1.exe",
+      "sha256": "271909382f0b22b2f9e6e1179152e36ac3f23ffa57466af91e11756494183017"
+    },
+    "as": {
+      "path": "C:\\msys64\\ucrt64\\x86_64-w64-mingw32\\bin\\as.exe",
+      "sha256": "a608bd29d15d7cad470567070c7362191881f238d6e8525f4c3ab908cf36fcc5"
+    },
+    "ld": {
+      "path": "C:\\msys64\\ucrt64\\x86_64-w64-mingw32\\bin\\ld.exe",
+      "sha256": "a279cc83f198a606f255a597b3a067b51f11a9bbf8fe46de2a0dc8bb71b47f4f"
+    }
+  },
+  "flags_common": [
+    "-std=c11",
+    "-O2",
+    "-shared",
+    "no -ffast-math",
+    "no -march=native"
+  ],
+  "timer": "QueryPerformanceCounter inside native C; Python/ctypes entry, process launch, file I/O excluded",
+  "warmup_calls_excluded": 1,
+  "ordering": "seeded shuffled variant order in each measured round, one process",
+  "cache_scope": "steady-state after warmup; no forced cache flush or frequency lock",
+  "source_hashes_before": {
+    "FPGA/xyf_workbench/zynq_-pl_-simd_-verilog/sw/circular9_candidates.c": "51c0570ef91c111f7d5416e3df119ecc3920f590a8635a5b42db745ae394f7d4",
+    "FPGA/xyf_workbench/zynq_-pl_-simd_-verilog/sw/circular9_candidates.h": "6239718f00f4884a5a1c8f04369df381cb390d34021f05540a9888669ae8c80c",
+    "FPGA/xyf_workbench/zynq_-pl_-simd_-verilog/sw/circular9_decimator.h": "23d6581088b8f1f84196e68f275dadc86d944177592b3ee10bf36f566687e11c",
+    "FPGA/xyf_workbench/zynq_-pl_-simd_-verilog/sw/circular9_direction.h": "d8f652bd8e6d85f6286a4e7b71a63e8a98711aedb01e7223f43daa3f4e6a7aa1",
+    "FPGA/xyf_workbench/zynq_-pl_-simd_-verilog/sw/circular9_diagnosis.h": "c4be289a89962b0cae79980671cf235063d5be0e41bc6bacc420cd31e62ca1d6",
+    "FPGA/xyf_workbench/zynq_-pl_-simd_-verilog/sw/circular9_profile.h": "539e02c0905f8db8eca1f4d28337cd70bcd9fb5eb3ba54de5c07b6221e8f5af3",
+    "FPGA/xyf_workbench/zynq_-pl_-simd_-verilog/sw/acoustic_circular9_image.h": "001077edc5ba8aa0991be4e81466ce37d6384a690b72bd98581f26bd438e4731",
+    "FPGA/xyf_workbench/zynq_-pl_-simd_-verilog/sw/gsc9.c": "0b62f373ff0ee51510859ef084a4f9f6dc29840d1d655e221efa98dd2c711d8e",
+    "FPGA/xyf_workbench/zynq_-pl_-simd_-verilog/sw/gsc9.h": "2a6b835cd4956fa8b75e6e6aacb158df7082f19a6bc6ef9d76fe19f06dbcb0f8",
+    "FPGA/xyf_workbench/zynq_-pl_-simd_-verilog/sw/circular9_envelope.h": "149d9f47780a721ffbbba6371921b5d957d6cfc7eb732db67f8c9a0fae4781b2",
+    "FPGA/xyf_workbench/zynq_-pl_-simd_-verilog/sw/bearing_6004_2zr.h": "f3196dc0323b1cc7890d08493246cb4dddda976fb6475990e74e616e5af0ba18",
+    "FPGA/xyf_workbench/zynq_-pl_-simd_-verilog/sw/ps_env_pipeline.h": "1cf3baee43826f86b148484eb917aafbad389b7cda4ea0e6ff4aa0081be04b8d",
+    "FPGA/xyf_workbench/zynq_-pl_-simd_-verilog/sw/ps_features.h": "7c5f23ac08a1051ffa6c9a5f98961f6f2cee43cd55c2d5a97e66aa5dff3c2e9e",
+    "FPGA/xyf_workbench/zynq_-pl_-simd_-verilog/configs/circular9_array.json": "47b7f9f3215b82c1f2a71a4d67bd4124b4009f4aaa5634c32476530320dc60cc",
+    "FPGA/xyf_workbench/zynq_-pl_-simd_-verilog/scripts/build_circular9.py": "fedbbd4d068afd6bbac41877bf4e52a7c95a25779eb683564ff6841e2092638d"
+  },
+  "requested_counts": {
+    "output": "C:\\Users\\lenovo\\Desktop\\FPGA_PDM\\performance_comparison\\ps_software\\smoke_run2",
+    "warmup": 1,
+    "search_repeats": 2,
+    "division_repeats": 2,
+    "envelope_repeats": 2,
+    "skip_envelope": false
+  },
+  "commands": [
+    {
+      "argv": [
+        "C:\\msys64\\ucrt64\\bin\\gcc.exe",
+        "-std=c11",
+        "-O2",
+        "-Wall",
+        "-Wextra",
+        "-shared",
+        "-Wno-unused-function",
+        "-Wno-unused-const-variable",
+        "-MMD",
+        "-IC:\\Users\\lenovo\\Desktop\\FPGA_PDM\\FPGA\\xyf_workbench\\zynq_-pl_-simd_-verilog\\sw",
+        "-DC9_REFERENCE_SEARCH_INTERPOLATION",
+        "-DC9_REFERENCE_SEARCH_IFFT",
+        "C:\\Users\\lenovo\\Desktop\\FPGA_PDM\\performance_comparison\\ps_software\\search_bench.c",
+        "-lm",
+        "-o",
+        "C:\\Users\\lenovo\\Desktop\\FPGA_PDM\\performance_comparison\\ps_software\\smoke_run2\\build\\search_reference.dll"
+      ],
+      "returncode": 0,
+      "build_wall_seconds": 2.4580865999960224
+    },
+    {
+      "argv": [
+        "C:\\msys64\\ucrt64\\bin\\gcc.exe",
+        "-std=c11",
+        "-O2",
+        "-Wall",
+        "-Wextra",
+        "-shared",
+        "-Wno-unused-function",
+        "-Wno-unused-const-variable",
+        "-MMD",
+        "-IC:\\Users\\lenovo\\Desktop\\FPGA_PDM\\FPGA\\xyf_workbench\\zynq_-pl_-simd_-verilog\\sw",
+        "-DC9_REFERENCE_SEARCH_IFFT",
+        "C:\\Users\\lenovo\\Desktop\\FPGA_PDM\\performance_comparison\\ps_software\\search_bench.c",
+        "-lm",
+        "-o",
+        "C:\\Users\\lenovo\\Desktop\\FPGA_PDM\\performance_comparison\\ps_software\\smoke_run2\\build\\search_precomputed_only.dll"
+      ],
+      "returncode": 0,
+      "build_wall_seconds": 2.2524276999974973
+    },
+    {
+      "argv": [
+        "C:\\msys64\\ucrt64\\bin\\gcc.exe",
+        "-std=c11",
+        "-O2",
+        "-Wall",
+        "-Wextra",
+        "-shared",
+        "-Wno-unused-function",
+        "-Wno-unused-const-variable",
+        "-MMD",
+        "-IC:\\Users\\lenovo\\Desktop\\FPGA_PDM\\FPGA\\xyf_workbench\\zynq_-pl_-simd_-verilog\\sw",
+        "-DC9_REFERENCE_SEARCH_INTERPOLATION",
+        "C:\\Users\\lenovo\\Desktop\\FPGA_PDM\\performance_comparison\\ps_software\\search_bench.c",
+        "-lm",
+        "-o",
+        "C:\\Users\\lenovo\\Desktop\\FPGA_PDM\\performance_comparison\\ps_software\\smoke_run2\\build\\search_paired_ifft_only.dll"
+      ],
+      "returncode": 0,
+      "build_wall_seconds": 2.3169053999954485
+    },
+    {
+      "argv": [
+        "C:\\msys64\\ucrt64\\bin\\gcc.exe",
+        "-std=c11",
+        "-O2",
+        "-Wall",
+        "-Wextra",
+        "-shared",
+        "-Wno-unused-function",
+        "-Wno-unused-const-variable",
+        "-MMD",
+        "-IC:\\Users\\lenovo\\Desktop\\FPGA_PDM\\FPGA\\xyf_workbench\\zynq_-pl_-simd_-verilog\\sw",
+        "C:\\Users\\lenovo\\Desktop\\FPGA_PDM\\performance_comparison\\ps_software\\search_bench.c",
+        "-lm",
+        "-o",
+        "C:\\Users\\lenovo\\Desktop\\FPGA_PDM\\performance_comparison\\ps_software\\smoke_run2\\build\\search_combined.dll"
+      ],
+      "returncode": 0,
+      "build_wall_seconds": 2.492205299997295
+    },
+    {
+      "argv": [
+        "C:\\msys64\\ucrt64\\bin\\gcc.exe",
+        "-std=c11",
+        "-O2",
+        "-Wall",
+        "-Wextra",
+        "-shared",
+        "-Wno-unused-function",
+        "-Wno-unused-const-variable",
+        "-MMD",
+        "-IC:\\Users\\lenovo\\Desktop\\FPGA_PDM\\FPGA\\xyf_workbench\\zynq_-pl_-simd_-verilog\\sw",
+        "C:\\Users\\lenovo\\Desktop\\FPGA_PDM\\performance_comparison\\ps_software\\division_bench.c",
+        "-lm",
+        "-o",
+        "C:\\Users\\lenovo\\Desktop\\FPGA_PDM\\performance_comparison\\ps_software\\smoke_run2\\build\\division.dll"
+      ],
+      "returncode": 0,
+      "build_wall_seconds": 1.3494317999939085
+    },
+    {
+      "argv": [
+        "C:\\msys64\\ucrt64\\bin\\gcc.exe",
+        "-std=c11",
+        "-O2",
+        "-Wall",
+        "-Wextra",
+        "-shared",
+        "-Wno-unused-function",
+        "-Wno-unused-const-variable",
+        "-MMD",
+        "-IC:\\Users\\lenovo\\Desktop\\FPGA_PDM\\FPGA\\xyf_workbench\\zynq_-pl_-simd_-verilog\\sw",
+        "C:\\Users\\lenovo\\Desktop\\FPGA_PDM\\performance_comparison\\ps_software\\envelope_bench.c",
+        "C:\\Users\\lenovo\\Desktop\\FPGA_PDM\\performance_comparison\\ps_software\\envelope_legacy.c",
+        "-lm",
+        "-o",
+        "C:\\Users\\lenovo\\Desktop\\FPGA_PDM\\performance_comparison\\ps_software\\smoke_run2\\build\\envelope.dll"
+      ],
+      "returncode": 0,
+      "build_wall_seconds": 1.5569232999987435
+    }
+  ],
+  "search": {
+    "summary": {
+      "single_wideband": {
+        "reference": {
+          "unit": "ms",
+          "repeats": 2,
+          "mean": 7.51225,
+          "p50": 7.51225,
+          "p95": 8.061835,
+          "max": 8.1229,
+          "min": 6.9016,
+          "stdev": 0.86358951186313,
+          "mean_speedup_vs_reference": 1.0
+        },
+        "precomputed_only": {
+          "unit": "ms",
+          "repeats": 2,
+          "mean": 7.043950000000001,
+          "p50": 7.043950000000001,
+          "p95": 7.076665,
+          "max": 7.0803,
+          "min": 7.0076,
+          "stdev": 0.05140666299226215,
+          "mean_speedup_vs_reference": 1.066482584345431
+        },
+        "paired_ifft_only": {
+          "unit": "ms",
+          "repeats": 2,
+          "mean": 6.6876,
+          "p50": 6.6876,
+          "p95": 6.83124,
+          "max": 6.8472,
+          "min": 6.528,
+          "stdev": 0.22570848455474624,
+          "mean_speedup_vs_reference": 1.1233103056402896
+        },
+        "combined": {
+          "unit": "ms",
+          "repeats": 2,
+          "mean": 6.1648,
+          "p50": 6.1648,
+          "p95": 6.334630000000001,
+          "max": 6.3535,
+          "min": 5.9761,
+          "stdev": 0.2668620992198035,
+          "mean_speedup_vs_reference": 1.218571567609655
+        }
+      },
+      "three_band_sources": {
+        "reference": {
+          "unit": "ms",
+          "repeats": 2,
+          "mean": 6.6223,
+          "p50": 6.6223,
+          "p95": 7.2015400000000005,
+          "max": 7.2659,
+          "min": 5.9787,
+          "stdev": 0.9101878487433243,
+          "mean_speedup_vs_reference": 1.0
+        },
+        "precomputed_only": {
+          "unit": "ms",
+          "repeats": 2,
+          "mean": 9.0175,
+          "p50": 9.0175,
+          "p95": 11.62498,
+          "max": 11.9147,
+          "min": 6.1203,
+          "stdev": 4.097259532907331,
+          "mean_speedup_vs_reference": 0.7343831438868866
+        },
+        "paired_ifft_only": {
+          "unit": "ms",
+          "repeats": 2,
+          "mean": 10.1073,
+          "p50": 10.1073,
+          "p95": 14.80206,
+          "max": 15.3237,
+          "min": 4.8909,
+          "stdev": 7.377103626763013,
+          "mean_speedup_vs_reference": 0.6551997071423624
+        },
+        "combined": {
+          "unit": "ms",
+          "repeats": 2,
+          "mean": 6.34615,
+          "p50": 6.34615,
+          "p95": 7.699434999999999,
+          "max": 7.8498,
+          "min": 4.8425,
+          "stdev": 2.1264822230623044,
+          "mean_speedup_vs_reference": 1.0435145718270133
+        }
+      }
+    },
+    "equivalence": {
+      "single_wideband": {
+        "feedback_candidate_count": 1,
+        "feedback_invalid_input": 0,
+        "variants": {
+          "reference": {
+            "feedback_word_exact": true,
+            "feedback_words": 61,
+            "all_3072_scores_max_abs_integer_error": 0,
+            "last_processed_band_2304_lags_max_abs_error": 0.0,
+            "feedback_sha256": "dbaa4482e1f6841c9d1cfe631c7a3e0b8940e6e445f2c340af59663974dce602",
+            "scores_sha256": "23d31cb358148f28bd2f33a2a5240a7500a35f4e86dce9cd3d0941b8b8b36ae9",
+            "lags_sha256": "6c082a6e7f7e9223a623f3bb53ff969fe9824ddb3280b91b45d2a57c8ff893ba"
+          },
+          "precomputed_only": {
+            "feedback_word_exact": true,
+            "feedback_words": 61,
+            "all_3072_scores_max_abs_integer_error": 0,
+            "last_processed_band_2304_lags_max_abs_error": 0.0,
+            "feedback_sha256": "dbaa4482e1f6841c9d1cfe631c7a3e0b8940e6e445f2c340af59663974dce602",
+            "scores_sha256": "23d31cb358148f28bd2f33a2a5240a7500a35f4e86dce9cd3d0941b8b8b36ae9",
+            "lags_sha256": "6c082a6e7f7e9223a623f3bb53ff969fe9824ddb3280b91b45d2a57c8ff893ba"
+          },
+          "paired_ifft_only": {
+            "feedback_word_exact": true,
+            "feedback_words": 61,
+            "all_3072_scores_max_abs_integer_error": 0,
+            "last_processed_band_2304_lags_max_abs_error": 1.1102230246251565e-16,
+            "feedback_sha256": "dbaa4482e1f6841c9d1cfe631c7a3e0b8940e6e445f2c340af59663974dce602",
+            "scores_sha256": "23d31cb358148f28bd2f33a2a5240a7500a35f4e86dce9cd3d0941b8b8b36ae9",
+            "lags_sha256": "afde0953966c7676ee9a9a7c6cb468bba65963ca67b83f4a4420d201d3f35f6b"
+          },
+          "combined": {
+            "feedback_word_exact": true,
+            "feedback_words": 61,
+            "all_3072_scores_max_abs_integer_error": 0,
+            "last_processed_band_2304_lags_max_abs_error": 1.1102230246251565e-16,
+            "feedback_sha256": "dbaa4482e1f6841c9d1cfe631c7a3e0b8940e6e445f2c340af59663974dce602",
+            "scores_sha256": "23d31cb358148f28bd2f33a2a5240a7500a35f4e86dce9cd3d0941b8b8b36ae9",
+            "lags_sha256": "afde0953966c7676ee9a9a7c6cb468bba65963ca67b83f4a4420d201d3f35f6b"
+          }
+        },
+        "physical_classification_claimed": false
+      },
+      "three_band_sources": {
+        "feedback_candidate_count": 2,
+        "feedback_invalid_input": 0,
+        "variants": {
+          "reference": {
+            "feedback_word_exact": true,
+            "feedback_words": 61,
+            "all_3072_scores_max_abs_integer_error": 0,
+            "last_processed_band_2304_lags_max_abs_error": 0.0,
+            "feedback_sha256": "7438cff293c647a2b4e8b5f75dbd7ca9cdb08651df5f309410bc8322e72a4a28",
+            "scores_sha256": "5d6ab06d190c2c87b3468226a3a330782703e3d115342c090f99b908c12b09ca",
+            "lags_sha256": "5db2acadbb6a9dd9e1bafcefc58234480fe8304f0340d21d922eaea623c5a617"
+          },
+          "precomputed_only": {
+            "feedback_word_exact": true,
+            "feedback_words": 61,
+            "all_3072_scores_max_abs_integer_error": 0,
+            "last_processed_band_2304_lags_max_abs_error": 0.0,
+            "feedback_sha256": "7438cff293c647a2b4e8b5f75dbd7ca9cdb08651df5f309410bc8322e72a4a28",
+            "scores_sha256": "5d6ab06d190c2c87b3468226a3a330782703e3d115342c090f99b908c12b09ca",
+            "lags_sha256": "5db2acadbb6a9dd9e1bafcefc58234480fe8304f0340d21d922eaea623c5a617"
+          },
+          "paired_ifft_only": {
+            "feedback_word_exact": true,
+            "feedback_words": 61,
+            "all_3072_scores_max_abs_integer_error": 0,
+            "last_processed_band_2304_lags_max_abs_error": 8.326672684688674e-17,
+            "feedback_sha256": "7438cff293c647a2b4e8b5f75dbd7ca9cdb08651df5f309410bc8322e72a4a28",
+            "scores_sha256": "5d6ab06d190c2c87b3468226a3a330782703e3d115342c090f99b908c12b09ca",
+            "lags_sha256": "2ca353811c51edacc0596356df8d672de889d47e2d982915d2a557b4a40e7f46"
+          },
+          "combined": {
+            "feedback_word_exact": true,
+            "feedback_words": 61,
+            "all_3072_scores_max_abs_integer_error": 0,
+            "last_processed_band_2304_lags_max_abs_error": 8.326672684688674e-17,
+            "feedback_sha256": "7438cff293c647a2b4e8b5f75dbd7ca9cdb08651df5f309410bc8322e72a4a28",
+            "scores_sha256": "5d6ab06d190c2c87b3468226a3a330782703e3d115342c090f99b908c12b09ca",
+            "lags_sha256": "2ca353811c51edacc0596356df8d672de889d47e2d982915d2a557b4a40e7f46"
+          }
+        },
+        "physical_classification_claimed": false
+      }
+    },
+    "first_call_ms_excluded": {
+      "single_wideband/reference": 8.6356,
+      "single_wideband/precomputed_only": 8.237,
+      "single_wideband/paired_ifft_only": 7.572,
+      "single_wideband/combined": 7.1189,
+      "three_band_sources/reference": 7.8998,
+      "three_band_sources/precomputed_only": 7.8486,
+      "three_band_sources/paired_ifft_only": 9.1834,
+      "three_band_sources/combined": 6.0416
+    },
+    "scope": "entire c9_candidates_search; excludes PCM generation/history copying/DMA/queue/HTTP",
+    "first_call_note": "Each fixture first call excluded; lookup cache persists across fixtures; no ARM NEON on x86",
+    "fixtures": [
+      {
+        "scene": "single_wideband",
+        "path": "C:\\Users\\lenovo\\Desktop\\FPGA_PDM\\performance_comparison\\ps_software\\smoke_run2\\inputs\\single_wideband.pcm",
+        "sha256": "26f76c7d181985bcfc403a2851001a90d80246889244fda39cb660ff5d8d49f9",
+        "source": "synthetic_far_field_plane_waves",
+        "frames": 16640,
+        "channels": 9,
+        "format": "s16le_interleaved",
+        "sample_rate_num": 156250,
+        "sample_rate_den": 1,
+        "warmup_raw_frames": 256,
+        "evidence_raw_frames": 16384,
+        "geometry_confirmed": false,
+        "calibration_version": 0,
+        "clipped_samples": 0,
+        "rms_pcm": [
+          2123.0772322443945,
+          2123.104660760007,
+          2122.9829590911336,
+          2123.04525251601,
+          2122.944996912512,
+          2123.0958700674814,
+          2122.8576772616325,
+          2122.983858006973,
+          2123.1519294730183
+        ],
+        "sources": [
+          {
+            "azimuth_deg": 15.0,
+            "elevation_deg": 8.0,
+            "amplitude": 0.065,
+            "frequencies_hz": [
+              650,
+              720,
+              790,
+              860,
+              930,
+              1000,
+              1070,
+              1140,
+              1210,
+              1280,
+              1350,
+              1420,
+              1490,
+              1560,
+              1630,
+              1700,
+              1770,
+              1840,
+              2350,
+              2445,
+              2540,
+              2635,
+              2730,
+              2825,
+              2920,
+              3015,
+              3110,
+              3205,
+              3300,
+              3395,
+              3490,
+              3585,
+              3680,
+              3775,
+              3870,
+              3965,
+              4060,
+              4155,
+              4800,
+              4910,
+              5020,
+              5130,
+              5240,
+              5350,
+              5460,
+              5570,
+              5680,
+              5790,
+              5900,
+              6010,
+              6120,
+              6230,
+              6340,
+              6450,
+              6560,
+              6670,
+              6780,
+              6890,
+              7000,
+              7110,
+              7220,
+              7330,
+              7440
+            ]
+          }
+        ]
+      },
+      {
+        "scene": "three_band_sources",
+        "path": "C:\\Users\\lenovo\\Desktop\\FPGA_PDM\\performance_comparison\\ps_software\\smoke_run2\\inputs\\three_band_sources.pcm",
+        "sha256": "283bc608821c618a0a5a493df8ee1bd1d86ce7e2101849966f79bb5a829dd4be",
+        "source": "synthetic_far_field_plane_waves",
+        "frames": 16640,
+        "channels": 9,
+        "format": "s16le_interleaved",
+        "sample_rate_num": 156250,
+        "sample_rate_den": 1,
+        "warmup_raw_frames": 256,
+        "evidence_raw_frames": 16384,
+        "geometry_confirmed": false,
+        "calibration_version": 0,
+        "clipped_samples": 0,
+        "rms_pcm": [
+          3129.607218295179,
+          3128.4695598101403,
+          3128.4847850709893,
+          3128.3323106494563,
+          3129.374058644679,
+          3129.420112478447,
+          3129.5674358666597,
+          3129.396055365018,
+          3129.5417214502954
+        ],
+        "sources": [
+          {
+            "azimuth_deg": -55.0,
+            "elevation_deg": 0.0,
+            "amplitude": 0.05,
+            "frequencies_hz": [
+              600,
+              630,
+              660,
+              690,
+              720,
+              750,
+              780,
+              810,
+              840,
+              870,
+              900,
+              930,
+              960,
+              990,
+              1020,
+              1050,
+              1080,
+              1110,
+              1140,
+              1170,
+              1200,
+              1230,
+              1260,
+              1290,
+              1320,
+              1350,
+              1380,
+              1410,
+              1440,
+              1470,
+              1500,
+              1530,
+              1560,
+              1590,
+              1620,
+              1650,
+              1680,
+              1710,
+              1740,
+              1770
+            ]
+          },
+          {
+            "azimuth_deg": 15.0,
+            "elevation_deg": 8.0,
+            "amplitude": 0.018,
+            "frequencies_hz": [
+              2600,
+              2670,
+              2740,
+              2810,
+              2880,
+              2950,
+              3020,
+              3090,
+              3160,
+              3230,
+              3300,
+              3370,
+              3440,
+              3510,
+              3580,
+              3650
+            ]
+          },
+          {
+            "azimuth_deg": 60.0,
+            "elevation_deg": -5.0,
+            "amplitude": 0.08,
+            "frequencies_hz": [
+              5200,
+              5260,
+              5320,
+              5380,
+              5440,
+              5500,
+              5560,
+              5620,
+              5680,
+              5740,
+              5800,
+              5860,
+              5920,
+              5980,
+              6040,
+              6100,
+              6160,
+              6220,
+              6280,
+              6340,
+              6400,
+              6460,
+              6520,
+              6580,
+              6640,
+              6700,
+              6760,
+              6820,
+              6880,
+              6940,
+              7000,
+              7060,
+              7120,
+              7180,
+              7240,
+              7300,
+              7360,
+              7420,
+              7480,
+              7540
+            ]
+          }
+        ]
+      }
+    ],
+    "lut_sha256": "7a91f907d813fcfde54b592bfa7379354b13dd204785f85fc8bbda0ec0b91c7e",
+    "reference_macros": {
+      "reference": [
+        "-DC9_REFERENCE_SEARCH_INTERPOLATION",
+        "-DC9_REFERENCE_SEARCH_IFFT"
+      ],
+      "precomputed_only": [
+        "-DC9_REFERENCE_SEARCH_IFFT"
+      ],
+      "paired_ifft_only": [
+        "-DC9_REFERENCE_SEARCH_INTERPOLATION"
+      ],
+      "combined": []
+    }
+  },
+  "division": {
+    "summary": {
+      "signed_division_reference": {
+        "unit": "ms",
+        "repeats": 2,
+        "mean": 0.3664,
+        "p50": 0.3664,
+        "p95": 0.36657999999999996,
+        "max": 0.3666,
+        "min": 0.3662,
+        "stdev": 0.00028284271247458785
+      },
+      "production_shared_reciprocal": {
+        "unit": "ms",
+        "repeats": 2,
+        "mean": 1.13765,
+        "p50": 1.13765,
+        "p95": 1.459355,
+        "max": 1.4951,
+        "min": 0.7802,
+        "stdev": 0.5055106378702628
+      }
+    },
+    "mean_speedup": 0.3220674196809212,
+    "quotients_compared": 131072,
+    "max_abs_error": 0,
+    "batches_per_timed_call": 4096,
+    "updates_per_batch": 32,
+    "scope": "division arithmetic only; NOT gsc9_process throughput",
+    "baseline": "C signed int64 division with runtime-changing positive denominator per batch",
+    "optimized": "unchanged production divide_shared plus one reciprocal per 32 quotients",
+    "input_hashes": {
+      "division_numerators.i64le": "556abbc27587583b2393589e85d89a64fc22ed3a99ae3e87e458ef87f48056e3",
+      "division_denominators.u64le": "2505afbc81d2f0cf0563afc1a1616fb527887329c20b62e33878bdf3460ddee2"
+    }
+  },
+  "envelope": {
+    "summary": {
+      "historical_24x8192_frontend": {
+        "unit": "ms",
+        "repeats": 2,
+        "mean": 7.665150000000001,
+        "p50": 7.665150000000001,
+        "p95": 7.743585,
+        "max": 7.7523,
+        "min": 7.578,
+        "stdev": 0.12324871196081501
+      },
+      "current_C9F2_1x4096_frontend": {
+        "unit": "ms",
+        "repeats": 2,
+        "mean": 2.0149500000000002,
+        "p50": 2.0149500000000002,
+        "p95": 2.1108450000000003,
+        "max": 2.1215,
+        "min": 1.9084,
+        "stdev": 0.15068445507085332
+      }
+    },
+    "mean_runtime_ratio": 3.8041390605225933,
+    "numerically_equivalent_frontends": false,
+    "scope": "feature extraction only; excludes separation, capture, task queue and display",
+    "differences": [
+      "historical carrier1400..4600Hz vs current2200..4600Hz",
+      "historical short-window averaged envelope vs current full1.024s envelope",
+      "different filters, peak tolerance and normalization floor; models require matching feature contract"
+    ],
+    "current_vs_independent_analytic_DFT_max_abs_amplitude_error": 1.0450754422269837e-06,
+    "DFT_not_timed": true,
+    "input_sha256": "cfbc7fbf8f2719b869117027573b8bd9a963756f28625065535316a99ff8f6ed",
+    "input_samples": 40000,
+    "input_rate_hz": 39062.5,
+    "shaft_hz": 10.0,
+    "observation_seconds": 1.024,
+    "features": {
+      "historical_24x8192_frontend": [
+        90.51087488256843,
+        90.51087488256843,
+        90.51087488256843,
+        90.51087488256843,
+        63.63287551829955,
+        -10.743074230875937,
+        -25.454777045530378,
+        -31.76031806620511,
+        4.65840077189268,
+        -25.454777045530378,
+        -34.536616912237946,
+        -37.560802418560215,
+        -15.47401414852444,
+        -34.536616912237946,
+        -23.02066698192202,
+        71.25179225862962,
+        90.51087488256843,
+        84.78017133854158
+      ],
+      "current_C9F2_1x4096_frontend": [
+        97.71750975328231,
+        65.39941035295429,
+        76.50400911473432,
+        34.71848632834614,
+        15.76865617158781,
+        -4.599990291733499,
+        -16.356793993000668,
+        -24.944351025737618,
+        2.9914986032757565,
+        -16.356793993000668,
+        -29.167207442715053,
+        -31.321069378172904,
+        -8.9112894245405,
+        -29.167207442715053,
+        -21.032826329915267,
+        94.37727286654717,
+        88.27135968728506,
+        24.354772722225555
+      ]
+    }
+  },
+  "source_hashes_after": {
+    "FPGA/xyf_workbench/zynq_-pl_-simd_-verilog/sw/circular9_candidates.c": "51c0570ef91c111f7d5416e3df119ecc3920f590a8635a5b42db745ae394f7d4",
+    "FPGA/xyf_workbench/zynq_-pl_-simd_-verilog/sw/circular9_candidates.h": "6239718f00f4884a5a1c8f04369df381cb390d34021f05540a9888669ae8c80c",
+    "FPGA/xyf_workbench/zynq_-pl_-simd_-verilog/sw/circular9_decimator.h": "23d6581088b8f1f84196e68f275dadc86d944177592b3ee10bf36f566687e11c",
+    "FPGA/xyf_workbench/zynq_-pl_-simd_-verilog/sw/circular9_direction.h": "d8f652bd8e6d85f6286a4e7b71a63e8a98711aedb01e7223f43daa3f4e6a7aa1",
+    "FPGA/xyf_workbench/zynq_-pl_-simd_-verilog/sw/circular9_diagnosis.h": "c4be289a89962b0cae79980671cf235063d5be0e41bc6bacc420cd31e62ca1d6",
+    "FPGA/xyf_workbench/zynq_-pl_-simd_-verilog/sw/circular9_profile.h": "539e02c0905f8db8eca1f4d28337cd70bcd9fb5eb3ba54de5c07b6221e8f5af3",
+    "FPGA/xyf_workbench/zynq_-pl_-simd_-verilog/sw/acoustic_circular9_image.h": "001077edc5ba8aa0991be4e81466ce37d6384a690b72bd98581f26bd438e4731",
+    "FPGA/xyf_workbench/zynq_-pl_-simd_-verilog/sw/gsc9.c": "0b62f373ff0ee51510859ef084a4f9f6dc29840d1d655e221efa98dd2c711d8e",
+    "FPGA/xyf_workbench/zynq_-pl_-simd_-verilog/sw/gsc9.h": "2a6b835cd4956fa8b75e6e6aacb158df7082f19a6bc6ef9d76fe19f06dbcb0f8",
+    "FPGA/xyf_workbench/zynq_-pl_-simd_-verilog/sw/circular9_envelope.h": "149d9f47780a721ffbbba6371921b5d957d6cfc7eb732db67f8c9a0fae4781b2",
+    "FPGA/xyf_workbench/zynq_-pl_-simd_-verilog/sw/bearing_6004_2zr.h": "f3196dc0323b1cc7890d08493246cb4dddda976fb6475990e74e616e5af0ba18",
+    "FPGA/xyf_workbench/zynq_-pl_-simd_-verilog/sw/ps_env_pipeline.h": "1cf3baee43826f86b148484eb917aafbad389b7cda4ea0e6ff4aa0081be04b8d",
+    "FPGA/xyf_workbench/zynq_-pl_-simd_-verilog/sw/ps_features.h": "7c5f23ac08a1051ffa6c9a5f98961f6f2cee43cd55c2d5a97e66aa5dff3c2e9e",
+    "FPGA/xyf_workbench/zynq_-pl_-simd_-verilog/configs/circular9_array.json": "47b7f9f3215b82c1f2a71a4d67bd4124b4009f4aaa5634c32476530320dc60cc",
+    "FPGA/xyf_workbench/zynq_-pl_-simd_-verilog/scripts/build_circular9.py": "fedbbd4d068afd6bbac41877bf4e52a7c95a25779eb683564ff6841e2092638d"
+  },
+  "source_unchanged": true,
+  "passed": true,
+  "finished_utc": "2026-10-28T05:14:13.700251+00:00",
+  "artifact_hashes": {
+    "build/division.d": "68a9ceb60170bba4dd49d535a4ce3abfad5b83e9768cda00754add2c170da9dc",
+    "build/division.dll": "d0db74deda018fbcf7b4ebd3d5e5fc9d1f4ebbffc4db7fb85869581d9210a79f",
+    "build/envelope.d": "a1ee12ec863715807581c52c530da754b4f26944a1baf60add2ac6dc3541aa25",
+    "build/envelope.dll": "90a69abb69e08379cdec5f9a87efbf55c2859ea26f089e837ec47e69ed00fa1a",
+    "build/search_combined.d": "6fe96200b5615c9ebb2fcf5096ec22390fe6fffcdcb9adc7fd0dce22868b72d5",
+    "build/search_combined.dll": "0995df94f35b4b1f169418d390958a01575d760bc488557a2f33224b575d1c17",
+    "build/search_paired_ifft_only.d": "68397b82a5d23b97c072ea13c88192ad0b47407a943474a24c9e1112a59b136e",
+    "build/search_paired_ifft_only.dll": "143cea02a5d61c8b1c5e1ab3185918c0bdaed96533d71864b5e95bc829457af9",
+    "build/search_precomputed_only.d": "9b7487295c59ddd14e95d86cc565436640a75a819f7855fd64506f1cfae13422",
+    "build/search_precomputed_only.dll": "b374a684ccea53605d3015c88f8eff48c4270d24c620d141a0773d9200702066",
+    "build/search_reference.d": "102fde0bc881d2e85b94f91956bf7cd286ab10675e883cd97b703ec68ea6a06a",
+    "build/search_reference.dll": "2f821fb8a71b01b88340591d26329521aa855b879ec462bd092133a13807cff2",
+    "inputs/division_denominators.u64le": "2505afbc81d2f0cf0563afc1a1616fb527887329c20b62e33878bdf3460ddee2",
+    "inputs/division_numerators.i64le": "556abbc27587583b2393589e85d89a64fc22ed3a99ae3e87e458ef87f48056e3",
+    "inputs/envelope_am600rpm.f64le": "cfbc7fbf8f2719b869117027573b8bd9a963756f28625065535316a99ff8f6ed",
+    "inputs/search_metadata.json": "8a517284832f3457855688cdbd2bc0843c5290e4bac96e2124c1eccf63ac040f",
+    "inputs/single_wideband.pcm": "26f76c7d181985bcfc403a2851001a90d80246889244fda39cb660ff5d8d49f9",
+    "inputs/steer_lut.u32le": "7a91f907d813fcfde54b592bfa7379354b13dd204785f85fc8bbda0ec0b91c7e",
+    "inputs/three_band_sources.pcm": "283bc608821c618a0a5a493df8ee1bd1d86ce7e2101849966f79bb5a829dd4be",
+    "logs/division_compile.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "logs/envelope_compile.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "logs/search_combined_compile.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "logs/search_paired_ifft_only_compile.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "logs/search_precomputed_only_compile.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "logs/search_reference_compile.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "numeric/envelope_dft_checks.json": "88bbfd93e79517679b86bcffe840135b6e769f7dbd07dbe35235965bee421622",
+    "numeric/envelope_features.json": "bdd488ca2cde36f81fdbc6fcdb05e6eecaa6a73b37fb7762282618e0a7cc6756",
+    "numeric/production_shared_reciprocal.i64le": "7e49d9a25d0cb4230645d2ff66d9de4be6b5dfc61994a02e09c665b6475d9163",
+    "numeric/signed_division_reference.i64le": "7e49d9a25d0cb4230645d2ff66d9de4be6b5dfc61994a02e09c665b6475d9163",
+    "numeric/single_wideband_combined_feedback.bin": "dbaa4482e1f6841c9d1cfe631c7a3e0b8940e6e445f2c340af59663974dce602",
+    "numeric/single_wideband_combined_last_band_lags.bin": "afde0953966c7676ee9a9a7c6cb468bba65963ca67b83f4a4420d201d3f35f6b",
+    "numeric/single_wideband_combined_scores.bin": "23d31cb358148f28bd2f33a2a5240a7500a35f4e86dce9cd3d0941b8b8b36ae9",
+    "numeric/single_wideband_paired_ifft_only_feedback.bin": "dbaa4482e1f6841c9d1cfe631c7a3e0b8940e6e445f2c340af59663974dce602",
+    "numeric/single_wideband_paired_ifft_only_last_band_lags.bin": "afde0953966c7676ee9a9a7c6cb468bba65963ca67b83f4a4420d201d3f35f6b",
+    "numeric/single_wideband_paired_ifft_only_scores.bin": "23d31cb358148f28bd2f33a2a5240a7500a35f4e86dce9cd3d0941b8b8b36ae9",
+    "numeric/single_wideband_precomputed_only_feedback.bin": "dbaa4482e1f6841c9d1cfe631c7a3e0b8940e6e445f2c340af59663974dce602",
+    "numeric/single_wideband_precomputed_only_last_band_lags.bin": "6c082a6e7f7e9223a623f3bb53ff969fe9824ddb3280b91b45d2a57c8ff893ba",
+    "numeric/single_wideband_precomputed_only_scores.bin": "23d31cb358148f28bd2f33a2a5240a7500a35f4e86dce9cd3d0941b8b8b36ae9",
+    "numeric/single_wideband_reference_feedback.bin": "dbaa4482e1f6841c9d1cfe631c7a3e0b8940e6e445f2c340af59663974dce602",
+    "numeric/single_wideband_reference_last_band_lags.bin": "6c082a6e7f7e9223a623f3bb53ff969fe9824ddb3280b91b45d2a57c8ff893ba",
+    "numeric/single_wideband_reference_scores.bin": "23d31cb358148f28bd2f33a2a5240a7500a35f4e86dce9cd3d0941b8b8b36ae9",
+    "numeric/three_band_sources_combined_feedback.bin": "7438cff293c647a2b4e8b5f75dbd7ca9cdb08651df5f309410bc8322e72a4a28",
+    "numeric/three_band_sources_combined_last_band_lags.bin": "2ca353811c51edacc0596356df8d672de889d47e2d982915d2a557b4a40e7f46",
+    "numeric/three_band_sources_combined_scores.bin": "5d6ab06d190c2c87b3468226a3a330782703e3d115342c090f99b908c12b09ca",
+    "numeric/three_band_sources_paired_ifft_only_feedback.bin": "7438cff293c647a2b4e8b5f75dbd7ca9cdb08651df5f309410bc8322e72a4a28",
+    "numeric/three_band_sources_paired_ifft_only_last_band_lags.bin": "2ca353811c51edacc0596356df8d672de889d47e2d982915d2a557b4a40e7f46",
+    "numeric/three_band_sources_paired_ifft_only_scores.bin": "5d6ab06d190c2c87b3468226a3a330782703e3d115342c090f99b908c12b09ca",
+    "numeric/three_band_sources_precomputed_only_feedback.bin": "7438cff293c647a2b4e8b5f75dbd7ca9cdb08651df5f309410bc8322e72a4a28",
+    "numeric/three_band_sources_precomputed_only_last_band_lags.bin": "5db2acadbb6a9dd9e1bafcefc58234480fe8304f0340d21d922eaea623c5a617",
+    "numeric/three_band_sources_precomputed_only_scores.bin": "5d6ab06d190c2c87b3468226a3a330782703e3d115342c090f99b908c12b09ca",
+    "numeric/three_band_sources_reference_feedback.bin": "7438cff293c647a2b4e8b5f75dbd7ca9cdb08651df5f309410bc8322e72a4a28",
+    "numeric/three_band_sources_reference_last_band_lags.bin": "5db2acadbb6a9dd9e1bafcefc58234480fe8304f0340d21d922eaea623c5a617",
+    "numeric/three_band_sources_reference_scores.bin": "5d6ab06d190c2c87b3468226a3a330782703e3d115342c090f99b908c12b09ca",
+    "raw_timings.csv": "08a35a6d2194fcc6baeac5cf949197be0eaaf149ac1b13167343cfdb58c4c7e0"
+  },
+  "benchmark_sources": {
+    "division_bench.c": "49e639724eb43bfe02c226f865e26a93074053853b56e6e51fb12f8c7eb47aef",
+    "envelope_bench.c": "fea80b5dd20e16bef1e7911b59209a42060c6962e67ef106eadc73b9b188a41a",
+    "envelope_legacy.c": "6eb8294a834a1863b4dfa0d8aebcce2bcc4bb7e1c93d36de8f24bf32a49a1b10",
+    "run_benchmarks.py": "bb71f2f7295ea0c0540f80c5c46870f36355d264d5f3d7907428b9b0de965617",
+    "search_bench.c": "e2b91683325cb8ef8c2af73121d08b41a911a08c993696f7d2008508694ca4c6"
+  }
+}
