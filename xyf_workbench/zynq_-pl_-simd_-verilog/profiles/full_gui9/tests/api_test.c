@@ -27,6 +27,10 @@ static int c9_history_copy(const int *h,int16_t (*r)[9],uint32_t count,uint32_t 
 }
 static unsigned checkpoints;
 static void c9_realtime_checkpoint(void){checkpoints++;}
+#define C9_HISTORY_FRAMES 1048576u
+#define ACOUSTIC_GEOMETRY_VERSION 1u
+#define C9_EVIDENCE_BUILD_ID "mock"
+static int c9_source_exists(unsigned o,uint32_t q,uint32_t se,uint32_t ep,uint32_t f,uint32_t e){(void)o;(void)q;(void)se;(void)ep;(void)f;(void)e;return 0;}
 #include "sw/ps_circular9_gui.h"
 static char out[61440];
 static struct ui_reply request(const char *s,int expected){struct ui_reply r;memset(out,0,sizeof(out));assert(c9_gui_route(s,&r,out,sizeof(out)));assert(r.code==expected);return r;}

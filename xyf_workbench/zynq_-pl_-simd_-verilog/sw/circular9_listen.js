@@ -1,0 +1,139 @@
+(function(){
+'use strict';
+const $=id=>document.getElementById(id);let system=null,systemRead=0;let state=null,serial=0,lastWrite=0,busy=false,selection=null;
+const card=document.createElement('section');card.className='card';card.id='listen-control';
+card.innerHTML='<h3>声学巡检与监听</h3><p id="listen-state">等待音频控制状态</p><div class="actions"><span id="listen-direction"></span><button id="listen-start">启动DAS巡检</button><button id="listen-pause">暂停</button><button id="listen-resume">继续</button><button id="listen-stop">停止巡检</button><button id="listen-lock-formal">锁定新鲜PS正式方向</button><button id="listen-lock-current">锁定当前监听方向</button><button id="listen-back">结束监听，返回巡检</button></div><div class="actions"><label>Az <input id="listen-az" type="number" min="-85" max="85" value="0"></label><label>El <input id="listen-el" type="number" min="-85" max="85" value="0"></label><button id="listen-lock">锁定并精细监听</button><span id="listen-selected">手动指定空间方向，不证明存在声源</span></div><p id="listen-note" role="status"></p><small>共用G9A1 UDP链路；诊断双谱来自C9S3，不是GSC。保留目标保护，不保证GSC优于DAS。</small>';
+const overview=$('demo-overview')||document.querySelector('main');overview.appendChild(card);
+const advanced=document.createElement('section');advanced.className='card';advanced.id='listen-editor';advanced.innerHTML='<h3>巡检点管理与监听调试</h3><label>巡检策略 <select id="listen-strategy"><option value="0">预设点位</option><option value="1">跟随一个新鲜PS正式方向</option></select></label><button id="listen-strategy-set">应用策略</button><p>最多8点，Az/El整数度，停留0.5–60秒。修改/排序后保存；保存会暂停正在运行的巡检。</p><div id="listen-rows"></div><button id="listen-add">添加点位</button><button id="listen-save">保存点位</button><button id="listen-baseline">固定目标DAS/GSC对照（内部测试）</button><pre id="listen-debug"></pre>';
+($('demo-advanced')||document.querySelector('main')).appendChild(advanced);
+let names,points;try{names=JSON.parse(localStorage.getItem('c9-listen-names'))||[];points=JSON.parse(localStorage.getItem('c9-listen-points'));}catch(e){names=[];}
+const ownershipKey='c9-focus-udp-owner-v1';
+async function request(path){
+  const response=await fetch(path,{cache:'no-store',signal:AbortSignal.timeout(3000)});
+  if(!response.ok)throw Error(path+' HTTP '+response.status);
+  return response.json();
+}
+async function refresh(){
+  const id=++systemRead;
+  const [mode,listen]=await Promise.all([request('/api/system/state'),request('/api/listen')]);
+  if(id!==systemRead)return;
+  system=mode;state=listen;render();return {mode,listen};
+}
+async function waitFor(predicate,label){
+  const deadline=performance.now()+12000;
+  do {
+    const snapshot=await refresh();
+    if(snapshot&&predicate(snapshot))return snapshot;
+    await new Promise(resolve=>setTimeout(resolve,150));
+  } while(performance.now()<deadline);
+  throw Error(label+'超时，当前系统状态 '+(system?.state||'未知'));
+}
+function ready(mode,listen,a,e){
+  return mode.state==='FOCUS'&&mode.search_diagnosis_paused===1&&mode.cpu1_quiescent===1&&
+    mode.gsc_allowed===1&&listen.mode==='MANUAL_GSC'&&listen.applied_version>0&&
+    listen.version===listen.applied_version&&!listen.pending&&listen.az===a&&listen.el===e;
+}
+async function focus(a,e){
+  if(!Number.isInteger(a)||!Number.isInteger(e)||Math.abs(a)>85||Math.abs(e)>85)
+    throw Error('请输入−85至85的整数角度');
+  const {mode,listen}=await refresh();
+  if(mode.state==='FOCUS'){
+    if(ready(mode,listen,a,e))return;
+    throw Error('已锁定其他方向，请先退出FOCUS');
+  }
+  if(mode.state!=='SEARCH')throw Error('当前系统状态 '+mode.state);
+  if(sessionStorage.getItem(ownershipKey))throw Error('请先完成上一次监听的UDP收尾');
+  note('正在切换至精细监听');
+  const ownsUdp=!listen.udp_enabled;
+  await request('/api/system/focus?az='+a+'&el='+e);
+  if(ownsUdp)sessionStorage.setItem(ownershipKey,'1');
+  await waitFor(({mode,listen})=>ready(mode,listen,a,e),'FOCUS确认');
+}
+async function leave(){
+  const {mode,listen}=await refresh();
+  if(mode.state==='SEARCH'&&listen.mode==='MANUAL_GSC')await send('back?rev={rev}');
+  if(['FOCUS','ENTERING_FOCUS','CONFIGURING_FOCUS'].includes(mode.state))
+    await request('/api/system/search');
+  note('正在恢复SEARCH');
+  await waitFor(({mode,listen})=>mode.state==='SEARCH'&&!mode.cpu1_quiescent&&
+    !mode.search_diagnosis_paused&&!mode.gsc_allowed&&listen.mode==='PATROL_DAS','SEARCH恢复');
+  if(sessionStorage.getItem(ownershipKey)){
+    try{
+      if(state.udp_enabled)await request('/api/recording/off');
+      await waitFor(({listen})=>!listen.udp_enabled,'UDP关闭');
+      sessionStorage.removeItem(ownershipKey);
+    }catch(error){
+      throw Error('SEARCH已恢复，UDP收尾未确认：'+error.message);
+    }
+  }
+}
+function note(t){$('listen-note').textContent=t;}
+async function read(){return refresh();}
+async function send(path){if(system?.state!=='SEARCH')throw Error('监听配置仅允许在SEARCH修改');if(!state)await read();lastWrite=++serial;const r=await fetch('/api/listen/'+path.replace('{rev}',String(state.revision)),{cache:'no-store'});const s=await r.json();if(!r.ok)throw Error('请求被拒绝：参数无效或状态已变化，请重试');state=s;render();return s;}
+async function act(fn){
+  if(busy)return;
+  busy=true;
+  if(state)render();
+  try{await refresh();await fn();await refresh();note('请求完成');}
+  catch(error){
+    try{await refresh();}catch{system=null;if(state)render();}
+    note(error.message+' · 系统 '+(system?.state||'未知'));
+  }finally{busy=false;if(state)render();}
+}
+function render(){
+  const s=state,m=system?.state,search=m==='SEARCH',manual=s.mode==='MANUAL_GSC';
+  const focused=system&&ready(system,s,s.az,s.el);
+  const label=focused?'FOCUS · 精细监听 · 自动搜索和诊断暂停':
+    m==='RECOVERING_SEARCH'?'正在恢复SEARCH':
+    m==='ENTERING_FOCUS'||m==='CONFIGURING_FOCUS'?'正在切换至精细监听':
+    search?(manual?'SEARCH · 监听与系统模式不一致':'SEARCH · 自动巡检 DAS'):
+    m==='FOCUS'?'FOCUS · 方向或静止确认未完成':'系统状态未知';
+  $('listen-state').textContent=label+(focused||search&&!manual?' · '+s.engine:'')+
+    ' · UDP '+(s.udp_enabled?'已启用':'未启用')+
+    (search?'':' · 定位轨迹与诊断区保留历史数据，当前无实时PS搜索或新诊断保证');
+  $('listen-direction').textContent='实际 '+s.az+'° / '+s.el+'° · 方向版本 '+s.applied_version;
+  for(const id of ['start','pause','resume','stop','save','strategy-set'])
+    $('listen-'+id).disabled=busy||!search;
+  $('listen-pause').disabled ||= !s.running||s.paused||!!s.pending;
+  $('listen-resume').disabled ||= !s.running||!s.paused||!!s.pending;
+  $('listen-lock').disabled=busy||!search;
+  $('listen-lock-formal').disabled=busy||!search||!s.formal_fresh;
+  $('listen-lock-current').disabled=busy||!search||!s.applied_version||!!s.pending;
+  $('listen-back').hidden=search&&!manual&&!sessionStorage.getItem(ownershipKey);
+  $('listen-back').disabled=busy||!m;
+  $('listen-baseline').disabled=busy||!search||!manual;
+  $('listen-debug').textContent=JSON.stringify({system,listen:s},null,2);
+}
+function nextName(s){for(let k=1;k<=8;k++){const i=(s.index+k)%8;if(s.points[i].enabled)return names[i]||('P'+(i+1));}return '无';}
+function choose(az,el,source){selection={az,el,source};$('listen-az').value=az;$('listen-el').value=el;$('listen-selected').textContent=(source===3?'热力图人工选点；不代表确认声源':'手动空间方向')+' '+az+'° / '+el+'°';}
+for(const key of ['az','el'])$('listen-'+key).oninput=()=>{selection=null;$('listen-selected').textContent='手动指定空间方向，不证明存在声源';};
+$('listen-lock').onclick=()=>act(()=>{
+  const a=$('listen-az').value,e=$('listen-el').value;
+  if(!a.trim()||!e.trim())throw Error('请输入完整角度');
+  return focus(Number(a),Number(e));
+});
+$('listen-lock-formal').onclick=()=>act(()=>{
+  if(!state.formal_fresh)throw Error('没有新鲜PS正式方向');
+  return focus(state.formal_az,state.formal_el);
+});
+$('listen-lock-current').onclick=()=>act(()=>{
+  if(!state.applied_version||state.pending)throw Error('当前监听方向尚未生效');
+  return focus(state.az,state.el);
+});
+$('listen-back').onclick=()=>act(leave);
+for(const cmd of ['start','pause','resume','stop','baseline'])$('listen-'+cmd).onclick=()=>act(()=>send(cmd+'?rev={rev}'));
+$('listen-strategy-set').onclick=()=>act(()=>send('strategy?rev={rev}&value='+$('listen-strategy').value));
+function editor(){const box=$('listen-rows');box.textContent='';points.forEach((p,i)=>{const row=document.createElement('div');row.className='actions';row.innerHTML='<input data-k="name" placeholder="点位名称"><label>启用<input data-k="enabled" type="checkbox"></label><label>Az<input data-k="az" type="number" min="-85" max="85"></label><label>El<input data-k="el" type="number" min="-85" max="85"></label><label>停留秒<input data-k="sec" type="number" min="0.5" max="60" step="0.5"></label><button data-a="lock">监听此点</button><button data-a="up">上移</button><button data-a="down">下移</button><button data-a="del">删除</button>';for(const k of ['name','enabled','az','el','sec']){const n=row.querySelector('[data-k="'+k+'"]');if(k==='enabled')n.checked=!!p.enabled;else n.value=k==='name'?(names[i]||''):k==='sec'?p.ms/1000:p[k];n.onchange=()=>{if(k==='name')names[i]=n.value.slice(0,24);else p[k==='sec'?'ms':k]=k==='enabled'?Number(n.checked):Number(n.value)*(k==='sec'?1000:1);};}row.querySelector('[data-a="lock"]').onclick=()=>{choose(p.az,p.el,2);$('listen-lock').click();};for(const [a,d]of [['up',-1],['down',1]])row.querySelector('[data-a="'+a+'"]').onclick=()=>{const j=i+d;if(j<0||j>7)return;[points[i],points[j]]=[points[j],points[i]];[names[i],names[j]]=[names[j],names[i]];editor();};row.querySelector('[data-a="del"]').onclick=()=>{points.splice(i,1);points.push({az:0,el:0,ms:3000,enabled:0});names.splice(i,1);names.push('');editor();};box.appendChild(row);});}
+$('listen-add').onclick=()=>{const i=points.findIndex(p=>!p.enabled);if(i<0){note('最多8点');return;}points[i]={az:0,el:0,ms:3000,enabled:1};names[i]='P'+(i+1);editor();};
+$('listen-save').onclick=()=>act(async()=>{for(const p of points)if(!Number.isInteger(p.az)||!Number.isInteger(p.el)||Math.abs(p.az)>85||Math.abs(p.el)>85||!Number.isInteger(p.ms)||p.ms<500||p.ms>60000)throw Error('点位角度或停留时间无效');if(state.mode==='PATROL_DAS'&&state.running)await send('pause?rev={rev}');for(let i=0;i<8;i++){const p=points[i];await send('point?rev={rev}&i='+i+'&az='+p.az+'&el='+p.el+'&ms='+p.ms+'&on='+Number(!!p.enabled));}localStorage.setItem('c9-listen-names',JSON.stringify(names));localStorage.setItem('c9-listen-points',JSON.stringify(points));});
+// Replace the old heatmap action: apply existing plot margins, CSS scaling and
+// grid orientation; selection only, never change formal localization/track IDs.
+$('direction_map').onclick=function(e){const r=this.getBoundingClientRect(),x=(e.clientX-r.left)*this.width/r.width,y=(e.clientY-r.top)*this.height/r.height;if(x<54||x>=374||y<18||y>=338)return;const col=Math.floor((x-54)/10),row=31-Math.floor((y-18)/10);choose(Math.round(-90+(col+.5)*180/32),Math.round(-90+(row+.5)*180/32),3);};
+// Old direct audio buttons must not bypass the two-mode owner. Reuse the new
+// block in both pages; keep original recording and freeze/adapt controls.
+for(const n of document.querySelectorAll('[data-control="/api/gsc/on"],[data-control="/api/gsc/off"]'))n.hidden=true;
+if($('gsc_target_set')){$('gsc_target_set').onclick=()=>{choose(Number($('gsc_az').value),Number($('gsc_el').value),2);$('listen-lock').click();};}
+read().then(()=>{if(!Array.isArray(points)||points.length!==8)points=state.points.map(p=>({...p}));editor();}).catch(e=>note(String(e)));setInterval(()=>{if(!document.hidden&&!busy)read().catch(e=>{system=null;if(state)render();note(String(e));});},1000);
+const oldMap=renderMap;renderMap=function(m){oldMap(m);const c=$('direction_map'),x=c.getContext('2d');if(!state?.applied_version)return;x.save();x.strokeStyle='#ffbe55';x.lineWidth=2;x.setLineDash([4,3]);const a=54+(state.az+90)*320/180,e=18+(90-state.el)*320/180;x.beginPath();x.moveTo(a,e-7);x.lineTo(a+7,e);x.lineTo(a,e+7);x.lineTo(a-7,e);x.closePath();x.stroke();x.setLineDash([]);x.font='11px sans-serif';x.fillStyle='#ffbe55';x.fillText('监听方向',a+9,e);x.restore();};
+window.c9Listen={choose,read};
+})();

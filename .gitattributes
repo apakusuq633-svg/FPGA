@@ -1,2 +1,4 @@
 # Preserve archived inputs, logs, hashes and submission documents byte for byte.
 docs/** -text
+**/docs/** -text
+README.md -text

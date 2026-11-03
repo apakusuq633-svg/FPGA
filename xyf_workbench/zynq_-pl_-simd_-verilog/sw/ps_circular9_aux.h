@@ -84,6 +84,33 @@ static int c9_aux_feedback_current(const c9_aux_result *result,uint32_t end,uint
  }
  return 1;
 }
+#if C9_JOINT_SHADOW
+static void c9_joint_receive(void){
+ c9_joint_mailbox *m=&c9_tasks_shared.data.auxiliary.joint;
+ uint32_t end=0,count=0,epoch=0,session=0;int have=c9_history_info(&c9_history_shared.history,&end,&count,&epoch,&session);
+ for(unsigned i=0;i<2;i++){
+  c9_joint_slot *v=&m->slots[i];if(__atomic_load_n(&v->state,__ATOMIC_ACQUIRE)!=2u)continue;
+  if(have&&v->session==session&&v->epoch==epoch&&(!c9_joint_latest.state||c9_joint_latest.session!=session||c9_joint_latest.epoch!=epoch||(int32_t)(v->sequence-c9_joint_latest.sequence)>0))memcpy(&c9_joint_latest,v,sizeof(*v));
+  __atomic_store_n(&v->state,0u,__ATOMIC_RELEASE);c9_metric_increment(&m->received);
+ }
+}
+static void c9_joint_publish(const c9_search_feedback *original,uint32_t sequence,uint32_t formal_us){
+ uint32_t timer=dia_gtimer_now();
+ c9_joint_mailbox *m=&c9_tasks_shared.data.auxiliary.joint;c9_joint_slot *slot=NULL;
+ for(unsigned i=0;i<2;i++)if(__atomic_load_n(&m->slots[i].state,__ATOMIC_ACQUIRE)==0u){slot=&m->slots[i];break;}
+ if(!slot){c9_metric_increment(&m->no_slot);return;}
+ __atomic_store_n(&slot->state,1u,__ATOMIC_RELEASE);slot->sequence=sequence;slot->session=original->session;slot->epoch=original->epoch;slot->first=original->first_sample;slot->end=original->end_sample;slot->original=*original;slot->formal_us=formal_us;
+ if(formal_us>=200000u||C9_JOINT_SHADOW_BUDGET_US>200000u-formal_us){memset(&c9_joint_private,0,sizeof(c9_joint_private));c9_joint_private.status=C9_JOINT_BUDGET;c9_joint_private.budget_us=C9_JOINT_SHADOW_BUDGET_US;}
+ else c9_joint_shadow_compute(&c9_separator,acoustic_steer_lut,original->band_valid_mask,C9_JOINT_SHADOW_BUDGET_US,&c9_joint_private);
+ if(c9_joint_private.status==C9_JOINT_BUDGET)c9_metric_increment(&m->budget_skipped);
+ slot->report=c9_joint_private;slot->shadow_pipeline_us=c9_ticks_to_us(dia_gtimer_now()-timer);c9_metric_max(&m->total_us_max,slot->shadow_pipeline_us);__atomic_store_n(&slot->state,2u,__ATOMIC_RELEASE);c9_metric_increment(&m->produced);
+}
+#endif
+static c9_trace_track c9_trace_view(const c9_track *t){
+ c9_trace_track v={.id=t->id,.state=t->state,.observations=t->observations,.last_sample=t->last_sample};
+ if(t->id)c9_candidate_angles(&t->candidate,&v.az,&v.el);
+ return v;
+}
 static void c9_aux_receive(void){
  for(unsigned pass=0;pass<3;pass++){
   c9_aux_result *chosen=NULL;
@@ -99,10 +126,16 @@ static void c9_aux_receive(void){
   if(valid&&c9_aux_received_have&&f->session==c9_aux_received_session&&f->epoch==c9_aux_received_epoch&&
      (int32_t)(f->end_sample-c9_aux_received_end)<=0){valid=0;c9_aux_replayed++;}
   if(valid){
+   for(unsigned i=0;i<3;i++)chosen->debug.before[i]=c9_trace_view(&c9_aux_tracks.tracks[i]);
    c9_aux_interval_raw=c9_aux_received_have&&f->session==c9_aux_received_session&&f->epoch==c9_aux_received_epoch?f->end_sample-c9_aux_received_end:0;
    if(c9_aux_interval_raw>c9_aux_interval_max_raw)c9_aux_interval_max_raw=c9_aux_interval_raw;
    c9_aux_age_raw=end-f->end_sample;if(c9_aux_age_raw>c9_aux_age_max_raw)c9_aux_age_max_raw=c9_aux_age_raw;
    c9_tracks_update_intervals(&c9_aux_tracks,f->candidates,f->count,f->support_first_sample,f->support_end_sample,f->end_sample,f->epoch,f->session);
+   c9_debug_bind(1,&c9_aux_tracks,f->candidates,f->count,f->support_end_sample,chosen->sequence,f->first_sample,f->end_sample,f->end_sample);
+   for(unsigned i=0;i<3;i++)chosen->debug.after[i]=c9_trace_view(&c9_aux_tracks.tracks[i]);
+   chosen->debug.tracking_trace_valid=1;
+   memcpy(&c9_debug_aux,chosen,sizeof(c9_debug_aux));
+   memcpy(&c9_source_aux.events[c9_source_aux.writes++%C9_SOURCE_AUX_CAP],chosen,sizeof(*chosen));
    c9_aux_received_have=1;c9_aux_received_end=f->end_sample;c9_aux_received_session=f->session;c9_aux_received_epoch=f->epoch;
    c9_aux_last_tick=dia_gtimer_now();c9_aux_accepted++;
   }else c9_aux_rejected++;
@@ -110,7 +143,14 @@ static void c9_aux_receive(void){
   c9_realtime_checkpoint();uint32_t duration=c9_ticks_to_us(dia_gtimer_now()-start);
   if(duration>c9_aux_receive_us_max)c9_aux_receive_us_max=duration;
  }
+#if C9_JOINT_SHADOW
+ c9_joint_receive();
+#endif
+
 }
+#if C9_JOINT_SHADOW
+/* Separate mailbox is read after normal result consumption. */
+#endif
 static int c9_aux_cpu1(volatile struct ipc_page *ipc){
  c9_aux_memory *memory=&c9_tasks_shared.data.auxiliary;c9_aux_job job;
  uint32_t expected=1u;
@@ -136,13 +176,22 @@ static int c9_aux_cpu1(volatile struct ipc_page *ipc){
   __atomic_store_n(&memory->observations_us,c9_ticks_to_us(c9_separator.search_ticks[1]),__ATOMIC_RELEASE);
   __atomic_store_n(&memory->search_us,c9_ticks_to_us(c9_separator.search_ticks[2]),__ATOMIC_RELEASE);
   uint32_t end=0,count=0,current_epoch=0,current_session=0;
+  /* Include observer copy; leave the existing acceptance rule unchanged. */
+  if(valid)memcpy(&result->debug,&c9_separator.debug,sizeof(result->debug));
   result->processing_us=c9_ticks_to_us(dia_gtimer_now()-t0);
   c9_metric_max(&memory->processing_us_max,result->processing_us);
   if(!c9_history_info(&c9_history_shared.history,&end,&count,&current_epoch,&current_session)||
      current_epoch!=job.epoch||current_session!=job.session||(uint32_t)(end-selected)>C9_SEARCH_MAX_AGE_SAMPLES||result->processing_us>200000u){valid=0;c9_metric_increment(&memory->late);}
   if(valid){
    result->sequence=job.sequence*4u+(selected-first_end)/C9_AUX_HOP_RAW;result->generation=job.generation;
+#if C9_JOINT_SHADOW
+   c9_search_feedback joint_original=result->feedback;uint32_t joint_sequence=result->sequence,joint_formal_us=result->processing_us;
+#endif
    __atomic_store_n(&result->state,2u,__ATOMIC_RELEASE);c9_metric_increment(&memory->completed);
+#if C9_JOINT_SHADOW
+   /* Formal result already published; shadow failure never invalidates it. */
+   c9_joint_publish(&joint_original,joint_sequence,joint_formal_us);
+#endif
 
   }else{c9_metric_increment(&memory->rejected);__atomic_store_n(&result->state,0u,__ATOMIC_RELEASE);}
   if(selected==job.end_sample)break;

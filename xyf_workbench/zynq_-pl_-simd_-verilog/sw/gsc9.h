@@ -27,6 +27,7 @@ typedef struct {
  uint64_t stats[GSC9_STATS];
  /* Cached configuration and optional target protection. The public config ABI
   * stays unchanged; guard defaults off for existing exact golden fixtures. */
+ uint32_t fir_nonzero;uint8_t fir_index[32];
  uint32_t max_delay_q16,delay_age[9];int32_t cubic_coeff[9][4];
  uint32_t target_guard_enabled,target_guard_active,target_guard_samples;
  uint32_t target_guard_good_blocks,target_guard_coherence_q15;
@@ -40,6 +41,7 @@ int gsc9_configure(gsc9_state *s,const gsc9_config *config);
  * Word values must already be decoded from little endian. enabled defaults to 0
  * in the caller; transition/mismatch/loss automatically returns original FIR. */
 int16_t gsc9_process(gsc9_state *s,const uint32_t words[16],int enabled,int freeze_updates);
+int16_t gsc9_process_nominal(gsc9_state *,const uint32_t words[16],int enabled,int freeze_updates);
 uint64_t gsc9_stat(const gsc9_state *s,unsigned index);
 uint32_t gsc9_reason(const gsc9_state *s);
 uint32_t gsc9_model_beam(const gsc9_state *s);

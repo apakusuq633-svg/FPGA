@@ -3,7 +3,7 @@ from pathlib import Path
 import numpy as np,json,wave,hashlib,subprocess,itertools,math,time,argparse
 from c9_scene_evaluation import angle,match,direction
 R=Path(__file__).resolve().parents[1]
-ap=argparse.ArgumentParser();ap.add_argument('--scenes',type=Path);ap.add_argument('--output',type=Path);ap.add_argument('--duration-s',type=float,default=2.56);ap.add_argument('--seed',type=int,default=20261027);args=ap.parse_args()
+ap=argparse.ArgumentParser();ap.add_argument('--scenes',type=Path);ap.add_argument('--output',type=Path);ap.add_argument('--duration-s',type=float,default=2.56);ap.add_argument('--seed',type=int,default=20261027);ap.add_argument('--candidate-source',type=Path,default=R/'sw/circular9_candidates.c');args=ap.parse_args()
 assert 1.1<=args.duration_s<=60
 O=args.output.resolve() if args.output else R/'build/fstf_integration_20261027';O.mkdir(parents=True,exist_ok=True)
 # Build the actual adapter/task harness on every run; never reuse a stale executable.
@@ -12,7 +12,7 @@ inc=R/'build/circular9_pipeline_checks/include'
 if not (inc/'xtime_l.h').exists():
  import sys
  subprocess.run([sys.executable,str(R/'scripts/check_circular9_pipeline.py')],cwd=R,check=True)
-subprocess.run([cc,'-std=c11','-O2','-DC9_CANDIDATES_TEST','-DC9_FSTF_EXPERIMENTAL=1','-I'+str(inc),'-Isw','sw/circular9_candidates.c','sw/circular9_diagnosis.c','sw/circular9_fstf_e2e_test.c','-pthread','-lm','-o',str(O/'fstf_e2e.exe')],cwd=R,check=True)
+subprocess.run([cc,'-std=c11','-O2','-DC9_CANDIDATES_TEST','-DC9_FSTF_EXPERIMENTAL=1','-I'+str(inc),'-Isw',str(args.candidate_source),'sw/circular9_diagnosis.c','sw/circular9_fstf_e2e_test.c','-pthread','-lm','-o',str(O/'fstf_e2e.exe')],cwd=R,check=True)
 DATA=Path(r'F:\RISC-V\26fpga创新设计赛道\测试音频\FSTF_1800rpm_6_fault_types_WAV');labels=['inner','outer','ball','healthy','looseness','combined'];waves={};wave_manifest={}
 assert len(list(DATA.glob('*.wav')))==6
 for label,p in zip(labels,sorted(DATA.glob('*.wav'))):
@@ -30,7 +30,11 @@ for scene in scenes:
  receiver_xyz=np.asarray(scene.get('receiver_positions_m',xyz),dtype=float);assert receiver_xyz.shape==(9,3) and np.isfinite(receiver_xyz).all()
  name=scene['name'];mix=rng.normal(0,scene.get('noise_rms',.00003),(N,9));provenance=[]
  for source_index,src in enumerate(scene['sources']):
-  x,looped=segment(src['label'],src['start_s']);x=x*(src['rms']/np.sqrt(np.mean(x*x)));spec=np.fft.rfft(x);base=np.zeros(N//2+1,complex);base[:len(spec)]=spec*(N/IN);base[len(spec)-1]*=.5
+  x,looped=segment(src['label'],src['start_s'])
+  synthetic=src.get('synthetic_kind')=='fan_like'
+  if synthetic:
+   t=np.arange(IN)/48000;tones=sum(np.sin(2*np.pi*h*t+rng.uniform(0,2*np.pi))/(1+i*.3) for i,h in enumerate([360,720,1080,1440,1800]));noise=rng.normal(size=IN);ns=np.fft.rfft(noise);ff=np.fft.rfftfreq(IN,1/48000);ns[(ff<150)|(ff>2100)]=0;x=tones+.3*np.fft.irfft(ns,n=IN);looped=False
+  x=x*(src['rms']/np.sqrt(np.mean(x*x)));spec=np.fft.rfft(x);base=np.zeros(N//2+1,complex);base[:len(spec)]=spec*(N/IN);base[len(spec)-1]*=.5
   if src.get('active_intervals_s'):
    signal=np.fft.irfft(base,n=N);times=np.arange(N)/156250;envelope=np.zeros(N)
    for begin,end in src['active_intervals_s']:
@@ -51,7 +55,7 @@ for scene in scenes:
    if echo['source_index']!=source_index:continue
    ea=np.deg2rad(echo['azimuth_deg']);eu=np.array([np.sin(ea),0,np.cos(ea)]);et=-(receiver_xyz@eu)/343+echo['delay_s']
    for ch in range(9):mix[:,ch]+=echo['gain']*np.fft.irfft(base*np.exp(-2j*np.pi*freq*et[ch]),n=N)
-  provenance.append({**src,'source_wav':wave_manifest[src['label']],'looped_for_simulation':looped,'heldout_within_recording':src['label']!='outer','recording_disjoint':False})
+  provenance.append({**src,'source_wav':None if synthetic else wave_manifest[src['label']], 'synthetic_fan_not_measured':synthetic,'looped_for_simulation':looped,'heldout_within_recording':not synthetic and src['label']!='outer','recording_disjoint':False})
  for ch in range(9):
   gain=scene.get('channel_gain',[1]*9)[ch];delay=scene.get('channel_delay_us',[0]*9)[ch]*1e-6
   mix[:,ch]=gain*np.fft.irfft(np.fft.rfft(mix[:,ch])*np.exp(-2j*np.pi*freq*delay),n=N)
@@ -70,5 +74,5 @@ for scene in scenes:
  assignment=match(current,provenance)
  entry={'one_to_one_matches':assignment,'matched_sources':len(assignment),'all_sources_localized':len(assignment)==len(provenance),'all_sources_classified':len(assignment)==len(provenance) and all(current[v['output']]['experimental'].get('label')==provenance[v['source']]['label'] for v in assignment),'scene':name,'scenario_parameters':scene,'simulated_clipped_samples':clipped,'peak_before_quantization':maximum,'sources':provenance,'pcm_sha256':hashlib.sha256(path.read_bytes()).hexdigest(),'snapshot_sequence':d['sequence'],'candidates':out,'proposals':d['proposals'],'scheduler':d['diagnostic_scheduler'],'eligibility':d.get('diagnostic_eligibility'),'host_elapsed_s':time.perf_counter()-start,'source':'simulated_plane_wave_PCM_from_FSTF','hardware_tested':False,'host_mock_clock_metrics_not_real_timing':True};entry['known_direction_control']=json.loads(Path(str(output)+'.known_direction_control.json').read_text());results.append(entry)
  print('SCENE',name,'snapshot',d['sequence'],'outputs',[(round(c['azimuth_deg'],2),c['experimental'].get('label'),c['separation_ready']) for c in out],flush=True)
-(O/'e2e_results.json').write_text(json.dumps({'simulation_only':True,'seed':args.seed,'rate_hz':156250,'duration_s':args.duration_s,'propagation':'FFT fractional-delay propagation; optional spherical near field, declared interpolated trajectories, gain/delay errors and reflections; no PDM/RTL or measured room impulse response','noise_rms':.00003,'classification_truth_only_used_for_evaluation':True,'cases':results},indent=2))
+(O/'e2e_results.json').write_text(json.dumps({'candidate_source_sha256':hashlib.sha256(args.candidate_source.read_bytes()).hexdigest(),'simulation_only':True,'seed':args.seed,'rate_hz':156250,'duration_s':args.duration_s,'propagation':'FFT fractional-delay propagation; optional spherical near field, declared interpolated trajectories, gain/delay errors and reflections; no PDM/RTL or measured room impulse response','noise_rms':.00003,'classification_truth_only_used_for_evaluation':True,'cases':results},indent=2))
 print('FSTF_E2E_RUN_COMPLETE cases='+str(len(results)))

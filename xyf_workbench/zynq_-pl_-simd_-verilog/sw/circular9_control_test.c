@@ -1,3 +1,4 @@
+#define C9_CONTROL_TEST 1
 /* Real CPU0 control header and audio/GSC, with a named native MMIO model.
  * Synthetic calibration and history metadata exercise gates only. This is
  * neither a physical calibration nor a Cortex-A9/RTL timing measurement. */
@@ -90,7 +91,7 @@ static void model_write(void *ctx,uint32_t offset,uint32_t value){
 }
 static das_bus das_axi_bus(uintptr_t base){(void)base;return(das_bus){&device,model_read,model_write};}
 static circular9_audio c9_audio;
-static unsigned c9_shaft_confirmed,c9_shaft_waiting;
+static unsigned c9_shaft_confirmed,c9_shaft_waiting,c9_shaft_default;
 static uint32_t c9_shaft_generation,c9_shaft_millihz,c9_shaft_epoch,c9_shaft_session,c9_shaft_first_sample;
 static struct {unsigned have;} c9_schedule;
 typedef struct {uint32_t end,count,epoch,session;unsigned available;} native_history_metadata;
@@ -211,6 +212,9 @@ static void test_commit(void){
  CHECK(!c9_apply_target(&b,&c,7)&&!device.armed,"unconfirmed physical geometry protects target routing");
  fixture_geometry_confirmed=1;fixture_calibration_version=0;
  CHECK(!c9_apply_target(&b,&c,7)&&!device.armed,"unmeasured calibration protects target routing");
+ CHECK(c9_apply_target_impl(&b,&c,7,1)&&device.armed,"explicit nominal audio can commit without falsifying calibration");
+ CHECK(fixture_calibration_version==0,"nominal audio does not certify calibration");
+ CHECK(!c9_apply_target(&b,&c,7)&&!device.armed,"formal target gate remains closed after nominal experiment");
  fixture_calibration_version=0x54455354u;c9_fine_sequence=0x7fffffffu;
  CHECK(!c9_apply_target(&b,&c,7)&&!device.armed,"token exhaustion releases instead of wrapping");
  reset_control();device.clock=0xfffffff0u;b=das_axi_bus(0);

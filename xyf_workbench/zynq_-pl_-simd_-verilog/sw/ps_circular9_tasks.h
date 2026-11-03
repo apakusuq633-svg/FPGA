@@ -9,6 +9,7 @@
 #include "circular9_proposals.h"
 #include "circular9_schedule.h"
 #include "xil_cache.h"
+#include "circular9_joint_shadow.h"
 static void c9_realtime_checkpoint(void);
 static int c9_apply_target(const das_bus*,const c9_candidate*,uint32_t);
 static void c9_release_target(const das_bus*);
@@ -19,6 +20,7 @@ typedef struct {
 } c9_diagnostic_job;
 typedef struct {
  uint32_t state,sequence,count,epoch,session,first_sample,processing_ms,shaft_generation,unresolved_tracks;
+ uint32_t queued_tick,started_tick,finished_tick,started_sample,finished_sample;
  uint32_t processing_us,queue_wait_us,total_elapsed_us,queue_age_samples,result_age_samples,deadline_missed,rejection;
  c9_separation_report separation;
  c9_diag_report diagnosis[3];
@@ -30,13 +32,20 @@ typedef struct {
  uint32_t processing_us_max,queue_wait_us_max,total_elapsed_us_max,queue_age_samples_max,result_age_samples_max;
 } c9_cpu1_metrics;
 typedef struct {uint32_t state,sequence,end_sample,session,epoch,generation;} c9_aux_job;
-typedef struct {uint32_t state,sequence,generation,processing_us;c9_search_feedback feedback;} c9_aux_result;
+typedef struct {uint32_t state,sequence,generation,processing_us;c9_search_feedback feedback;c9_search_debug debug;} c9_aux_result;
+#if C9_JOINT_SHADOW
+typedef struct {uint32_t state,sequence,session,epoch,first,end,formal_us,shadow_pipeline_us;c9_search_feedback original;c9_joint_report report;} c9_joint_slot;
+typedef struct {c9_joint_slot slots[2];uint32_t produced,received,no_slot,total_us_max,budget_skipped;} c9_joint_mailbox;
+#endif
 typedef struct {
  c9_aux_job job;c9_aux_result results[3];
  uint32_t started,completed,rejected,late,no_output,processing_us_max;
  uint32_t copy_us,prepare_us,observations_us,search_us,decimator_vector_status;
+#if C9_JOINT_SHADOW
+ c9_joint_mailbox joint;
+#endif
 } c9_aux_memory;
-typedef struct {c9_diagnostic_job job;c9_diagnostic_result results[2];c9_cpu1_metrics metrics;c9_aux_memory auxiliary;} c9_task_memory;
+typedef struct {c9_diagnostic_job job;c9_diagnostic_result results[2];c9_cpu1_metrics metrics;c9_aux_memory auxiliary;uint32_t focus_request,focus_ack;} c9_task_memory;
 static union {c9_history history;uint8_t section[33554432];} c9_history_shared
  __attribute__((section(".c9_history"),aligned(1048576)));
 static union {c9_task_memory data;uint8_t section[1048576];} c9_tasks_shared
@@ -45,6 +54,27 @@ _Static_assert(sizeof(c9_history)<=33554432,"history shared section overflow");
 _Static_assert(sizeof(c9_task_memory)<=1048576,"task shared section overflow");
 static c9_tracker c9_tracks;
 static c9_tracker c9_aux_tracks;
+static c9_aux_result c9_debug_aux;
+#if C9_JOINT_SHADOW
+static c9_joint_slot c9_joint_latest;
+static c9_joint_report c9_joint_private;
+#endif
+typedef struct {uint32_t id,known,sequence,first,end,peak;} c9_observation_ref;
+static c9_observation_ref c9_debug_refs[2][3];
+static void c9_debug_bind(unsigned origin,const c9_tracker *tr,const c9_candidate *c,unsigned count,
+ const uint32_t *ends,uint32_t sequence,uint32_t first,uint32_t end,uint32_t point){
+ for(unsigned i=0;i<3;i++){
+  const c9_track *t=&tr->tracks[i];c9_observation_ref *ref=&c9_debug_refs[origin][i];
+  if(ref->id!=t->id){memset(ref,0,sizeof(*ref));ref->id=t->id;}
+  if(!t->id||t->state==C9_TRACK_COASTING)continue;
+  unsigned matches=0,index=0;
+  for(unsigned j=0;j<count;j++)if(t->last_sample==(ends?ends[j]:point)&&!memcmp(&t->candidate,&c[j],sizeof(c[j]))){matches++;index=j;}
+  if(matches==1)*ref=(c9_observation_ref){t->id,1,sequence,first,end,index};
+ }
+}
+
+static struct {uint32_t sequence,first,end,count,reason,session,epoch;c9_candidate peaks[3];} c9_debug_primary;
+#include "circular9_source_events.h"
 static c9_proposal_map c9_proposals;
 static uint32_t c9_job_sequence,c9_jobs_started,c9_map_retries;
 /* CPU0 owns this complete committed map; HTTP reuses it, never rereads 1024 MMIO words. */
@@ -57,9 +87,11 @@ static uint32_t c9_jobs_skipped,c9_pending_replaced,c9_schedule_coverage_rejecte
 static uint32_t c9_schedule_nonobserved_skipped,c9_schedule_ineligible_skipped;
 static uint32_t c9_schedule_reasons[8],c9_schedule_last_reject_track,c9_schedule_last_reject_reason;
 static int c9_latest_slot=-1;
-static uint32_t c9_shaft_millihz=UI_SHAFT_MILLIHZ,c9_shaft_confirmed;
+static uint32_t c9_shaft_millihz=30000u,c9_shaft_confirmed;
+static uint32_t c9_shaft_default=1u;
 static uint32_t c9_shaft_generation=1,c9_shaft_first_sample;
 static uint32_t c9_shaft_session,c9_shaft_epoch,c9_shaft_waiting;
+static struct {uint32_t sequence,session,epoch,end,queued_tick,count;c9_trace_track tracks[3];c9_observation_ref refs[3];uint32_t origins[3];} c9_debug_created_job;
 static unsigned c9_target_fault_mode=1;
 static uint32_t c9_fault_track,c9_fault_grid=UINT32_MAX;
 /* These arrays belong only to CPU1 and remain cached. */
@@ -122,6 +154,8 @@ static int c9_result_current(const c9_diag_report *d,uint32_t session,uint32_t g
 /* CPU1 sole caller. A bounded owned snapshot feeds ALL candidate outputs. */
 static void c9_tasks_cpu1(volatile struct ipc_page *ipc){
  static unsigned auxiliary_burst;
+ if(__atomic_load_n(&c9_tasks_shared.data.focus_request,__ATOMIC_ACQUIRE)){uint32_t expected=1u;__atomic_compare_exchange_n(&c9_tasks_shared.data.job.state,&expected,0u,0,__ATOMIC_ACQ_REL,__ATOMIC_ACQUIRE);expected=1u;__atomic_compare_exchange_n(&c9_tasks_shared.data.auxiliary.job.state,&expected,0u,0,__ATOMIC_ACQ_REL,__ATOMIC_ACQUIRE);if(!__atomic_load_n(&c9_tasks_shared.data.focus_ack,__ATOMIC_RELAXED))__atomic_store_n(&c9_tasks_shared.data.focus_ack,1u,__ATOMIC_RELEASE);return;}
+ __atomic_store_n(&c9_tasks_shared.data.focus_ack,0u,__ATOMIC_RELEASE);
  if((auxiliary_burst<2u||__atomic_load_n(&c9_tasks_shared.data.job.state,__ATOMIC_ACQUIRE)!=1u)&&c9_aux_cpu1(ipc)){if(auxiliary_burst<2u)auxiliary_burst++;return;}
  auxiliary_burst=0;
  c9_diagnostic_job *shared=&c9_tasks_shared.data.job,job;
@@ -135,10 +169,12 @@ static void c9_tasks_cpu1(volatile struct ipc_page *ipc){
  c9_diagnostic_result *r=&c9_tasks_shared.data.results[slot];
  __atomic_store_n(&r->state,1u,__ATOMIC_RELEASE);
  uint32_t first=0,epoch=0,session=0,t0=dia_gtimer_now();
+ r->queued_tick=job.queued_tick;r->started_tick=t0;
  r->queue_wait_us=c9_ticks_to_us(t0-job.queued_tick);
  ipc->busy=1u;
  uint32_t end_before=0,available=0,now_epoch=0,now_session=0;
  int info=c9_history_info(&c9_history_shared.history,&end_before,&available,&now_epoch,&now_session);
+ r->started_sample=info?end_before:UINT32_MAX;
  r->queue_age_samples=info?end_before-job.end_sample:UINT32_MAX;
  int valid=info&&r->queue_age_samples<C9_DIAGNOSTIC_HOP_RAW&&r->queue_wait_us<C9_DIAGNOSTIC_DEADLINE_US&&
   c9_history_snapshot_at(&c9_history_shared.history,c9_snapshot,job.end_sample,&first,&epoch,&session);
@@ -186,10 +222,12 @@ static void c9_tasks_cpu1(volatile struct ipc_page *ipc){
   }
  }
  uint32_t finished_tick=dia_gtimer_now();
+ r->finished_tick=finished_tick;
  r->processing_us=c9_ticks_to_us(finished_tick-t0);r->processing_ms=r->processing_us/1000u;
  r->total_elapsed_us=c9_ticks_to_us(finished_tick-job.queued_tick);
  uint32_t end_after=0;
  info=c9_history_info(&c9_history_shared.history,&end_after,&available,&now_epoch,&now_session);
+ r->finished_sample=info?end_after:UINT32_MAX;
  r->result_age_samples=info?end_after-job.end_sample:UINT32_MAX;
  r->deadline_missed=!info||now_epoch!=job.epoch||now_session!=job.session||
   r->result_age_samples>=C9_DIAGNOSTIC_RESULT_AGE_RAW||r->total_elapsed_us>=C9_DIAGNOSTIC_DEADLINE_US;
@@ -248,18 +286,39 @@ static void c9_tasks_map_poll(const das_bus *b){
   * not invalidate a multi-source map. Silence, clipping and deadline do. */
  if(!(m.reason&(1u|2u|4u|64u)))n=c9_proposals_update(&c9_proposals,m.scores,m.sample,epoch,session,candidates);
  else c9_proposals_reset(&c9_proposals);
+ c9_debug_primary.sequence=c9_map_cache.seq;c9_debug_primary.first=m.sample;
+ c9_debug_primary.session=session;c9_debug_primary.epoch=epoch;
+ c9_debug_primary.end=m.sample+1024u;c9_debug_primary.count=n;c9_debug_primary.reason=m.reason;
+ memcpy(c9_debug_primary.peaks,candidates,n*sizeof(candidates[0]));
+ {c9_source_primary *ev=&c9_source_pl.events[c9_source_pl.writes++%C9_SOURCE_PL_CAP];
+  *ev=(c9_source_primary){.sequence=c9_debug_primary.sequence,.session=session,.epoch=epoch,.first=m.sample,.end=m.sample+1024u,.count=n,.reason=m.reason};
+  memcpy(ev->peaks,candidates,n*sizeof(candidates[0]));}
  c9_tracks_update(&c9_tracks,candidates,n,m.sample,epoch,session);
+ c9_debug_bind(0,&c9_tracks,candidates,n,NULL,c9_debug_primary.sequence,m.sample,m.sample+1024u,m.sample);
  uint32_t process_us=c9_ticks_to_us(dia_gtimer_now()-process_start);
  if(process_us>c9_candidate_service_max_us)c9_candidate_service_max_us=process_us;
  if(process_us>100u)c9_candidate_service_overruns++;
 }
+/* User-selected preset:1800rpm=30Hz, not a measured tachometer value.
+ * Rebind after a history discontinuity; retain the complete-window guard. */
+static void c9_default_rpm_bind(uint32_t end,uint32_t count,uint32_t epoch,uint32_t session){
+ if(!c9_shaft_default||!count)return;
+ if(c9_shaft_confirmed&&c9_shaft_session==session&&c9_shaft_epoch==epoch)return;
+ c9_shaft_millihz=30000u;c9_shaft_confirmed=1u;++c9_shaft_generation;
+ c9_shaft_session=session;c9_shaft_epoch=epoch;c9_shaft_first_sample=end-count;
+ c9_shaft_waiting=1u;c9_schedule.have=0;
+}
+static uint32_t sf_state,sf_started,sf_elapsed,sf_recovery_accepted,sf_resume_sample;
 static void c9_tasks_schedule(void){
+ if(sf_state==1u||sf_state==2u||sf_state==4u)return;
  c9_aux_schedule();
+ if(sf_state==3u)return;
  c9_diagnostic_job *j=&c9_tasks_shared.data.job;
  uint32_t state=__atomic_load_n(&j->state,__ATOMIC_ACQUIRE);
  if(state!=0u&&state!=1u)return;
  uint32_t now=dia_gtimer_now(),end,count,epoch,session;
  if(!c9_history_info(&c9_history_shared.history,&end,&count,&epoch,&session)||count<C9_SNAPSHOT_FRAMES+3)return;
+ c9_default_rpm_bind(end,count,epoch,session);
  uint32_t selected=0,skipped=0;
  if(!c9_diagnostic_due(&c9_schedule,end,session,epoch,c9_shaft_generation,&selected,&skipped))return;
  if(c9_shaft_confirmed&&(session!=c9_shaft_session||epoch!=c9_shaft_epoch)){
@@ -302,6 +361,13 @@ static void c9_tasks_schedule(void){
  j->sequence=++c9_job_sequence;j->count=n;j->epoch=epoch;j->session=session;
  j->map_sample=j->tracks[0].last_sample;j->shaft_millihz=c9_shaft_millihz;j->shaft_confirmed=c9_shaft_confirmed;
  j->shaft_generation=c9_shaft_generation;
+ c9_debug_created_job.sequence=j->sequence;c9_debug_created_job.session=session;c9_debug_created_job.epoch=epoch;
+ c9_debug_created_job.end=selected;c9_debug_created_job.queued_tick=now;c9_debug_created_job.count=n;memset(c9_debug_created_job.tracks,0,sizeof(c9_debug_created_job.tracks));
+ memset(c9_debug_created_job.refs,0,sizeof(c9_debug_created_job.refs));
+ for(unsigned i=0;i<n;i++){
+  c9_debug_created_job.tracks[i]=c9_trace_view(&tracks[i]);c9_debug_created_job.origins[i]=UINT32_MAX;
+  for(unsigned o=0;o<2;o++)for(unsigned k=0;k<3;k++)if(c9_debug_refs[o][k].id==tracks[i].id){c9_debug_created_job.refs[i]=c9_debug_refs[o][k];c9_debug_created_job.origins[i]=o;}
+ }
  c9_diagnostic_issued(&c9_schedule,selected,session,epoch,c9_shaft_generation);
  c9_jobs_skipped+=skipped;c9_jobs_started++;
  __atomic_store_n(&j->state,1u,__ATOMIC_RELEASE);

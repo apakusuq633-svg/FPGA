@@ -7,6 +7,7 @@
 typedef struct {uint32_t version,epoch,grid,delay_q16[9];} c9_audio_direction;
 typedef struct {
  gsc9_state adaptive;
+ unsigned nominal_ps;
  das_audio_block block;
  uint32_t count,block_sequence,have_sample,last_sample,last_version,last_epoch;
  uint32_t discontinuities,reason,filter_head,filter_count,pending_flags;

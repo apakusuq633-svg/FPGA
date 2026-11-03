@@ -19,7 +19,7 @@ for name in ['health','api']:
 run('page_compile',[GCC,'-std=c11','-I'+str(R/'sw'),'-I'+str(R/'sw/cstub'),P/'tests/page_dump.c','-o',O/'page_dump.exe'])
 run('page_extract',[O/'page_dump.exe',O/'compiled_gui.html'])
 html=(O/'compiled_gui.html').read_text(encoding='utf-8')
-assert len(html.encode())<60000 and 'id="archive_load"' in html and 'id="pair_run"' in html
+assert len(html.encode())<61440 and 'id="archive_load"' in html and 'id="pair_run"' in html
 (P/'tests/full_gui.html').write_text(html,encoding='utf-8',newline='\n')
 gui_env=dict(os.environ,C9_GUI_BINARY_PACKET=str(O/'synthetic_snapshot.bin'))
 run('browser_dom',[NODE,P/'tests/gui_test.js'],gui_env)

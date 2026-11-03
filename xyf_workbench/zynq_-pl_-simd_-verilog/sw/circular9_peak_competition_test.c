@@ -14,7 +14,25 @@ static void permutation(c9_peak_evidence *p,unsigned at,unsigned n,unsigned expe
   t=p[at];p[at]=p[i];p[i]=t;
  }
 }
-int main(void){
+static void cell_edge_refinement_test(void){
+ int32_t map[1024];const unsigned center=16u*32u+16u;
+ const double vertices[4][2]={{.52,.1},{-.52,-.1},{.1,.52},{-.1,-.52}};
+ for(unsigned t=0;t<4;t++){
+  double dx=vertices[t][0],dy=vertices[t][1],gx=10000*dx-5000*dy,gy=10000*dy-5000*dx;
+  for(unsigned g=0;g<1024;g++){double x=(int)(g%32)-16,y=(int)(g/32)-16;map[g]=(int32_t)(1000000+gx*x+gy*y-5000*x*x-5000*y*y+5000*x*y);}
+  c9_candidate c;assert(c9_candidate_at_peak(map,center,&c)&&c.flags==C9_CANDIDATE_REFINED&&c.uncertainty_mdeg==3000u);
+  int32_t az=c.azimuth_mdeg-c9_direction_azimuth_mdeg[16],el=c.elevation_mdeg-c9_direction_elevation_mdeg[16];
+  assert(az>=-2814&&az<=2814&&el>=-2814&&el<=2814);
+  if(t<2)assert(az>2800||az< -2800);else assert(el>2800||el< -2800);
+ }
+ for(unsigned g=0;g<1024;g++){double x=(int)(g%32)-16,y=(int)(g/32)-16;map[g]=(int32_t)(1000000+5000*x-1000*y-5000*x*x-5000*y*y+5000*x*y);}
+ c9_candidate c;assert(c9_candidate_at_peak(map,center,&c)&&!c.flags); /* vertex .6,.2 remains rejected. */
+ for(unsigned g=0;g<1024;g++)map[g]=1000000;
+ assert(c9_candidate_at_peak(map,center,&c)&&!c.flags); /* flat map never invents a fine angle. */
+ assert(c9_candidate_at_peak(map,0,&c)&&!c.flags); /* array boundary unchanged. */
+ puts("CELL_EDGE_REFINEMENT_PASS shared_edge=4 half_cell_bounded=1 far_vertex_flat_boundary_rejected=1 uncertainty_unchanged=1");
+}
+int main(void){cell_edge_refinement_test();
  /* A65degree low-band peak must not win solely because band0 is visited first.
   * Independent85degree evidence in two other bands is ranked jointly. */
  c9_peak_evidence p[5]={point(27,0,1000000),point(31,1,900000),point(31,2,880000),point(12,0,700000),point(5,1,650000)};

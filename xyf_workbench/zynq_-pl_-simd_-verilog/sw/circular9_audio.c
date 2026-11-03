@@ -25,7 +25,7 @@ int circular9_audio_push(circular9_audio *s,const uint32_t w[16],
  int changed=s->have_sample&&(w[1]!=s->last_sample+1u||w[2]!=s->last_version||w[14]!=s->last_epoch);
  if(changed){s->count=0;s->filter_count=0;s->pending_flags=DAS_FLAG_GAP;s->discontinuities++;memset(s->filter_history,0,sizeof(s->filter_history));}
  s->have_sample=1;s->last_sample=w[1];s->last_version=w[2];s->last_epoch=w[14];
- if((w[6]&3u)==1u&&(!s->adaptive.configured||s->adaptive.config.version!=w[2]||
+ if(!s->nominal_ps&&(w[6]&3u)==1u&&(!s->adaptive.configured||s->adaptive.config.version!=w[2]||
     s->adaptive.config.epoch!=w[14]||s->adaptive.config.direction_id!=grid)) {
   gsc9_config c={0};int32_t tau[9],minimum=0;
   c.version=w[2];c.epoch=w[14];c.direction_id=(uint16_t)grid;c.mu_q15=8192;c.epsilon=1u<<20;
@@ -49,7 +49,8 @@ int circular9_audio_push(circular9_audio *s,const uint32_t w[16],
   gsc9_set_target_guard(&s->adaptive,s->target_guard_requested!=0);
  }
 no_direction_config:
- *output=gsc9_process(&s->adaptive,w,enabled,freeze);s->reason=gsc9_reason(&s->adaptive);
+ *output=s->nominal_ps?gsc9_process_nominal(&s->adaptive,w,enabled,freeze):gsc9_process(&s->adaptive,w,enabled,freeze);s->reason=gsc9_reason(&s->adaptive);
+ if(s->nominal_ps)return 0; /* output-only; candidate diagnosis has its own raw history */
  uint32_t flags=0;
  if((w[6]&3u)!=1u||s->reason==GSC9_BYPASS_ALIGNMENT||s->reason==GSC9_BYPASS_METADATA||
     s->reason==GSC9_BYPASS_FORMAT||s->reason==GSC9_BYPASS_SEQUENCE||s->reason==GSC9_BYPASS_DIVERGENCE||s->reason==GSC9_BYPASS_UNCONFIGURED)
