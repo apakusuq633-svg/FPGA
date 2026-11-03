@@ -28,6 +28,7 @@
 #include "ps_das_mmio.h"
 #include "ps_das_replay.h"
 #include "ps_das_plots.h"
+#include "circular9_listen_js.h"
 #include "ps_ui_page.h"    /* 站 15 的本体：ui_route / ui_json / UI_PAGE_HTML */
 #include "ps_raw_capture.h"
 
@@ -46,7 +47,11 @@
 #define UI_DAS_WINDOW_PRESENT 0
 #endif
 #ifndef UI_SHAFT_MILLIHZ
+#if UI_DAS_LIVE && UI_DAS_ACTIVE_CHANNELS == 9
+#define UI_SHAFT_MILLIHZ 30000u
+#else
 #define UI_SHAFT_MILLIHZ 25000u
+#endif
 #endif
 #if UI_DAS_LIVE && !UI_DAS_WINDOW_PRESENT
 #error "Live DAS requires the matching PL FIFO bitstream"
@@ -58,6 +63,7 @@
 #include "ps_circular9_live.h"
 #include "ps_circular9_tasks.h"
 #include "ps_circular9_control.h"
+#include "ps_circular9_listen.h"
 #include "ps_circular9_gui.h"
 #endif
 static das_fifo_receiver fifo_receiver;
@@ -65,7 +71,11 @@ static uint32_t live_start_tick,live_ready;
 static raw_capture_receiver raw_receiver;
 #endif
 #ifndef UI_SHAFT_MILLIHZ
+#if UI_DAS_LIVE && UI_DAS_ACTIVE_CHANNELS == 9
+#define UI_SHAFT_MILLIHZ 30000u
+#else
 #define UI_SHAFT_MILLIHZ 25000u
+#endif
 #endif
 #if UI_SHAFT_MILLIHZ < 1000 || UI_SHAFT_MILLIHZ > 200000
 #error "Shaft rate must be 1..200 Hz; validate model applicability separately"
@@ -627,6 +637,7 @@ static u16_t header(http_conn *c, const struct ui_reply *rep)
 }
 
 /* 一行请求 → 一整份应答。**先量 body、再写头**，因为 Content-Length 得知道长度。 */
+#include "ps_search_focus.h"
 static u16_t build_response(http_conn *c)
 {
     struct ui_reply rep;
@@ -661,7 +672,10 @@ static u16_t build_response(http_conn *c)
 #endif
 #if UI_DAS_LIVE
 #if UI_DAS_ACTIVE_CHANNELS == 9
-    if(c9_gui_route(c->req,&rep,g_body,sizeof(g_body))) {
+    if(!strncmp(c->req,"GET /listen.js ",15)){rep=(struct ui_reply){200,"OK","application/javascript",(int)strlen(C9_LISTEN_JS)};body=C9_LISTEN_JS;
+    } else if(sf_route(c->req,&rep,g_body,sizeof(g_body))) {
+    } else if(c9_listen_route(c->req,&rep,g_body,sizeof(g_body))) {
+    } else if(c9_gui_route(c->req,&rep,g_body,sizeof(g_body))) {
         /* Read-only plots and bounded monitoring; no DSP in HTTP callbacks. */
     } else if(c9_tasks_route(c->req,&rep,g_body,sizeof(g_body))) {
         /* Candidate audio/diagnosis routes never execute DSP on CPU0. */
@@ -677,12 +691,10 @@ static u16_t build_response(http_conn *c)
         c9_target_fault_mode=0;c9_fault_track=0;
         das_bus b=das_axi_bus(RV32_BASE);b.write(b.ctx,0x3c,0xd2000000u);
         strcpy(g_body,"{\"mode\":\"automatic_localization\"}");rep=(struct ui_reply){202,"Accepted","application/json",(int)strlen(g_body)};
-    } else if(strncmp(c->req,"GET /api/gsc/on ",16)==0||strncmp(c->req,"GET /api/gsc/off ",17)==0||
-       strncmp(c->req,"GET /api/gsc/freeze ",20)==0||strncmp(c->req,"GET /api/gsc/adapt ",19)==0) {
-        if(strncmp(c->req,"GET /api/gsc/on ",16)==0)c9_requested=1;
-        if(strncmp(c->req,"GET /api/gsc/off ",17)==0)c9_requested=0;
-        if(strncmp(c->req,"GET /api/gsc/freeze ",20)==0)c9_freeze=1;
-        if(strncmp(c->req,"GET /api/gsc/adapt ",19)==0)c9_freeze=0;
+    } else if(strncmp(c->req,"GET /api/gsc/target?",20)==0||strncmp(c->req,"GET /api/gsc/on ",16)==0||strncmp(c->req,"GET /api/gsc/off ",17)==0) {
+        strcpy(g_body,"{\"error\":\"use_two_mode_listen_controls\"}");rep=(struct ui_reply){409,"Conflict","application/json",(int)strlen(g_body)};
+    } else if(strncmp(c->req,"GET /api/gsc/freeze ",20)==0||strncmp(c->req,"GET /api/gsc/adapt ",19)==0) {
+        c9_freeze=strncmp(c->req,"GET /api/gsc/freeze ",20)==0;
         rep=(struct ui_reply){200,"OK","application/json",c9_status(g_body,sizeof(g_body))};
     } else if(strncmp(c->req,"GET /api/gsc ",13)==0) {
         rep=(struct ui_reply){200,"OK","application/json",c9_status(g_body,sizeof(g_body))};
@@ -1100,7 +1112,7 @@ int main(void)
         c9_network_poll();
         poll_audio();
         {das_bus bus=das_axi_bus(RV32_BASE);
-         c9_rpm_poll(&bus);c9_tasks_map_poll(&bus);c9_tasks_receive();c9_tasks_schedule();c9_tasks_select_fault(&bus);}
+         c9_rpm_poll(&bus);c9_tasks_map_poll(&bus);c9_tasks_receive();c9_tasks_schedule();c9_tasks_select_fault(&bus);sf_poll();if(sf_state!=2u)c9_listen_poll();}
         poll_audio();
 #endif
         { int connection;

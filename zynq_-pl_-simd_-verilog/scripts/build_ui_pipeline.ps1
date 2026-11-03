@@ -7,12 +7,18 @@ param(
     [switch]$MatchingPlWindow,
     [switch]$DynamicReplay,
     [switch]$FstfExperimental,
+    [switch]$ConsensusExperiment,
     [switch]$DisableWindowExport,
     [switch]$Localization16,
     [switch]$FixedDas16,
     [ValidateSet(4,8,9,12,16)][int]$ActiveChannels = 8,
     [int]$ShaftMilliHz = 25000,
-    [string]$DiagnosticModel = ''
+    [string]$DiagnosticModel = '',
+    [string]$IndependentOutput = '',
+    [string]$EvidenceBuildId = '',
+    [switch]$JointShadow,
+    [switch]$JointFormal,
+    [ValidateRange(1,5000)][int]$JointBudgetUs = 2000
 )
 $ErrorActionPreference = 'Stop'
 function Get-FileHash([string]$LiteralPath,[string]$Algorithm='SHA256') {
@@ -23,6 +29,8 @@ if ($FixedDas16 -and ($Localization16 -or -not $Live -or $ActiveChannels -ne 16)
 if ($Live -and $ActiveChannels -eq 16 -and -not $FixedDas16) { $Localization16 = $true }
 if ($Localization16 -and $ActiveChannels -eq 12) { throw 'Localization16 selects the legacy sixteen-microphone profile' }
 if ($Live -and -not $MatchingPlWindow) { throw 'Live mode requires -MatchingPlWindow and a matching loaded bitstream' }
+# Nine-mic FSTF display/default only; actual RPM still requires operator confirmation.
+if ($Live -and $ActiveChannels -eq 9 -and -not $PSBoundParameters.ContainsKey('ShaftMilliHz')) { $ShaftMilliHz = 30000 }
 $project = Split-Path -Parent $PSScriptRoot
 $gcc = Join-Path $ToolDir 'arm-none-eabi-gcc.exe'
 $nm = Join-Path $ToolDir 'arm-none-eabi-nm.exe'
@@ -56,11 +64,22 @@ if ($Localization16) {
     if (-not $Live -or $ActiveChannels -ne 16) { throw 'Localization16 requires live sixteen-channel mode' }
     $mode = 'live16_loc'
 }
-$out = Join-Path $project "build\ui_pipeline_$mode"
+$out = if ($IndependentOutput) { [IO.Path]::GetFullPath($IndependentOutput) } else { Join-Path $project "build\ui_pipeline_$mode" }
+if ($EvidenceBuildId -and ($ConsensusExperiment -or -not $IndependentOutput -or -not $Live -or $ActiveChannels -ne 9)) { throw "Evidence build requires independent output, live nine channels, NO consensus" }
 New-Item -ItemType Directory -Force -Path $out | Out-Null
 $obj = Join-Path $out 'ui.o'
 $elf = Join-Path $out 'ui.elf'
 $defs = @("-DUI_SHAFT_MILLIHZ=$ShaftMilliHz")
+if ($JointFormal -and $JointShadow) { throw "Choose formal OR shadow" }
+if ($JointFormal) { $defs += @("-DC9_JOINT_FORMAL=1") }
+if ($JointShadow) { $defs += @("-DC9_JOINT_SHADOW=1", "-DC9_JOINT_SHADOW_BUDGET_US=$JointBudgetUs") }
+if ($EvidenceBuildId) {
+ if ($EvidenceBuildId -notmatch '^[0-9a-f]{64}$') { throw 'Invalid evidence build ID' }
+ $identityHeader = Join-Path $out 'evidence_identity.h'
+ [IO.File]::WriteAllText($identityHeader,('#define C9_EVIDENCE_OBSERVER_BUILD 1' + "`n" + '#define C9_EVIDENCE_BUILD_ID "' + $EvidenceBuildId + '"' + "`n"))
+ $defs += @('-include',$identityHeader)
+}
+if ($ConsensusExperiment) { $defs += "-DC9_EXPERIMENT_CONSENSUS=1" }
 if ($DisableWindowExport) { $defs += "-DC9_WINDOW_EXPORT=0" }
 $defs += "-DUI_DAS_ACTIVE_CHANNELS=$ActiveChannels"
 if ($FstfExperimental) {
@@ -143,7 +162,15 @@ if ($Live -and $ActiveChannels -eq 9) {
         $proofSources[$relative] = (Get-FileHash -LiteralPath $source.FullName -Algorithm SHA256).Hash.ToLowerInvariant()
     }
     $proof = @{
-        schema=1; mode='circular9_direction_candidates'; elf_sha256=(Get-FileHash -LiteralPath $elf -Algorithm SHA256).Hash.ToLowerInvariant();
+        schema=2; joint_formal_enabled=[bool]$JointFormal; joint_shadow_enabled=[bool]$JointShadow; joint_shadow_budget_us=$JointBudgetUs; evidence_build_id=$EvidenceBuildId; consensus_experiment=[bool]$ConsensusExperiment; debug_observation=[bool]$EvidenceBuildId;
+        compiler=(& $gcc --version | Out-String); compiler_sha256=(Get-FileHash -LiteralPath $gcc -Algorithm SHA256).Hash.ToLowerInvariant();
+        include_directories=@((Join-Path $BspDir 'bspinclude\include'),(Join-Path $project 'sw'));
+        unit_sources=@('ps_ui','gsc9','pdm_stream','circular9_stream','circular9_audio','circular9_candidates','circular9_diagnosis');
+        link_flags=@('-mcpu=cortex-a9','-mfpu=vfpv3','-mfloat-abi=hard',"-specs=$spec",'-Wl,-build-id=none',"-Wl,-T,$linker","-Wl,-Map,$(Join-Path $out 'ui.map')","-L$lib",'-Wl,--start-group','-llwip4','-lxil','-lgcc','-lc','-Wl,--end-group');
+        bsp_libraries=@{xil=(Get-FileHash -LiteralPath (Join-Path $lib 'libxil.a') -Algorithm SHA256).Hash.ToLowerInvariant();lwip=(Get-FileHash -LiteralPath (Join-Path $lib 'liblwip4.a') -Algorithm SHA256).Hash.ToLowerInvariant()};
+        compile_flags=@('-std=c11','-Wall','-Wextra','-Werror','-O2','-g','-fstack-usage','-c','-mcpu=cortex-a9','-mfloat-abi=hard');
+        unit_fpu=@{ps_ui='vfpv3';circular9_candidates='neon';others='vfpv3'}; linker_script_sha256=(Get-FileHash -LiteralPath $linker -Algorithm SHA256).Hash.ToLowerInvariant();
+        build_time_utc=[DateTime]::UtcNow.ToString('o'); mode='circular9_direction_candidates'; elf_sha256=(Get-FileHash -LiteralPath $elf -Algorithm SHA256).Hash.ToLowerInvariant();
         source_sha256=$proofSources; bsp_dir=$BspDir; definitions=$defs; diagnostic_model_header=$(if ($DiagnosticModel) { $modelPath } else { '' });
         physical_board_tested=$false; ps_runtime_measured=$false
     }

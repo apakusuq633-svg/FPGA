@@ -15,15 +15,18 @@ static void c9_release_target(const das_bus *b){
  b->write(b->ctx,0x3f0,0x4f464631u);b->write(b->ctx,0x3c,0xd3000000u);
  c9_fine_last_grid=UINT32_MAX;c9_target_withheld=1;
 }
-static int c9_apply_target(const das_bus *b,const c9_candidate *candidate,uint32_t epoch){
+static int c9_apply_target_impl(const das_bus *b,const c9_candidate *candidate,uint32_t epoch,int nominal_audio){
  uint32_t delay[9];
- if(!candidate||!ACOUSTIC_GEOMETRY_CONFIRMED||!ACOUSTIC_CALIBRATION_VERSION||
+ if(!candidate||(!nominal_audio&&(!ACOUSTIC_GEOMETRY_CONFIRMED||!ACOUSTIC_CALIBRATION_VERSION))||
     !c9_candidate_delays_q16(candidate,acoustic_steer_lut,delay)){
   c9_fine_errors++;c9_release_target(b);return 0;
  }
  uint32_t now=b->read(b->ctx,0x3e0);
  int changed=c9_fine_last_grid!=candidate->grid||epoch!=c9_fine_last_epoch||memcmp(delay,c9_fine_delay,sizeof(delay));
- if(!changed&&(uint32_t)(now-c9_fine_last_clock)<800000u)return 1;
+ if(!changed&&(uint32_t)(now-c9_fine_last_clock)<800000u){
+  /* DMA recovery can clear the software cache while hardware token survives. */
+  return circular9_audio_store_direction(&c9_audio,c9_fine_sequence|0x80000000u,epoch,candidate->grid,delay);
+ }
  if(changed){
   uint32_t active=c9_hw_read(b,21)&0x7fffffffu;
   if(c9_fine_sequence<active)c9_fine_sequence=active;
@@ -52,6 +55,26 @@ static int c9_apply_target(const das_bus *b,const c9_candidate *candidate,uint32
  c9_fine_last_epoch=epoch;c9_fine_last_clock=now;c9_fine_commits++;
  b->write(b->ctx,0x3c,0xd1000000u|candidate->grid);c9_target_withheld=0;return 1;
 }
+static int c9_apply_target(const das_bus *b,const c9_candidate *candidate,uint32_t epoch){
+ return c9_apply_target_impl(b,candidate,epoch,0);
+}
+#ifndef C9_CONTROL_TEST
+/* GUI opt-in keeps a fixed target, independent of candidate ranking. */
+static int c9_gsc_manual_target(const das_bus *b,int az,int el){
+ (void)b;uint32_t end,count,epoch,session;
+ if(az< -85||az>85||el< -85||el>85||!c9_history_info(&c9_history_shared.history,&end,&count,&epoch,&session)||!count)return 0;
+ if(c9_audio.nominal_ps&&c9_audio.adaptive.configured&&c9_gsc_manual_ready&&c9_gsc_target_az==az&&c9_gsc_target_el==el&&c9_audio.adaptive.config.epoch==epoch)return 1;
+ c9_candidate c={0};c.flags=C9_CANDIDATE_REFINED;c.azimuth_mdeg=az*1000;c.elevation_mdeg=el*1000;
+ c.grid=(unsigned)((el+90)*32/180)*32+(unsigned)((az+90)*32/180);
+ gsc9_config cfg={0};cfg.version=1;cfg.epoch=epoch;cfg.direction_id=c.grid;cfg.mu_q15=8192;cfg.epsilon=1u<<20;
+ if(!c9_candidate_delays_q16(&c,acoustic_steer_lut,cfg.delay_q16))return 0;
+ for(unsigned i=0;i<9;i++)cfg.delay_q16[i]=(cfg.delay_q16[i]/8u)&~4095u;
+ cfg.fir_q15[0]=32767; /* common anti-alias FIR already applied before /4 */
+ if(gsc9_configure(&c9_audio.adaptive,&cfg))return 0;
+ c9_audio.nominal_ps=1;c9_audio_have=0;c9_audio_fill=0;gsc9_set_target_guard(&c9_audio.adaptive,1);
+ c9_gsc_target_az=az;c9_gsc_target_el=el;c9_gsc_manual_ready=1;return 1;
+}
+#endif
 static void c9_rpm_invalidate(const das_bus *b){
  if(c9_shaft_confirmed){c9_shaft_confirmed=0;++c9_shaft_generation;}
  c9_shaft_waiting=0;c9_schedule.have=0;c9_release_target(b);
@@ -94,11 +117,11 @@ static int c9_control_route(const char *request,struct ui_reply *rep,char *body,
   if(!c9_http_decimal(request+35,1,128,&ppr)){
    *rep=(struct ui_reply){400,"Bad Request","application/json",snprintf(body,cap,"{\"error\":\"explicit pulses_per_revolution1..128 required\"}")};return 1;
   }
-  c9_hw_write(&b,64,0);c9_tacho_ppr=ppr;c9_tacho_mode=1;c9_tacho_last_poll=0;c9_tacho_valid=0;
+  c9_shaft_default=0;c9_hw_write(&b,64,0);c9_tacho_ppr=ppr;c9_tacho_mode=1;c9_tacho_last_poll=0;c9_tacho_valid=0;
   c9_hw_write(&b,65,64);c9_hw_write(&b,66,128);c9_hw_write(&b,67,12000000);c9_hw_write(&b,64,1);
   c9_rpm_invalidate(&b);
  }else if(strncmp(request,"GET /api/rpm/source?mode=manual ",32)==0){
-  c9_tacho_mode=0;c9_tacho_valid=0;c9_hw_write(&b,64,0);c9_rpm_invalidate(&b);
+  c9_shaft_default=1;c9_tacho_mode=0;c9_tacho_valid=0;c9_hw_write(&b,64,0);c9_rpm_invalidate(&b);
  }else if(strncmp(request,"GET /api/rpm/state ",19)!=0){
   if(strncmp(request,"GET /api/rpm?value=",19)==0){
    uint32_t rpm;
@@ -112,7 +135,7 @@ static int c9_control_route(const char *request,struct ui_reply *rep,char *body,
   "{\"source\":\"%s\",\"pulses_per_revolution\":%u,\"confirmed\":%u,\"shaft_millihz\":%u,"
   "\"rpm_milli\":%u,\"period_ticks\":%u,\"age_ticks\":%u,\"tacho_valid\":%u,\"updates\":%u,\"rejections\":%u,"
   "\"fine_commits\":%u,\"fine_errors\":%u,\"gsc_target_guard\":%u,\"gsc_target_coherence_q15\":%u}",
-  c9_tacho_mode?"tacho":"operator_confirmed",c9_tacho_ppr,(unsigned)c9_shaft_confirmed,(unsigned)c9_shaft_millihz,
+  c9_tacho_mode?"tacho":c9_shaft_default?"default_preset":"operator_confirmed",c9_tacho_ppr,(unsigned)c9_shaft_confirmed,(unsigned)c9_shaft_millihz,
   (unsigned)(c9_shaft_millihz*60u),(unsigned)c9_tacho_period,(unsigned)c9_tacho_age,(unsigned)c9_tacho_valid,
   (unsigned)c9_tacho_updates,(unsigned)c9_tacho_rejections,(unsigned)c9_fine_commits,(unsigned)c9_fine_errors,
   (unsigned)gsc9_target_guard_status(&c9_audio.adaptive),(unsigned)gsc9_target_coherence_q15(&c9_audio.adaptive))};return 1;

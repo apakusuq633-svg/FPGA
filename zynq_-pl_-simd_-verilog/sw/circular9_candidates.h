@@ -61,6 +61,17 @@ typedef struct {
  uint32_t band_bins[C9_SEARCH_BANDS];
 } c9_search_feedback;
 typedef struct {
+ uint32_t grid,band,quality,checks,cross_checked;int32_t shoulder;uint32_t direct_mask,residual_mask,combined_mask,peer,selected;
+ int32_t az,el,score,band_score[3];uint32_t band_quality[3],band_support[3];
+} c9_debug_peak;
+typedef struct {uint32_t id,state,observations,last_sample;int32_t az,el;} c9_trace_track;
+typedef struct {uint32_t first,end,session,epoch,count; c9_debug_peak peaks[9];
+ uint32_t joint_raw_count,joint_selected_raw[3],tracking_trace_valid;
+ c9_candidate joint_raw[3];uint32_t joint_quality[3];int32_t joint_shoulder[3];
+ c9_trace_track before[3],after[3];
+} c9_search_debug;
+typedef struct {
+ c9_search_debug debug;
  /* CPU1-owned cached workspace. Never place in shared history section. */
  float decimated[9][C9_DECIMATED_FRAMES];
  c9_complex spectrum[9][C9_SEPARATION_FFT];

@@ -33,6 +33,7 @@ int gsc9_configure(gsc9_state *s,const gsc9_config *c) {
  for(unsigned i=0;i<32;i++)if(c->fir_q15[i])nonzero=1;
  if(!nonzero)return -3;
  s->config=*c;s->configured=1;s->have_packet=0;s->enabled_prev=0;clear_signal(s);
+ s->fir_nonzero=0;for(unsigned i=0;i<32;i++)if(c->fir_q15[i])s->fir_index[s->fir_nonzero++]=(uint8_t)i;
  s->max_delay_q16=0;
  for(unsigned ch=0;ch<9;ch++){
   uint32_t d=c->delay_q16[ch];int f=(d>>12)&15;
@@ -53,9 +54,9 @@ static int16_t cubic(const gsc9_state *s,unsigned ch) {
  int64_t rounded=sum>=0?(sum+8192)/16384:-((-sum+8192)/16384);
  return clip16(rounded);
 }
-static int16_t fir(const int16_t *history,unsigned head,const int16_t *coeff,int *clipped) {
+static int16_t fir(const int16_t *history,unsigned head,const gsc9_state *state,int *clipped) {
  int64_t sum=0;
- for(unsigned j=0;j<32;j++)sum+=(int32_t)history[(head-j)&31u]*coeff[j];
+ for(unsigned k=0;k<state->fir_nonzero;k++){unsigned j=state->fir_index[k];sum+=(int32_t)history[(head-j)&31u]*state->config.fir_q15[j];}
  int64_t y=floor_power(sum,15);
  if(y>32767||y< -32768)*clipped=1;
  return clip16(y);
@@ -101,7 +102,7 @@ static void target_monitor(gsc9_state *s,const int16_t aligned[9],int16_t beam){
  }
  s->target_guard_samples=0;s->target_guard_common_energy=s->target_guard_residual_energy=0;
 }
-int16_t gsc9_process(gsc9_state *s,const uint32_t w[16],int enabled,int freeze_updates) {
+static int16_t gsc9_process_core(gsc9_state *s,const uint32_t w[16],int enabled,int freeze_updates,int raw_nominal) {
  if(!s||!w)return 0;
  int16_t original=(int16_t)(uint16_t)(w[7]>>16);
  count(s,GSC9_PACKETS,1);
@@ -136,7 +137,8 @@ int16_t gsc9_process(gsc9_state *s,const uint32_t w[16],int enabled,int freeze_u
  int16_t model_das=(int16_t)(sum>=0?(sum+4)/9:-((-sum+4)/9));
  s->beam_fir[s->fhead]=model_das;
  int ignored=0,ref_clipped=0;
- s->model_das=model_das;s->model_fir=fir(s->beam_fir,s->fhead,s->config.fir_q15,&ignored);
+ s->model_das=model_das;s->model_fir=fir(s->beam_fir,s->fhead,s,&ignored);
+ if(raw_nominal)original=s->model_fir;
  int16_t refs[8];
  for(unsigned ch=0;ch<8;ch++) {
    int32_t bm=((int32_t)aligned[ch]-aligned[8])/2;
@@ -146,7 +148,7 @@ int16_t gsc9_process(gsc9_state *s,const uint32_t w[16],int enabled,int freeze_u
    int64_t conditioned=v/16;
    if(conditioned>32767||conditioned< -32768)ref_clipped=1;
    s->blocking_fir[ch][s->fhead]=clip16(conditioned);
-   refs[ch]=fir(s->blocking_fir[ch],s->fhead,s->config.fir_q15,&ref_clipped);
+   refs[ch]=fir(s->blocking_fir[ch],s->fhead,s,&ref_clipped);
    for(unsigned t=15;t>0;t--)s->reference_history[ch][t]=s->reference_history[ch][t-1];
    s->reference_history[ch][0]=refs[ch];
  }
@@ -155,7 +157,7 @@ int16_t gsc9_process(gsc9_state *s,const uint32_t w[16],int enabled,int freeze_u
  if(ref_clipped)count(s,GSC9_REF_CLIPS,1);
  if(!enabled)return bypass(s,original,GSC9_BYPASS_DISABLED,GSC9_DISABLED);
  if(s->stable<=512)return bypass(s,original,GSC9_BYPASS_WARMUP,GSC9_WARMUP);
- if(model_das!=(int16_t)(uint16_t)w[7]||s->model_fir!=original) {
+ if(!raw_nominal&&(model_das!=(int16_t)(uint16_t)w[7]||s->model_fir!=original)) {
    clear_signal(s);return bypass(s,original,GSC9_BYPASS_ALIGNMENT,GSC9_ALIGN_ERRORS);
  }
  if(s->target_guard_enabled&&s->target_guard_active)
@@ -216,3 +218,13 @@ void gsc9_test_corrupt_weights(gsc9_state *s){
 }
 void gsc9_test_weight(gsc9_state *s,unsigned i,int32_t v){if(s&&i<32)s->weight[i/4][i%4]=v;}
 #endif
+
+int16_t gsc9_process(gsc9_state *s,const uint32_t w[16],int enabled,int freeze){return gsc9_process_core(s,w,enabled,freeze,0);}
+/* Explicit PS-only nominal audio. Raw sample IDs/loss counters remain real;
+ * steering metadata belongs to the PS config, not a claimed PL validation. */
+int16_t gsc9_process_nominal(gsc9_state *s,const uint32_t input[16],int enabled,int freeze){
+ if(!s||!input||input[0]!=0x47534302u||input[13]!=0x000a0009u||(input[12]>>16))return gsc9_process(s,input,0,freeze);
+ uint32_t w[16];for(unsigned i=0;i<16;i++)w[i]=input[i];
+ w[2]=s->config.version;w[3]=w[1];w[5]=s->max_delay_q16+65536u;w[6]=((uint32_t)s->config.direction_id<<8)|1u;
+ return gsc9_process_core(s,w,enabled,freeze,1);
+}

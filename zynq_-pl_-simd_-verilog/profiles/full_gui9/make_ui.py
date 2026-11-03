@@ -11,7 +11,11 @@ def main():
  geometry_js='var c9ChannelPositions='+json.dumps(positions,separators=(',',':'),allow_nan=False)+';\n'
  html=html.replace('{{GCC_CORE}}',(R/'sw/circular9_gcc_debug.js').read_text(encoding='utf-8')).replace('{{GUI9_JS}}',geometry_js+(R/'sw/circular9_full_gui.js').read_text(encoding='utf-8'))
  html=html.replace('{{GUI9_COMPLETENESS}}',(R/'sw/circular9_gui_complete.js').read_text(encoding='utf-8'))
- if len(html.encode())>=60000:raise ValueError('Page exceeds the bounded 16-bit HTTP response budget')
+ # Strip standalone JS comments only; preserve all executable source/line breaks.
+ html=re.sub(r'(?m)^[ \t]*//[^\n]*\n','',html)
+ html=re.sub(r'(?m)^[ \t]+','',html)
+ html=re.sub(r'\n[ \t]*\n','\n',html)
+ if len(html.encode())>=61440:raise ValueError('Page exceeds the bounded 16-bit HTTP response budget')
  def encode(line):
   raw=json.dumps(line+'\n',ensure_ascii=False)
   return ''.join(c if ord(c)<128 else ''.join('\\%03o'%b for b in c.encode()) for c in raw).replace('??','?\\?')

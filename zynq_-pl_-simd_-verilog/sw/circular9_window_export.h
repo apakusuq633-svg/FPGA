@@ -31,21 +31,52 @@ static int c9_window_route(const char *req,struct ui_reply *rep,char *body,size_
  if(!c9_export.enabled){*rep=(struct ui_reply){403,"Forbidden","application/json",0};return 1;}
  const char *p=req+strlen(capture);uint32_t frames=0,token=0,offset=0,count=0;
  if(!strncmp(p,"frames=",7)){
-  p+=7;if(!c9_export_uint(&p,C9_EXPORT_MAX_FRAMES,&frames)||*p!=' '||frames<1024u)goto bad;
-  if(cap<384u){*rep=(struct ui_reply){500,"Internal Server Error","application/json",0};return 1;}
+  uint32_t requested_first=0,requested_end=0,requested_epoch=0,requested_session=0,source_sequence=0,origin=0;int exact=0;
+  p+=7;if(!c9_export_uint(&p,C9_EXPORT_MAX_FRAMES,&frames)||frames<1024u||(frames&3u))goto bad;
+  if(*p!=' '){
+   exact=1;
+   if(strncmp(p,"&first=",7))goto bad;
+   p+=7;
+   if(!c9_export_uint(&p,UINT32_MAX,&requested_first)||strncmp(p,"&end=",5))goto bad;
+   p+=5;
+   if(!c9_export_uint(&p,UINT32_MAX,&requested_end)||strncmp(p,"&session=",9))goto bad;
+   p+=9;
+   if(!c9_export_uint(&p,UINT32_MAX,&requested_session)||strncmp(p,"&epoch=",7))goto bad;
+   p+=7;
+   if(!c9_export_uint(&p,UINT32_MAX,&requested_epoch)||strncmp(p,"&sequence=",10))goto bad;
+   p+=10;
+   if(!c9_export_uint(&p,UINT32_MAX,&source_sequence)||strncmp(p,"&origin=",8))goto bad;
+   p+=8;
+   if(!strncmp(p,"PS_AUX ",7)){origin=1;p+=6;}
+   else if(!strncmp(p,"PL_MAIN_MAP ",12))p+=11;else goto bad;
+   if(origin){if((requested_first&3u)||(requested_end&3u)||(uint32_t)(requested_end-requested_first)!=frames||frames!=16640u)goto bad;}
+   else if((uint32_t)(requested_end-requested_first)!=1024u||frames!=(uint32_t)(((requested_end+3u)&~3u)-(requested_first&~3u)))goto bad;
+  }
+  if(*p!=' ')goto bad;
+  if(cap<768u){*rep=(struct ui_reply){500,"Internal Server Error","application/json",0};return 1;}
   uint32_t end=0,available=0,epoch=0,session=0,first=0;c9_export.valid=0;
   if(!c9_history_info(&c9_history_shared.history,&end,&available,&epoch,&session)||available<frames)goto conflict;
   uint32_t start=(end&~3u)-frames;
+  if(exact){
+   if(session!=requested_session||epoch!=requested_epoch||
+      !c9_source_exists(origin,source_sequence,session,epoch,requested_first,requested_end))goto conflict;
+   start=requested_first&~3u;
+  }
+  if((uint32_t)(end-(start+frames))>=0x80000000u||(uint32_t)(end-start)>available)goto conflict;
   for(uint32_t n=0;n<frames;n+=64u){
    uint32_t size=frames-n;if(size>64u)size=64u;uint32_t ep=0,se=0;
    if(!c9_history_copy(&c9_history_shared.history,c9_export.pcm+n,size,start+n+size,&first,&ep,&se)||first!=start+n||ep!=epoch||se!=session)goto conflict;
    c9_realtime_checkpoint();
   }
   uint32_t ep=0,se=0;
-  if(!c9_history_info(&c9_history_shared.history,0,0,&ep,&se)||ep!=epoch||se!=session)goto conflict;
+  if(!c9_history_info(&c9_history_shared.history,&end,&available,&ep,&se)||ep!=epoch||se!=session||
+     (uint32_t)(end-start)>C9_HISTORY_FRAMES||(uint32_t)(end-start)>available)goto conflict;
   if(!++c9_export.token)++c9_export.token;
   c9_export.frames=frames;c9_export.first=start;c9_export.epoch=epoch;c9_export.session=session;c9_export.valid=1;
   int len=snprintf(body,cap,"{\"format\":\"C9W2\",\"version\":1,\"token\":%u,\"frames\":%u,\"channels\":9,\"sample_rate_num\":156250,\"sample_rate_den\":1,\"first_sample\":%u,\"epoch\":%u,\"session\":%u,\"max_chunk_frames\":1024,\"source\":\"live_history_frozen_copy\"}",(unsigned)c9_export.token,(unsigned)frames,(unsigned)start,(unsigned)epoch,(unsigned)session);
+  if(len>0&&(size_t)len<cap){
+   len=ui_append(body,(int)cap,len-1,",\"end_sample\":%u,\"interval\":\"[first,end)\",\"geometry_version\":%u,\"evidence_build_id\":\"%s\",\"exact_source\":%s,\"origin\":\"%s\",\"source_sequence\":%u,\"source_first\":%u,\"source_end\":%u}",start+frames,(unsigned)ACOUSTIC_GEOMETRY_VERSION,C9_EVIDENCE_BUILD_ID,exact?"true":"false",exact?(origin?"PS_AUX":"PL_MAIN_MAP"):"LATEST",source_sequence,requested_first,requested_end);
+  }
   *rep=(struct ui_reply){len<0||(size_t)len>=cap?500:200,len<0||(size_t)len>=cap?"Internal Server Error":"OK","application/json",len<0||(size_t)len>=cap?0:len};return 1;
  }
  if(strncmp(p,"token=",6))goto bad;

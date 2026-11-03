@@ -459,6 +459,11 @@ static void auxiliary_feedback_tests(void){
  printf("AUXILIARY_PIPELINE_PASS actual_FFT_candidates=%u support_frames=%u replay_wrong_era_expired_rejected=7 no_track_bootstrap=1\n",genuine.feedback.count,genuine.feedback.support_frames[0]);
 }
 #ifndef C9_PIPELINE_NO_MAIN
-int main(int argc,char **argv){tracking_tests();pipeline_tests(argc>1?argv[1]:"pipeline_candidates.json");overlap_and_overload_tests();auxiliary_feedback_tests();if(fail)return 1;puts("CIRCULAR9_PIPELINE_PASS");return 0;}
+int main(int argc,char **argv){tracking_tests();pipeline_tests(argc>1?argv[1]:"pipeline_candidates.json");overlap_and_overload_tests();auxiliary_feedback_tests();{char evidence[20000];
+ for(unsigned j=0;j<9;j++){c9_debug_aux.debug.count|=1u<<j;c9_debug_aux.debug.peaks[j].band=j/3;c9_debug_aux.debug.peaks[j].score=2000000000;c9_debug_aux.debug.peaks[j].az=-87188;c9_debug_aux.debug.peaks[j].el=87188;}
+ struct ui_reply reply;CHECK(c9_tasks_route("GET /api/candidates?debug=1 HTTP/1.1\r\n\r\n",&reply,evidence,sizeof(evidence))==1,"debug HTTP route");
+ int len=c9_evidence_json(evidence,sizeof(evidence));CHECK(len>0&&len<(int)sizeof(evidence),"evidence fits bounded response");FILE *ef=fopen("build/evidence_api.json","wb");CHECK(ef!=NULL,"evidence output");if(ef){fwrite(evidence,1,len,ef);fclose(ef);}}
+ if(fail){return 1;}
+ puts("CIRCULAR9_PIPELINE_PASS");return 0;}
 
 #endif

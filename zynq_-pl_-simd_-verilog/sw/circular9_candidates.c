@@ -1,4 +1,5 @@
 #include "circular9_candidates.h"
+#include "circular9_joint_shadow.h"
 #include "circular9_decimator.h"
 #include "circular9_direction.h"
 #include "circular9_diagnosis.h" /* One fixed carrier definition for readiness. */
@@ -120,7 +121,7 @@ int c9_candidate_at_peak(const int32_t p[1024],unsigned grid,c9_candidate *out){
  c.elevation_mdeg=c9_direction_elevation_mdeg[y];
  /* A bounded two-dimensional quadratic fit needs all nine committed cells.
   * Cross curvature matters for tilted peaks. Reject a saddle/flat surface,
-  * boundary maximum and a vertex outside the central cell rather than
+  * boundary maximum and a vertex substantially outside the central cell rather than
   * manufacture fine angular precision. All differences use double before
   * subtracting int32 inputs, including INT32_MIN negative side lobes. */
  if(x&&x<31u&&y&&y<31u){
@@ -133,7 +134,14 @@ int c9_candidate_at_peak(const int32_t p[1024],unsigned grid,c9_candidate *out){
   double floor=p0*.002;if(floor<2)floor=2;
   if(hx< -floor&&hy< -floor&&det>floor*floor){
    double dx=(hxy*gy-hy*gx)/det,dy=(hxy*gx-hx*gy)/det;
-   if(dx>= -.5&&dx<=.5&&dy>= -.5&&dy<=.5){
+   /* Tolerate only0.05cell of quadratic-fit overshoot at a shared cell
+    * edge; constrain the accepted vertex to the original half-cell.
+    * Negative curvature/conditioning/uncertainty limits remain unchanged. */
+   if(dx>= -.55&&dx<=.55&&dy>= -.55&&dy<=.55){
+    if(dx<-.5)dx=-.5;
+    if(dx>.5)dx=.5;
+    if(dy<-.5)dy=-.5;
+    if(dy>.5)dy=.5;
     double az=c.azimuth_mdeg+dx*(c9_direction_azimuth_mdeg[x+1]-c9_direction_azimuth_mdeg[x-1])*.5;
     double el=c.elevation_mdeg+dy*(c9_direction_elevation_mdeg[y+1]-c9_direction_elevation_mdeg[y-1])*.5;
     c.azimuth_mdeg=(int32_t)(az+(az>=0?.5:-.5));
@@ -496,6 +504,11 @@ static int c9_peak_pool_best(const c9_peak_evidence *p,unsigned count,unsigned e
   /* Only independently rechecked evidence at this exact bearing counts.
    * A nearby peak's band score must not be credited to this representative. */
   int64_t sum=(int64_t)p[i].rank_evidence[0]+p[i].rank_evidence[1]+p[i].rank_evidence[2];
+  /* Experiment only: bounded 25% consensus bonus; no candidate veto. */
+#ifdef C9_EXPERIMENT_CONSENSUS
+  unsigned nb=0;for(unsigned b=0;b<3;b++)if(p[i].rank_evidence[b]>0)nb++;
+  if(nb>1)sum+=sum*(nb-1)/4;
+#endif
   unsigned support=p[i].frames;
   if(best<0||sum>best_sum||(sum==best_sum&&(support>best_frames||
      (support==best_frames&&(p[i].candidate.score>p[best].candidate.score||
@@ -505,15 +518,18 @@ static int c9_peak_pool_best(const c9_peak_evidence *p,unsigned count,unsigned e
  }
  return best;
 }
-static unsigned c9_peak_quality(const int32_t scores[1024],const c9_candidate *c){
+static unsigned c9_peak_quality_details(const int32_t scores[1024],const c9_candidate *c,int32_t *out){
+ if(out)*out=0;
  int32_t score=scores[c->grid],shoulder=0;if(score<150000)return 0;
  for(unsigned g=0;g<1024;g++){
   int32_t dot=c9_direction_dot_q30(g,c->grid);
   if(dot<=1050277989&&dot>=973140576&&scores[g]>shoulder)shoulder=scores[g];
  }
+ if(out)*out=shoulder;
  int64_t quality=(int64_t)(score-shoulder)*1000/score;
  return quality<3?0u:quality>1000?1000u:(unsigned)quality;
 }
+static unsigned c9_peak_quality(const int32_t scores[1024],const c9_candidate *c){return c9_peak_quality_details(scores,c,NULL);}
 #ifdef C9_CANDIDATES_TEST
 void c9_debug_peak_support(c9_separation_workspace *w,const c9_candidate *c,const uint32_t *lut,unsigned band,unsigned out[3]){
  uint8_t used[210]={0};double peak=0;
@@ -581,11 +597,12 @@ static inline double search_interpolated(const double p[64],uint16_t code){
 int c9_candidates_search(const int16_t (*raw)[9],uint32_t raw_frames,const uint32_t *lut,
  c9_separation_workspace *w,const c9_search_context *ctx,c9_search_feedback *r){
  if(!r)return 0;
- memset(r,0,sizeof(*r));
+ memset(r,0,sizeof(*r));if(w)memset(&w->debug,0,sizeof(w->debug));
  if(!raw||!lut||!w||!ctx||raw_frames<C9_SEARCH_MIN_RAW_FRAMES||raw_frames>C9_SEARCH_RAW_FRAMES||
     (raw_frames&3u)||((ctx->first_sample|ctx->end_sample)&3u)||ctx->end_sample-ctx->first_sample!=raw_frames||!ctx->session||!ctx->geometry_version||
     ctx->geometry_confirmed>1u){r->invalid_input=0x80000000u;return 0;}
  r->abi=C9_SEARCH_FEEDBACK_ABI;r->session=ctx->session;r->epoch=ctx->epoch;r->first_sample=ctx->first_sample;
+ w->debug.first=ctx->first_sample;w->debug.end=ctx->end_sample;w->debug.session=ctx->session;w->debug.epoch=ctx->epoch;
  r->end_sample=ctx->end_sample;r->valid_until_sample=ctx->end_sample+C9_SEARCH_MAX_AGE_SAMPLES;
  r->geometry_version=ctx->geometry_version;r->calibration_version=ctx->calibration_version;r->geometry_confirmed=ctx->geometry_confirmed;
  uint32_t profile=search_clock();
@@ -676,17 +693,51 @@ int c9_candidates_search(const int16_t (*raw)[9],uint32_t raw_frames,const uint3
    w->search_scores[b][g]=(int32_t)score;
   }
   counts[b]=c9_candidates_extract(w->search_scores[b],proposals[b]);
+   for(unsigned k=0;k<counts[b];k++){
+    c9_candidate *p=&proposals[b][k];c9_debug_peak *d=&w->debug.peaks[b*3+k];
+    d->grid=p->grid;d->band=b;d->score=p->score;d->peer=UINT32_MAX;
+    c9_candidate_angles(p,&d->az,&d->el);w->debug.count|=1u<<(b*3+k);
+   }
   if(counts[b]&&proposals[b][0].score>=150000)r->band_valid_mask|=1u<<b;else counts[b]=0;
  }
+#if C9_JOINT_FORMAL
+ /* Experimental formal PS joint generator; original band candidates are not published. */
+ c9_joint_report joint;c9_joint_shadow_compute(w,lut,r->band_valid_mask,UINT32_MAX,&joint);
+ w->debug.joint_raw_count=joint.raw_peaks;
+ memcpy(w->debug.joint_raw,joint.raw_candidates,sizeof(joint.raw_candidates));
+ memcpy(w->debug.joint_quality,joint.raw_quality,sizeof(joint.raw_quality));
+ memcpy(w->debug.joint_shoulder,joint.raw_shoulder,sizeof(joint.raw_shoulder));
+ memcpy(w->debug.joint_selected_raw,joint.selected_raw_index,sizeof(joint.selected_raw_index));
+ r->count=0;
+ if(joint.status==C9_JOINT_OK)for(unsigned i=0;i<joint.count;i++){
+  unsigned first,last;c9_support_component(joint.support_mask[i],w->analysis_frames,&first,&last);
+  unsigned slot=r->count++;r->candidates[slot]=joint.candidates[i];
+  r->band_mask[slot]=joint.support_band_mask[i];r->quality_permille[slot]=joint.quality[i];
+  r->support_mask[slot]=joint.support_mask[i];
+  r->support_frames[slot]=c9_support_component(joint.support_mask[i],w->analysis_frames,&first,&last);
+  r->support_first_sample[slot]=ctx->first_sample+4u*w->observed_start[first];
+  r->support_end_sample[slot]=ctx->first_sample+4u*(w->observed_start[last]+C9_SEPARATION_FFT);
+  for(unsigned b=0;b<3;b++)r->band_score[slot][b]=w->search_scores[b][joint.candidates[i].grid];
+ }
+ w->search_ticks[2]=search_clock()-profile;return 1;
+#endif
  /* Rank by independently supported peak prominence (score - shoulder),
   * not broad unresolved-band coherence alone. Keep raw band scores intact.
   * First retain every eligible peak (at most3x3), then arbitrate globally.
   * A low-frequency slot can no longer hide a later independent direction. */
- c9_peak_evidence pool[9];unsigned pool_count=0,excluded=0;
+ c9_peak_evidence pool[9];unsigned pool_ids[9],pool_count=0,excluded=0;
  for(unsigned b=0;b<3;b++)for(unsigned rank=0;rank<counts[b];rank++){
-  c9_candidate c=proposals[b][rank];unsigned quality=c9_peak_quality(w->search_scores[b],&c);
+  c9_candidate c=proposals[b][rank];unsigned quality=c9_peak_quality_details(w->search_scores[b],&c,&w->debug.peaks[b*3+rank].shoulder);
+  w->debug.peaks[b*3+rank].quality=quality;
   if(!quality)continue;
   uint32_t mask;unsigned first,last,n=candidate_support(w,&c,lut,b,used[b],&mask,&first,&last);
+  pool_ids[pool_count]=b*3+rank;
+  w->debug.peaks[b*3+rank].checks|=1u;
+  w->debug.peaks[b*3+rank].direct_mask=mask;
+  w->debug.peaks[b*3+rank].combined_mask=mask;
+  w->debug.peaks[b*3+rank].band_score[b]=c.score;
+  w->debug.peaks[b*3+rank].band_quality[b]=quality;
+  w->debug.peaks[b*3+rank].band_support[b]=mask;
   pool[pool_count]=(c9_peak_evidence){.candidate=c,.band=b,.frames=n,.direct_frames=n,.quality=quality,
    .bands=1u<<b,.mask=mask,.first=ctx->first_sample+4u*w->observed_start[first],
    .last=ctx->first_sample+4u*(w->observed_start[last]+C9_SEPARATION_FFT)};
@@ -709,6 +760,10 @@ int c9_candidates_search(const int16_t (*raw)[9],uint32_t raw_frames,const uint3
   if(peer>=0){
    uint32_t mask;unsigned b=pool[i].band;
    candidate_support_residual(w,&pool[i].candidate,&pool[peer].candidate,lut,b,used[b],&mask,&first,&last);
+   w->debug.peaks[pool_ids[i]].checks|=2u;
+   w->debug.peaks[pool_ids[i]].residual_mask=mask;
+   w->debug.peaks[pool_ids[i]].peer=pool_ids[peer];
+   w->debug.peaks[pool_ids[i]].combined_mask=pool[i].mask|mask;
    uint32_t combined=pool[i].mask|mask;unsigned n=c9_support_component(combined,w->analysis_frames,&first,&last);
    if(n>=3){pool[i].mask=combined;pool[i].frames=n;pool[i].first=ctx->first_sample+4u*w->observed_start[first];pool[i].last=ctx->first_sample+4u*(w->observed_start[last]+C9_SEPARATION_FFT);}
   }
@@ -723,10 +778,17 @@ int c9_candidates_search(const int16_t (*raw)[9],uint32_t raw_frames,const uint3
    if(c9_peak_dot(&pool[i].candidate,&pool[j].candidate)>.9659258262890683)matched|=1u<<pool[j].band;
   int32_t interval_score=pool[i].candidate.score;
   for(unsigned b=0;b<3;b++)if((matched&(1u<<b))&&b!=pool[i].band){
-   unsigned quality=c9_peak_quality(w->search_scores[b],&pool[i].candidate);if(!quality)continue;
+   w->debug.peaks[pool_ids[i]].cross_checked|=1u<<b;
+   unsigned quality=c9_peak_quality(w->search_scores[b],&pool[i].candidate);
+   w->debug.peaks[pool_ids[i]].band_quality[b]=quality;
+   if(!quality)continue;
    uint32_t mask;unsigned first,last,n=candidate_support(w,&pool[i].candidate,lut,b,used[b],&mask,&first,&last);
+   w->debug.peaks[pool_ids[i]].band_support[b]=mask;
    if(n<3)continue;
    int32_t score=w->search_scores[b][pool[i].candidate.grid];
+   w->debug.peaks[pool_ids[i]].band_score[b]=score;
+   w->debug.peaks[pool_ids[i]].band_quality[b]=quality;
+   w->debug.peaks[pool_ids[i]].band_support[b]=mask;
    pool[i].bands|=1u<<b;pool[i].evidence[b]=score;
    pool[i].rank_evidence[b]=(int32_t)((int64_t)score*quality/1000);
    if(quality>pool[i].quality)pool[i].quality=quality;
@@ -741,6 +803,7 @@ int c9_candidates_search(const int16_t (*raw)[9],uint32_t raw_frames,const uint3
  while(r->count<3u){
   int winner=c9_peak_pool_best(pool,pool_count,excluded);if(winner<0)break;
   const c9_peak_evidence *p=&pool[winner];unsigned slot=r->count++;
+  w->debug.peaks[pool_ids[winner]].selected=slot+1u;
   r->candidates[slot]=p->candidate;r->band_mask[slot]=p->bands;
   for(unsigned b=0;b<3;b++)r->band_score[slot][b]=p->evidence[b];
   r->quality_permille[slot]=p->quality;r->support_frames[slot]=p->frames;
@@ -1024,3 +1087,6 @@ int c9_candidates_test_render(const int16_t (*raw)[9],const c9_candidate *cand,u
  return separate_internal(raw,cand,count,lut,w,out,r,0,frozen);
 }
 #endif
+
+/* Optional read-only shadow pass; original search above remains unchanged. */
+#include "circular9_joint_shadow_impl.h"
