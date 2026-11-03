@@ -1,0 +1,37 @@
+{
+  "date": "2026-10-28",
+  "scope": "same first1024 aligned PCM samples,9 channels,36 pairs,1024 grid; portable scalar C matches current PL arithmetic; no A9/board timing",
+  "checks": {
+    "statistics": {
+      "words": 45,
+      "mismatches": 0,
+      "first_mismatches": [],
+      "reference_sha256": "e9ae6b0063f8e961f3780ecd17e72981b47ce52154ddebdc4f33e058d22c374c"
+    },
+    "spectrum": {
+      "words": 576,
+      "mismatches": 0,
+      "first_mismatches": [],
+      "reference_sha256": "878dcf526d75d521aab0a116b69b0b119e181e78da3113cd0ca63813e0cb0c65"
+    },
+    "scores": {
+      "words": 1024,
+      "mismatches": 0,
+      "first_mismatches": [],
+      "reference_sha256": "e0d5d3f1799abdaba6930d334cd90c6f742318ad3a2cfe56c02b00d801f676f0"
+    },
+    "correlation": {
+      "words": 2304,
+      "mismatches": 0,
+      "first_mismatches": [],
+      "reference_sha256": "92b930fbd34a59c7c454630b13d47ef3100ee3982456912b1204efb2e19ade08"
+    }
+  },
+  "pass": true,
+  "source_hash_manifest": "source_hashes.json",
+  "input_sha256": "4f0dfc58c9fe1041e30bbf218c33fc64b5004f7752c5d9f3c134cdee222b8bdf",
+  "lut_packed_sha256": "95cc626dedd0852ec997856cace8809fc14abbf3bc21af5c2322c03ff8888969",
+  "clock": "QueryPerformanceCounter",
+  "scalar_compiler_vectorization_disabled": true,
+  "validation_output": "$ C:\\Users\\lenovo\\Desktop\\FPGA_PDM\\performance_comparison\\circular9_scalar\\c9_scalar_host.exe C:\\Users\\lenovo\\Desktop\\FPGA_PDM\\performance_comparison\\circular9_scalar\\input.pcm C:\\Users\\lenovo\\Desktop\\FPGA_PDM\\performance_comparison\\circular9_scalar\\srp_lut10.bin C:\\Users\\lenovo\\Desktop\\FPGA_PDM\\performance_comparison\\circular9_scalar\\host_output 0\nC9_SCALAR_OUTPUT best_grid=659 score=40734 channels=9 pairs=36 grid=1024 workspace_bytes=6712\n"
+}

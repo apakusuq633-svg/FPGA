@@ -1,0 +1,79 @@
+{
+  "pass": true,
+  "cases": [
+    {
+      "case": 0,
+      "mode": 0,
+      "words": 512,
+      "run_cycles": 854
+    },
+    {
+      "case": 1,
+      "mode": 1,
+      "words": 512,
+      "run_cycles": 854
+    },
+    {
+      "case": 2,
+      "mode": 2,
+      "words": 513,
+      "run_cycles": 917
+    },
+    {
+      "case": 3,
+      "mode": 0,
+      "words": 512,
+      "run_cycles": 854
+    },
+    {
+      "case": 4,
+      "mode": 1,
+      "words": 512,
+      "run_cycles": 854
+    },
+    {
+      "case": 5,
+      "mode": 2,
+      "words": 513,
+      "run_cycles": 917
+    },
+    {
+      "case": 6,
+      "mode": 0,
+      "words": 512,
+      "run_cycles": 854
+    },
+    {
+      "case": 7,
+      "mode": 1,
+      "words": 512,
+      "run_cycles": 854
+    },
+    {
+      "case": 8,
+      "mode": 2,
+      "words": 513,
+      "run_cycles": 917
+    },
+    {
+      "case": 9,
+      "mode": 0,
+      "words": 512,
+      "run_cycles": 854
+    },
+    {
+      "case": 10,
+      "mode": 1,
+      "words": 512,
+      "run_cycles": 854
+    },
+    {
+      "case": 11,
+      "mode": 2,
+      "words": 513,
+      "run_cycles": 917
+    }
+  ],
+  "disabled_sparse_negative_control_detected": true,
+  "golden": "scalar sw/fw/fw_fft.c"
+}

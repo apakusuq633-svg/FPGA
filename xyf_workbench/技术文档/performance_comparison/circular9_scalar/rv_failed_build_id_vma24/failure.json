@@ -1,0 +1,6 @@
+{
+  "cause": "GNU build-id orphan moved.text and entry to0x24; section-only ITCM extraction loaded at0; startup PCrelative LA cleared rodata36bytes too early",
+  "observed_rodata_corrupted_range": "0x1004..0x1027 before workspace0x1028",
+  "not_a_compiler_arithmetic_difference": true,
+  "cycles_not_valid_for_performance_comparison": true
+}

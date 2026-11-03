@@ -1,0 +1,179 @@
+[
+  {
+    "mode": "PS_JOINT_FORMAL",
+    "have": 0,
+    "fresh": false,
+    "session": 0,
+    "epoch": 0,
+    "sequence": 0,
+    "first": 0,
+    "end": 0,
+    "age_ms": null,
+    "peaks": [],
+    "gap": null,
+    "band_valid_mask": 0,
+    "scores_at_s1_grid": [
+      null,
+      null,
+      null
+    ],
+    "formal_count": 0,
+    "formal_main": null
+  },
+  {
+    "mode": "PS_JOINT_FORMAL",
+    "have": 1,
+    "fresh": true,
+    "session": 2,
+    "epoch": 3,
+    "sequence": 20,
+    "first": 100,
+    "end": 800,
+    "age_ms": 1.28,
+    "peaks": [
+      {
+        "score": 554013,
+        "az": 0,
+        "el": 0,
+        "grid": 500,
+        "quality": 0,
+        "boundary": false
+      }
+    ],
+    "gap": null,
+    "band_valid_mask": 0,
+    "scores_at_s1_grid": [
+      null,
+      null,
+      null
+    ],
+    "formal_count": 0,
+    "formal_main": null
+  },
+  {
+    "mode": "PS_JOINT_FORMAL",
+    "have": 1,
+    "fresh": true,
+    "session": 2,
+    "epoch": 3,
+    "sequence": 20,
+    "first": 100,
+    "end": 800,
+    "age_ms": 1.28,
+    "peaks": [
+      {
+        "score": 554013,
+        "az": 0,
+        "el": 0,
+        "grid": 500,
+        "quality": 0,
+        "boundary": false
+      },
+      {
+        "score": 478532,
+        "az": 0,
+        "el": 0,
+        "grid": 31,
+        "quality": 0,
+        "boundary": true
+      }
+    ],
+    "gap": 75481,
+    "band_valid_mask": 5,
+    "scores_at_s1_grid": [
+      500000,
+      null,
+      562039
+    ],
+    "formal_count": 1,
+    "formal_main": {
+      "az": 0,
+      "el": 0,
+      "grid": 500
+    }
+  },
+  {
+    "mode": "PS_JOINT_FORMAL",
+    "have": 1,
+    "fresh": false,
+    "session": 2,
+    "epoch": 3,
+    "sequence": 20,
+    "first": 100,
+    "end": 800,
+    "age_ms": 314.88,
+    "peaks": [
+      {
+        "score": 554013,
+        "az": 0,
+        "el": 0,
+        "grid": 500,
+        "quality": 0,
+        "boundary": false
+      },
+      {
+        "score": 478532,
+        "az": 0,
+        "el": 0,
+        "grid": 31,
+        "quality": 0,
+        "boundary": true
+      }
+    ],
+    "gap": 75481,
+    "band_valid_mask": 5,
+    "scores_at_s1_grid": [
+      500000,
+      null,
+      562039
+    ],
+    "formal_count": 1,
+    "formal_main": {
+      "az": 0,
+      "el": 0,
+      "grid": 500
+    }
+  },
+  {
+    "mode": "PS_JOINT_FORMAL",
+    "have": 1,
+    "fresh": false,
+    "session": 2,
+    "epoch": 3,
+    "sequence": 20,
+    "first": 100,
+    "end": 800,
+    "age_ms": null,
+    "peaks": [
+      {
+        "score": 554013,
+        "az": 0,
+        "el": 0,
+        "grid": 500,
+        "quality": 0,
+        "boundary": false
+      },
+      {
+        "score": 478532,
+        "az": 0,
+        "el": 0,
+        "grid": 31,
+        "quality": 0,
+        "boundary": true
+      }
+    ],
+    "gap": 75481,
+    "band_valid_mask": 5,
+    "scores_at_s1_grid": [
+      500000,
+      null,
+      562039
+    ],
+    "formal_count": 1,
+    "formal_main": {
+      "az": 0,
+      "el": 0,
+      "grid": 500
+    }
+  }
+]

@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="1100" height="820" viewBox="0 0 1100 820" role="img" aria-labelledby="title description">
+<title id="title">本次RTL声学算子加速对比</title>
+<desc id="description">2026年10月28日实际运行，各组独立基线；FFT含数据装载取回，SRP不含装载取回。毫秒按40 MHz换算，不是实板数据。</desc>
+<style>text{font-family:"Microsoft YaHei","Noto Sans CJK SC",sans-serif;fill:#172b4d;} .small{font-size:14px;fill:#526479;} .label{font-size:16px;}</style>
+<rect width="1100" height="820" fill="#fff"/>
+<text x="42" y="47" font-size="28" font-weight="700">声学算子与定位扫描阶段加速对比</text>
+<text class="label" x="42" y="79">本次RTL实测 · 2026-10-28 · 相同输入逐项核对 · 各组独立归一化</text>
+<rect x="42" y="103" width="20" height="12" rx="3" fill="#7694b7"/><text class="small" x="72" y="114">基线实现</text>
+<rect x="176" y="103" width="20" height="12" rx="3" fill="#df8a39"/><text class="small" x="206" y="114">加速实现</text>
+<rect x="30" y="139" width="1040" height="160" rx="12" fill="#f8fafc" stroke="#dbe3ec"/>
+<text x="48" y="171" font-size="21" text-anchor="start" style="fill:#172b4d" font-weight="700">1024点实FFT</text>
+<text x="320" y="171" font-size="14" text-anchor="start" style="fill:#172b4d" font-weight="400">179036 → 6602 拍</text>
+<text x="840" y="171" font-size="14" text-anchor="end" style="fill:#526479" font-weight="400">完整调用，含装载／运行／取回</text>
+<text x="975" y="171" font-size="14" text-anchor="middle" style="fill:#172b4d" font-weight="400">加速比</text>
+<text x="48" y="211" font-size="16" text-anchor="start" style="fill:#172b4d" font-weight="400">PL标量</text>
+<rect x="235" y="190" width="650" height="29" rx="5" fill="#7694b7"/>
+<text x="870" y="210" font-size="14" text-anchor="end" style="fill:#fff" font-weight="400">100%</text>
+<text x="1060" y="211" font-size="16" text-anchor="end" style="fill:#172b4d" font-weight="400">4.475900 ms</text>
+<text x="48" y="258" font-size="16" text-anchor="start" style="fill:#172b4d" font-weight="400">声学扩展</text>
+<rect x="235" y="237" width="650" height="29" rx="5" fill="#e8edf3"/>
+<rect x="235" y="237" width="23.968922451" height="29" rx="5" fill="#df8a39" data-normalized-percent="3.687526531"/>
+<text x="300" y="258" font-size="16" text-anchor="start" style="fill:#172b4d" font-weight="400">0.165050 ms</text>
+<text x="470" y="258" font-size="14" text-anchor="start" style="fill:#172b4d" font-weight="400">约3.6875%</text>
+<text x="975" y="260" font-size="28" text-anchor="middle" style="fill:#b45309" font-weight="700">27.12×</text>
+<rect x="30" y="319" width="1040" height="160" rx="12" fill="#f8fafc" stroke="#dbe3ec"/>
+<text x="48" y="351" font-size="21" text-anchor="start" style="fill:#172b4d" font-weight="700">512点、32抽头FIR</text>
+<text x="320" y="351" font-size="14" text-anchor="start" style="fill:#172b4d" font-weight="400">276774 → 15138 拍</text>
+<text x="840" y="351" font-size="14" text-anchor="end" style="fill:#526479" font-weight="400">同输入／同系数，原函数执行</text>
+<text x="975" y="351" font-size="14" text-anchor="middle" style="fill:#172b4d" font-weight="400">加速比</text>
+<text x="48" y="391" font-size="16" text-anchor="start" style="fill:#172b4d" font-weight="400">PL标量</text>
+<rect x="235" y="370" width="650" height="29" rx="5" fill="#7694b7"/>
+<text x="870" y="390" font-size="14" text-anchor="end" style="fill:#fff" font-weight="400">100%</text>
+<text x="1060" y="391" font-size="16" text-anchor="end" style="fill:#172b4d" font-weight="400">6.919350 ms</text>
+<text x="48" y="438" font-size="16" text-anchor="start" style="fill:#172b4d" font-weight="400">SIMD</text>
+<rect x="235" y="417" width="650" height="29" rx="5" fill="#e8edf3"/>
+<rect x="235" y="417" width="35.551388497" height="29" rx="5" fill="#df8a39" data-normalized-percent="5.469444384"/>
+<text x="300" y="438" font-size="16" text-anchor="start" style="fill:#172b4d" font-weight="400">0.378450 ms</text>
+<text x="470" y="438" font-size="14" text-anchor="start" style="fill:#172b4d" font-weight="400">约5.4694%</text>
+<text x="975" y="440" font-size="28" text-anchor="middle" style="fill:#b45309" font-weight="700">18.28×</text>
+<rect x="30" y="499" width="1040" height="160" rx="12" fill="#f8fafc" stroke="#dbe3ec"/>
+<text x="48" y="531" font-size="21" text-anchor="start" style="fill:#172b4d" font-weight="700">36对×1024格SRP</text>
+<text x="320" y="531" font-size="14" text-anchor="start" style="fill:#172b4d" font-weight="400">147458 → 9307 拍</text>
+<text x="840" y="531" font-size="14" text-anchor="end" style="fill:#526479" font-weight="400">64点相关环，START至DONE</text>
+<text x="975" y="531" font-size="14" text-anchor="middle" style="fill:#172b4d" font-weight="400">加速比</text>
+<text x="48" y="571" font-size="16" text-anchor="start" style="fill:#172b4d" font-weight="400">串行RTL</text>
+<rect x="235" y="550" width="650" height="29" rx="5" fill="#7694b7"/>
+<text x="870" y="570" font-size="14" text-anchor="end" style="fill:#fff" font-weight="400">100%</text>
+<text x="1060" y="571" font-size="16" text-anchor="end" style="fill:#172b4d" font-weight="400">3.686450 ms</text>
+<text x="48" y="618" font-size="16" text-anchor="start" style="fill:#172b4d" font-weight="400">四麦对并行</text>
+<rect x="235" y="597" width="650" height="29" rx="5" fill="#e8edf3"/>
+<rect x="235" y="597" width="41.025580165" height="29" rx="5" fill="#df8a39" data-normalized-percent="6.311627718"/>
+<text x="300" y="618" font-size="16" text-anchor="start" style="fill:#172b4d" font-weight="400">0.232675 ms</text>
+<text x="470" y="618" font-size="14" text-anchor="start" style="fill:#172b4d" font-weight="400">约6.3116%</text>
+<text x="975" y="620" font-size="28" text-anchor="middle" style="fill:#b45309" font-weight="700">15.84×</text>
+<text class="small" x="42" y="687">横条以每组基线归一为100%；加速比＝基线周期／加速周期。不同组的横条不表示相同绝对时间。</text>
+<rect x="30" y="710" width="1040" height="89" rx="10" fill="#fff8ed" stroke="#ecd9bc"/>
+<text x="48" y="736" font-size="16" font-weight="700">局部算子与扫描对照；完整九麦评分阶段另列，不代替三架构实板全程</text>
+<text class="small" x="48" y="760">FFT/FIR：实际RV32程序周期，TB为40 MHz；FIR逐样结果与独立整数参考一致。</text>
+<text class="small" x="48" y="784">SRP：同输入串行与并行RTL，TB周期10 ns；图中ms按40 MHz解析换算，不含装载／读回。</text>
+</svg>

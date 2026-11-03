@@ -1,0 +1,128 @@
+{
+  "reviewed_at_utc": "2026-10-28T04:54:24.857339+00:00",
+  "tests_executed": true,
+  "physical_board_accessed": false,
+  "synthesis_executed": false,
+  "production_source_hashes_unchanged": true,
+  "tool_executables": {
+    "gcc.exe": {
+      "path": "C:\\msys64\\ucrt64\\bin\\gcc.exe",
+      "bytes": 3297488,
+      "sha256": "70325d325c126905fc04c5bc57727969f4529173a139c129e3ff92b7adc2941e"
+    },
+    "iverilog.exe": {
+      "path": "C:\\msys64\\ucrt64\\bin\\iverilog.exe",
+      "bytes": 97998,
+      "sha256": "25e1ba02e72f58d9d484bc5457d69a6b179d22d86bdf5ba5d6f9f0d4fe620bbf"
+    },
+    "vvp.exe": {
+      "path": "C:\\msys64\\ucrt64\\bin\\vvp.exe",
+      "bytes": 1004959,
+      "sha256": "f0775603e1f1bcf1b2dea16dff963a4b7d71b7b33d5bbe23d2b01ff5b2304e09"
+    },
+    "python.exe": {
+      "path": "C:\\msys64\\ucrt64\\bin\\python.exe",
+      "bytes": 96721,
+      "sha256": "a8fd6ecea422ccf9e3a8b23394a8a0376689f355e08d99bb1686e3038b65df19"
+    }
+  },
+  "srp": {
+    "pairs": 36,
+    "grid_count": 1024,
+    "R_LEN": 64,
+    "IDX_W": 6,
+    "testbench_clock_period_ns": 10,
+    "cycle_anchor": "cycles0 at negedge start assertion after correlation transfer; sample when done observed; input loading and map readback excluded; includes assertion cycle",
+    "variants": [
+      {
+        "variant": "serial",
+        "FAST_SCAN": 0,
+        "cycles": 147458,
+        "two_scan_cycles": [
+          147458,
+          147458
+        ],
+        "ms_at_production_40MHz_analytical": 3.68645,
+        "speedup_vs_serial_same_testbench": 1.0
+      },
+      {
+        "variant": "single_pair_pipeline",
+        "FAST_SCAN": 1,
+        "cycles": 37153,
+        "two_scan_cycles": [
+          37153,
+          37153
+        ],
+        "ms_at_production_40MHz_analytical": 0.928825,
+        "speedup_vs_serial_same_testbench": 3.9689392512044788
+      },
+      {
+        "variant": "four_pair_banked_pipeline",
+        "FAST_SCAN": 4,
+        "cycles": 9307,
+        "two_scan_cycles": [
+          9307,
+          9307
+        ],
+        "ms_at_production_40MHz_analytical": 0.232675,
+        "speedup_vs_serial_same_testbench": 15.843773503814333
+      }
+    ],
+    "identical_input_text_hashes": {
+      "serial": {
+        "lut.hex": "09de6dac06c7749d2cccdc90e628266663acad66e529cbe74b1ff90dc35fe5d7",
+        "r.hex": "5d763d7c9dacc82990c45eea45ec969a97ac6cbff517d0e4a8850733c35675ad",
+        "golden.hex": "dc09e799962a615c2ecd4b954346ea793af3224c1e34d84bb7f6e57627e561b1"
+      },
+      "single_pair_pipeline": {
+        "lut.hex": "09de6dac06c7749d2cccdc90e628266663acad66e529cbe74b1ff90dc35fe5d7",
+        "r.hex": "5d763d7c9dacc82990c45eea45ec969a97ac6cbff517d0e4a8850733c35675ad",
+        "golden.hex": "dc09e799962a615c2ecd4b954346ea793af3224c1e34d84bb7f6e57627e561b1"
+      },
+      "four_pair_banked_pipeline": {
+        "lut.hex": "09de6dac06c7749d2cccdc90e628266663acad66e529cbe74b1ff90dc35fe5d7",
+        "r.hex": "5d763d7c9dacc82990c45eea45ec969a97ac6cbff517d0e4a8850733c35675ad",
+        "golden.hex": "dc09e799962a615c2ecd4b954346ea793af3224c1e34d84bb7f6e57627e561b1"
+      }
+    },
+    "same_inputs_for_all_three_variants": true,
+    "all_nine_configurations_pass": true,
+    "compared_scores_all_variants": 18432,
+    "edge_tests_pass": true,
+    "results_path": "FPGA/xyf_workbench/zynq_-pl_-simd_-verilog/build/srp_lag_ring/results.json",
+    "results_sha256": "6d9e4a62c807acfedd32dac4c22f3aa13c7e9697f5e9786f10342acaab05fccb",
+    "historical_9306_cycles_note": "Do not mix with current 9307 counter: historical direct-core/SRP stage uses another anchor. Current comparison is same testbench and identical inputs."
+  },
+  "fft": {
+    "pass": true,
+    "cases": 12,
+    "compared_output_words": 6148,
+    "inverse_run_cycles": [
+      854
+    ],
+    "forward_run_cycles": [
+      917
+    ],
+    "inverse_ms_at_40MHz_analytical": 0.02135,
+    "forward_ms_at_40MHz_analytical": 0.022925,
+    "cycle_anchor": "RUN start assertion to both full and sparse engines done; load/pop excluded",
+    "disabled_sparse_negative_control_detected": true,
+    "interpretation": "Functional equivalence and RUN latency evidence; does not measure scalar A9 execution or end-to-end data transfer speedup. Mode0 only transfers 64 nonzero-band input words to sparse instance versus 513 words to full reference after poisoning. Both engines match compiled scalar C golden.",
+    "results_path": "FPGA/xyf_workbench/zynq_-pl_-simd_-verilog/build/fft_sparse/results.json",
+    "results_sha256": "4967eafa4d8a1ef0790c88ee571a1cd5faf4a85aeae902600021522d9832bf6a"
+  },
+  "provenance_files": {
+    "srp": "srp_provenance.json",
+    "fft": "fft_provenance.json"
+  },
+  "raw_logs": {
+    "srp": {
+      "stdout": "srp_stdout.log",
+      "stderr": "srp_stderr.log"
+    },
+    "fft": {
+      "stdout": "fft_stdout.log",
+      "stderr": "fft_stderr.log"
+    }
+  }
+}

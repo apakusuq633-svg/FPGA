@@ -1,0 +1,1092 @@
+#include "circular9_candidates.h"
+#include "circular9_joint_shadow.h"
+#include "circular9_decimator.h"
+#include "circular9_direction.h"
+#include "circular9_diagnosis.h" /* One fixed carrier definition for readiness. */
+#include <string.h>
+#ifdef __arm__
+#include "xtime_l.h"
+static uint32_t search_clock(void){XTime t;XTime_GetTime(&t);return (uint32_t)t;}
+#else
+static uint32_t search_clock(void){return 0;}
+#endif
+_Static_assert((C9_HISTORY_FRAMES&(C9_HISTORY_FRAMES-1u))==0,"power-of-two history");
+_Static_assert(sizeof(c9_history)<=32u*1024u*1024u,"shared history reservation");
+
+/* Both cores map CPU-only history as Normal WB shareable, with SMP/SCU
+ * coherence enabled. Acquire/release order the 16/32-bit atomic accesses
+ * on Cortex-A9 and keep native SPSC tests
+ * within the C memory model. Invalidate BEFORE writing PCM, not afterwards. */
+#define LOAD(p) __atomic_load_n((p),__ATOMIC_ACQUIRE)
+#define STORE(p,v) __atomic_store_n((p),(v),__ATOMIC_RELEASE)
+static uint32_t head_begin(c9_history *s){
+ uint32_t g=LOAD(&s->head_guard);STORE(&s->head_guard,g+1u);
+ /* A release store alone orders earlier writes, not following payload writes.
+  * This barrier makes invalidation visible BEFORE any protected mutation. */
+ __atomic_thread_fence(__ATOMIC_SEQ_CST);return g+2u;
+}
+static void head_end(c9_history *s,uint32_t g){STORE(&s->head_guard,g);}
+void c9_history_init(c9_history *s){
+ /* No slot can be observed until count becomes nonzero. Avoid clearing 28 MiB
+  * in the real-time producer; even uninitialized slot guards are never read
+  * until that slot has first been explicitly initialized by the writer. */
+ STORE(&s->head_guard,0);STORE(&s->end,0);STORE(&s->count,0);
+ STORE(&s->epoch,0);STORE(&s->session,1);
+}
+void c9_history_reset(c9_history *s){
+ uint32_t g=head_begin(s);STORE(&s->count,0);
+ STORE(&s->session,LOAD(&s->session)+1u);head_end(s,g);
+}
+void c9_history_push(c9_history *s,const uint32_t w[16]){
+ uint32_t g=head_begin(s),seq=w[1],count=LOAD(&s->count);
+ if(count&&(seq!=LOAD(&s->end)||w[14]!=LOAD(&s->epoch))){
+  count=0;STORE(&s->session,LOAD(&s->session)+1u);
+ }
+ c9_history_frame *f=&s->frames[seq&(C9_HISTORY_FRAMES-1u)];
+ /* Global seq advances per packet, so use it to initialize a fresh guard
+  * without reading uninitialized RAM. Every rewrite differs by capacity. */
+ uint32_t version=(seq/C9_HISTORY_FRAMES)*2u+1u;
+ STORE(&f->guard,version);
+ __atomic_thread_fence(__ATOMIC_SEQ_CST);
+ STORE(&f->sequence,seq);
+ for(unsigned i=0;i<9;i++)
+  __atomic_store_n(&f->pcm[i],(int16_t)(uint16_t)(w[8+i/2]>>(16*(i&1))),__ATOMIC_RELAXED);
+ STORE(&f->guard,version+1u);
+ STORE(&s->epoch,w[14]);STORE(&s->count,count<C9_HISTORY_FRAMES?count+1u:count);
+ STORE(&s->end,seq+1u);head_end(s,g);
+}
+int c9_history_info(const c9_history *s,uint32_t *end,uint32_t *count,
+ uint32_t *epoch,uint32_t *session){
+ for(unsigned tries=0;tries<8;tries++){
+  uint32_t g=LOAD(&s->head_guard);if(g&1u)continue;
+  uint32_t en=LOAD(&s->end),n=LOAD(&s->count),ep=LOAD(&s->epoch),se=LOAD(&s->session);
+  if(LOAD(&s->head_guard)!=g)continue;
+  if(end)*end=en;
+  if(count)*count=n;
+  if(epoch)*epoch=ep;
+  if(session)*session=se;
+  return 1;
+ }
+ return 0;
+}
+int c9_history_copy(const c9_history *s,int16_t (*pcm)[9],uint32_t frames,
+ uint32_t requested_end,uint32_t *first,uint32_t *epoch,uint32_t *session){
+ uint32_t end,count,e,se;
+ if(!s||!pcm||!first||!epoch||!session||!frames||(frames&3u)||frames>C9_HISTORY_FRAMES||
+    (requested_end&3u)||!c9_history_info(s,&end,&count,&e,&se))return 0;
+ uint32_t distance=end-requested_end;
+ if(distance>=0x80000000u||distance>C9_HISTORY_FRAMES||frames>count||distance>count-frames)return 0;
+ uint32_t start=requested_end-frames;
+ for(unsigned i=0;i<frames;i++){
+  uint32_t seq=start+i;
+  const c9_history_frame *f=&s->frames[seq&(C9_HISTORY_FRAMES-1u)];
+  uint32_t g=LOAD(&f->guard);
+  if((g&1u)||LOAD(&f->sequence)!=seq)return 0;
+  for(unsigned ch=0;ch<9;ch++)pcm[i][ch]=__atomic_load_n(&f->pcm[ch],__ATOMIC_RELAXED);
+  __atomic_thread_fence(__ATOMIC_ACQUIRE);
+  if(LOAD(&f->guard)!=g||LOAD(&f->sequence)!=seq)return 0;
+ }
+ uint32_t end2,count2,e2,se2;
+ if(!c9_history_info(s,&end2,&count2,&e2,&se2)||e2!=e||se2!=se||
+    (uint32_t)(end2-start)>C9_HISTORY_FRAMES||count2<frames||
+    (uint32_t)(end2-requested_end)>count2-frames)return 0;
+ *first=start;*epoch=e;*session=se;return 1;
+}
+int c9_history_snapshot_at(const c9_history *s,int16_t (*pcm)[9],uint32_t requested_end,
+ uint32_t *first,uint32_t *epoch,uint32_t *session){
+ return c9_history_copy(s,pcm,C9_SNAPSHOT_FRAMES,requested_end,first,epoch,session);
+}
+int c9_history_snapshot(const c9_history *s,int16_t (*pcm)[9],uint32_t *first,
+ uint32_t *epoch,uint32_t *session){
+ uint32_t end;
+ return s&&c9_history_info(s,&end,NULL,NULL,NULL)&&
+  c9_history_snapshot_at(s,pcm,end&~3u,first,epoch,session);
+}
+
+static int candidate_local_maximum(const int32_t p[1024],unsigned grid){
+ unsigned x=grid%32u,y=grid/32u;
+ for(int dy=-1;dy<=1;dy++)for(int dx=-1;dx<=1;dx++){
+  int xx=(int)x+dx,yy=(int)y+dy;
+  if(xx>=0&&xx<32&&yy>=0&&yy<32&&p[yy*32+xx]>p[grid])return 0;
+ }
+ return 1;
+}
+int c9_candidate_at_peak(const int32_t p[1024],unsigned grid,c9_candidate *out){
+ if(!out)return 0;
+ *out=(c9_candidate){0};
+ if(!p||grid>=C9_DIRECTION_COUNT||p[grid]<=0||!candidate_local_maximum(p,grid))return 0;
+ c9_candidate c={.grid=grid,.score=p[grid],.uncertainty_mdeg=6000u};
+ unsigned x=grid%32u,y=grid/32u;
+ c.azimuth_mdeg=c9_direction_azimuth_mdeg[x];
+ c.elevation_mdeg=c9_direction_elevation_mdeg[y];
+ /* A bounded two-dimensional quadratic fit needs all nine committed cells.
+  * Cross curvature matters for tilted peaks. Reject a saddle/flat surface,
+  * boundary maximum and a vertex substantially outside the central cell rather than
+  * manufacture fine angular precision. All differences use double before
+  * subtracting int32 inputs, including INT32_MIN negative side lobes. */
+ if(x&&x<31u&&y&&y<31u){
+  double p0=p[grid],left=p[grid-1],right=p[grid+1];
+  double down=p[grid-32],up=p[grid+32];
+  double hx=left-2*p0+right,hy=down-2*p0+up;
+  double hxy=((double)p[grid+33]-p[grid+31]-p[grid-31]+p[grid-33])*.25;
+  double gx=(right-left)*.5,gy=(up-down)*.5,det=hx*hy-hxy*hxy;
+  /* A one-count ripple cannot establish a trustworthy local curvature. */
+  double floor=p0*.002;if(floor<2)floor=2;
+  if(hx< -floor&&hy< -floor&&det>floor*floor){
+   double dx=(hxy*gy-hy*gx)/det,dy=(hxy*gx-hx*gy)/det;
+   /* Tolerate only0.05cell of quadratic-fit overshoot at a shared cell
+    * edge; constrain the accepted vertex to the original half-cell.
+    * Negative curvature/conditioning/uncertainty limits remain unchanged. */
+   if(dx>= -.55&&dx<=.55&&dy>= -.55&&dy<=.55){
+    if(dx<-.5)dx=-.5;
+    if(dx>.5)dx=.5;
+    if(dy<-.5)dy=-.5;
+    if(dy>.5)dy=.5;
+    double az=c.azimuth_mdeg+dx*(c9_direction_azimuth_mdeg[x+1]-c9_direction_azimuth_mdeg[x-1])*.5;
+    double el=c.elevation_mdeg+dy*(c9_direction_elevation_mdeg[y+1]-c9_direction_elevation_mdeg[y-1])*.5;
+    c.azimuth_mdeg=(int32_t)(az+(az>=0?.5:-.5));
+    c.elevation_mdeg=(int32_t)(el+(el>=0?.5:-.5));
+    c.flags=C9_CANDIDATE_REFINED;c.uncertainty_mdeg=3000u;
+   }
+  }
+ }
+ *out=c;return 1;
+}
+
+unsigned c9_candidates_extract(const int32_t p[1024],c9_candidate out[3]){
+ if(!p||!out)return 0;
+ unsigned count=0;
+ /* 25 degree NMS is angular: grid row/column distances are misleading near
+  * the hemisphere poles. This is a candidate proposal, not a claim that a
+  * 50-mm aperture can resolve every pair separated by 25 degrees. */
+ const int32_t cos25=973140576;
+ for(unsigned k=0;k<C9_CANDIDATES;k++){
+  int32_t best=0;unsigned chosen=0;
+  for(unsigned g=0;g<C9_DIRECTION_COUNT;g++){
+   if(p[g]<=best)continue;
+   int separated=1;
+   for(unsigned j=0;j<count;j++)if(c9_direction_within(g,out[j].grid,cos25))separated=0;
+   if(!separated)continue;
+   if(candidate_local_maximum(p,g)){best=p[g];chosen=g;}
+  }
+  /* Keep weak peaks down to 1/20 of the largest score. Actual separability
+   * and trust are checked by the separator and caller's temporal tracker. */
+  if(!best||(count&&(int64_t)best*20<out[0].score))break;
+  if(c9_candidate_at_peak(p,chosen,&out[count]))count++;
+ }
+ return count;
+}
+
+static c9_complex zadd(c9_complex a,c9_complex b){return(c9_complex){a.re+b.re,a.im+b.im};}
+static c9_complex zsub(c9_complex a,c9_complex b){return(c9_complex){a.re-b.re,a.im-b.im};}
+static c9_complex zmul(c9_complex a,c9_complex b){return(c9_complex){a.re*b.re-a.im*b.im,a.re*b.im+a.im*b.re};}
+static c9_complex zconj(c9_complex a){return(c9_complex){a.re,-a.im};}
+static double zpower(c9_complex a){return a.re*a.re+a.im*a.im;}
+static c9_complex zdiv(c9_complex a,c9_complex b){double p=zpower(b);return(c9_complex){(a.re*b.re+a.im*b.im)/p,(a.im*b.re-a.re*b.im)/p};}
+static double absolute(double x){return x<0?-x:x;}
+static int finite_number(double x){return x==x&&x<1e100&&x> -1e100;}
+/* Small argument sin/cos without libm, matching the PS math convention. All
+ * callers use |angle|<2*pi; phase construction is bounded by the 25-mm ring. */
+static void sincos_small(double angle,double *sn,double *cs){
+ const double halfpi=1.57079632679489661923;
+ int q=(int)(angle/halfpi+(angle>=0?.5:-.5));
+ double x=(angle-q*1.5707963267948966)-q*6.123233995736766e-17,t=x*x;
+ double s=x*(1+t*(-1./6+t*(1./120+t*(-1./5040+t*(1./362880+t*(-1./39916800+t*(1./6227020800.+t*(-1./1307674368000.+t/355687428096000.))))))));
+ double c=1+t*(-1./2+t*(1./24+t*(-1./720+t*(1./40320+t*(-1./3628800+t*(1./479001600+t*(-1./87178291200.+t*(1./20922789888000.-t/6402373705728000.))))))));
+ switch(q&3){case 0:*sn=s;*cs=c;break;case 1:*sn=c;*cs=-s;break;case 2:*sn=-s;*cs=-c;break;default:*sn=-c;*cs=s;break;}
+}
+void c9_candidate_angles(const c9_candidate *c,int32_t *az,int32_t *el){
+ int32_t a=0,e=0;
+ if(c&&c->grid<C9_DIRECTION_COUNT){
+  a=c9_direction_azimuth_mdeg[c->grid%32u];e=c9_direction_elevation_mdeg[c->grid/32u];
+  /* Invalid metadata never steers outside the advertised front hemisphere. */
+  if((c->flags&C9_CANDIDATE_REFINED)&&c->azimuth_mdeg>= -90000&&c->azimuth_mdeg<=90000&&
+     c->elevation_mdeg>= -90000&&c->elevation_mdeg<=90000&&
+     c->azimuth_mdeg-a>= -2814&&c->azimuth_mdeg-a<=2814&&
+     c->elevation_mdeg-e>= -2814&&c->elevation_mdeg-e<=2814){
+   a=c->azimuth_mdeg;e=c->elevation_mdeg;
+  }
+ }
+ if(az)*az=a;
+ if(el)*el=e;
+}
+void c9_candidate_unit(const c9_candidate *c,double u[3]){
+ if(!u)return;
+ int32_t az,el;double sa,ca,se,ce;c9_candidate_angles(c,&az,&el);
+ sincos_small(az*(3.14159265358979323846/180000),&sa,&ca);
+ sincos_small(el*(3.14159265358979323846/180000),&se,&ce);
+ u[0]=sa*ce;u[1]=se;u[2]=ca*ce;
+}
+static void fft(c9_complex *x,const c9_complex *twiddle,int inverse){
+ unsigned j=0;
+ for(unsigned i=1;i<C9_SEPARATION_FFT;i++){
+  unsigned bit=C9_SEPARATION_FFT>>1;for(;j&bit;bit>>=1)j^=bit;j^=bit;
+  if(i<j){c9_complex z=x[i];x[i]=x[j];x[j]=z;}
+ }
+ for(unsigned len=2;len<=C9_SEPARATION_FFT;len<<=1){
+  unsigned half=len>>1,stride=C9_SEPARATION_FFT/len;
+  for(unsigned b=0;b<C9_SEPARATION_FFT;b+=len)for(unsigned k=0;k<half;k++){
+   c9_complex w=twiddle[k*stride];if(inverse)w.im=-w.im;
+   c9_complex z=zmul(x[b+k+half],w),a=x[b+k];
+   x[b+k]=zadd(a,z);x[b+k+half]=zsub(a,z);
+  }
+ }
+ if(inverse)for(unsigned i=0;i<C9_SEPARATION_FFT;i++){x[i].re/=C9_SEPARATION_FFT;x[i].im/=C9_SEPARATION_FFT;}
+}
+/* Dimensions are fixed at nine; no heap and no convergence-dependent loop. */
+static int inverse(c9_complex matrix[9][9],c9_complex result[9][9]){
+ memset(result,0,81*sizeof(c9_complex));for(unsigned i=0;i<9;i++)result[i][i].re=1;
+ for(unsigned k=0;k<9;k++){
+  unsigned pivot=k;double largest=zpower(matrix[k][k]);
+  for(unsigned i=k+1;i<9;i++)if(zpower(matrix[i][k])>largest){pivot=i;largest=zpower(matrix[i][k]);}
+  if(largest<1e-16||!finite_number(largest))return 0;
+  if(pivot!=k)for(unsigned j=0;j<9;j++){
+   c9_complex t=matrix[k][j];matrix[k][j]=matrix[pivot][j];matrix[pivot][j]=t;
+   t=result[k][j];result[k][j]=result[pivot][j];result[pivot][j]=t;
+  }
+  c9_complex d=matrix[k][k];
+  for(unsigned j=0;j<9;j++){matrix[k][j]=zdiv(matrix[k][j],d);result[k][j]=zdiv(result[k][j],d);}
+  for(unsigned i=0;i<9;i++)if(i!=k){
+   c9_complex m=matrix[i][k];for(unsigned j=0;j<9;j++){
+    matrix[i][j]=zsub(matrix[i][j],zmul(m,matrix[k][j]));
+    result[i][j]=zsub(result[i][j],zmul(m,result[k][j]));
+   }
+  }
+ }
+ return 1;
+}
+static double delay_q4(const uint32_t *lut,unsigned channel,int32_t az,int32_t el){
+ unsigned x=0,y=0;
+ while(x<30u&&az>c9_direction_azimuth_mdeg[x+1])x++;
+ while(y<30u&&el>c9_direction_elevation_mdeg[y+1])y++;
+ double fx=(az-c9_direction_azimuth_mdeg[x])/(double)(c9_direction_azimuth_mdeg[x+1]-c9_direction_azimuth_mdeg[x]);
+ double fy=(el-c9_direction_elevation_mdeg[y])/(double)(c9_direction_elevation_mdeg[y+1]-c9_direction_elevation_mdeg[y]);
+ /* At the hemisphere boundary at most half a cell is extrapolated. */
+ if(fx< -.5)fx= -.5;
+ if(fx>1.5)fx=1.5;
+ if(fy< -.5)fy= -.5;
+ if(fy>1.5)fy=1.5;
+ double q[2][2];
+ for(unsigned dy=0;dy<2;dy++)for(unsigned dx=0;dx<2;dx++){
+  int v=(int)(lut[channel*1024+(y+dy)*32+x+dx]&16383u);if(v&8192)v-=16384;
+  q[dy][dx]=v;
+ }
+ return (1-fy)*((1-fx)*q[0][0]+fx*q[0][1])+fy*((1-fx)*q[1][0]+fx*q[1][1]);
+}
+static int candidate_valid(const c9_candidate *c){
+ if(!c||c->grid>=C9_DIRECTION_COUNT||(c->flags&~C9_CANDIDATE_REFINED))return 0;
+ int32_t az,el;c9_candidate_angles(c,&az,&el);
+ return !(c->flags&C9_CANDIDATE_REFINED)||(az==c->azimuth_mdeg&&el==c->elevation_mdeg);
+}
+int c9_candidate_delays_q16(const c9_candidate *c,const uint32_t *lut,uint32_t delays[9]){
+ if(!delays)return 0;
+ memset(delays,0,9*sizeof(*delays));if(!lut||!candidate_valid(c))return 0;
+ int32_t az,el;int q[9],minimum=0;c9_candidate_angles(c,&az,&el);
+ unsigned x=0,y=0;
+ while(x<30u&&az>c9_direction_azimuth_mdeg[x+1])x++;
+ while(y<30u&&el>c9_direction_elevation_mdeg[y+1])y++;
+ int64_t sx=c9_direction_azimuth_mdeg[x+1]-c9_direction_azimuth_mdeg[x];
+ int64_t sy=c9_direction_elevation_mdeg[y+1]-c9_direction_elevation_mdeg[y];
+ int64_t dx=az-c9_direction_azimuth_mdeg[x],dy=el-c9_direction_elevation_mdeg[y];
+ int64_t wx[2]={sx-dx,dx},wy[2]={sy-dy,dy},denominator=sx*sy;
+ for(unsigned ch=0;ch<9;ch++){
+  /* Integer rational interpolation avoids a one-Q4 floor error when the true
+   * bilinear result is integral but binary64 rounds just below that integer.
+   * |numerator| stays below2e12 for these14-bit LUTs and hemisphere angles. */
+  int64_t numerator=0;
+  for(unsigned j=0;j<2;j++)for(unsigned i=0;i<2;i++){
+   int value=(int)(lut[ch*1024+(y+j)*32+x+i]&16383u);if(value&8192)value-=16384;
+   numerator+=(int64_t)value*wx[i]*wy[j];
+  }
+  q[ch]=(int)(numerator/denominator);if(numerator<0&&numerator%denominator)q[ch]--;
+  if(!ch||q[ch]<minimum)minimum=q[ch];
+ }
+ for(unsigned ch=0;ch<9;ch++)if(q[ch]-minimum>=61*16)return 0;
+ for(unsigned ch=0;ch<9;ch++)delays[ch]=(uint32_t)(q[ch]-minimum)*4096u;
+ return 1;
+}
+static double square_root(double x){
+ if(x<=0)return 0;
+ /* IEEE754 binary64/VFP: exponent estimate plus bounded Newton refinement. */
+ union {double d;uint64_t u;} v={x};v.u=(v.u>>1)+0x1ff8000000000000ull;
+ double y=v.d;for(unsigned i=0;i<6;i++)y=.5*(y+x/y);return y;
+}
+static unsigned analysis_band(unsigned bin){return bin<58u?0u:bin<=120u?1u:2u;}
+/* Integer-only acceleration. Never use floating reassociation/fast-math. */
+#if defined(__ARM_NEON) && !defined(C9_DISABLE_NEON_DECIMATOR)
+#include <arm_neon.h>
+static void decimate_eight(const int16_t (*raw)[9],unsigned index,int32_t out[8]){
+ int32x4_t lo=vdupq_n_s32(0),hi=lo;
+ for(unsigned j=6;j<63;j++){
+  int16x8_t a=vld1q_s16(&raw[index-j][0]),b=vld1q_s16(&raw[index-126+j][0]);
+  lo=vaddq_s32(lo,vmulq_n_s32(vaddl_s16(vget_low_s16(a),vget_low_s16(b)),c9_decim_coeff[j]));
+  hi=vaddq_s32(hi,vmulq_n_s32(vaddl_s16(vget_high_s16(a),vget_high_s16(b)),c9_decim_coeff[j]));
+ }
+ int16x8_t middle=vld1q_s16(&raw[index-63][0]);
+ lo=vaddq_s32(lo,vmulq_n_s32(vmovl_s16(vget_low_s16(middle)),c9_decim_coeff[63]));
+ hi=vaddq_s32(hi,vmulq_n_s32(vmovl_s16(vget_high_s16(middle)),c9_decim_coeff[63]));
+ vst1q_s32(out,lo);vst1q_s32(out+4,hi);
+}
+static unsigned vector_status;
+static unsigned decimator_vector_check(void){
+ if(vector_status)return vector_status;
+ static int16_t probe[160][9];uint32_t seed=17;int32_t actual[8];
+ for(unsigned pattern=0;pattern<6;pattern++){
+  for(unsigned n=0;n<160;n++)for(unsigned ch=0;ch<9;ch++){
+   seed=seed*1664525u+1013904223u;
+   probe[n][ch]=pattern==0?(int16_t)(seed>>16):pattern==1?32767:pattern==2?-32768:
+    pattern==3?(n&1?32767:-32768):pattern==4?(n==127?32767:0):
+    (c9_decim_coeff[(159u-n)%127u]>=0?32767:-32768);
+  }
+  for(unsigned index=127;index<160;index+=4){
+   decimate_eight(probe,index,actual);
+   for(unsigned ch=0;ch<8;ch++){
+    int64_t expected=0;for(unsigned j=0;j<127;j++)expected+=(int64_t)probe[index-j][ch]*c9_decim_coeff[j];
+    if(expected!=actual[ch]){vector_status=3u;return vector_status;}
+   }
+  }
+ }
+ vector_status=7u;return vector_status;
+}
+#else
+static unsigned decimator_vector_check(void){return 0;}
+#endif
+unsigned c9_candidates_acceleration(void){return decimator_vector_check();}
+static void prepare_samples(const int16_t (*raw)[9],unsigned frames,c9_separation_workspace *w,
+ uint32_t *invalid,uint32_t clipped[9]){
+ uint64_t energy[9]={0};uint32_t clips[9]={0};
+ for(unsigned n=0;n<frames;n++)for(unsigned ch=0;ch<9;ch++){
+  int v=raw[n][ch];energy[ch]+=(int64_t)v*v;if(v==32767||v== -32768)clips[ch]++;
+ }
+ *invalid=0;for(unsigned ch=0;ch<9;ch++){
+  if(energy[ch]<frames*4ull||clips[ch])*invalid|=1u<<ch;
+  if(clipped)clipped[ch]=clips[ch];
+ }
+ unsigned scalar_frames=frames/4u;
+#if defined(__ARM_NEON) && !defined(C9_DISABLE_NEON_DECIMATOR)
+ if(decimator_vector_check()==7u&&scalar_frames>32u){
+  for(unsigned n=32;n<scalar_frames;n++){
+   unsigned index=4*n+3;int32_t sums[8];decimate_eight(raw,index,sums);
+   for(unsigned ch=0;ch<8;ch++)w->decimated[ch][n]=(float)(sums[ch]/(32768.0*32768.0));
+   int32_t sum=0;for(unsigned j=6;j<63;j++)sum+=((int)raw[index-j][8]+raw[index-126+j][8])*c9_decim_coeff[j];
+   sum+=(int)raw[index-63][8]*c9_decim_coeff[63];w->decimated[8][n]=(float)(sum/(32768.0*32768.0));
+  }
+  scalar_frames=32u;
+ }
+#endif
+ for(unsigned ch=0;ch<9;ch++)for(unsigned n=0;n<scalar_frames;n++){
+  /* Sum(abs(Q15 taps))=55056, so every partial accumulation is bounded
+   * by 32768*55056=1804075008 < INT32_MAX, including full-scale inputs.
+   * This preserves the exact integer result and avoids 64-bit conversion. */
+  int index=(int)(4*n+3);int32_t sum=0;
+  if(index>=126){
+   /* Steady-state convolution: no per-tap zero-padding branches. The
+    * symmetric integer sum and accumulation order are bit-for-bit unchanged. */
+   const int16_t *front=&raw[index][ch],*back=&raw[index-126][ch];
+   for(unsigned j=0;j<63;j++,front-=9,back+=9)
+    sum+=((int)*front+(int)*back)*c9_decim_coeff[j];
+   sum+=*front*c9_decim_coeff[63];
+  }else{
+   for(int j=0;j<63;j++){
+    int v=index>=j?raw[index-j][ch]:0;if(index>=126-j)v+=raw[index-126+j][ch];
+    sum+=v*c9_decim_coeff[j];
+   }
+   if(index>=63)sum+=raw[index-63][ch]*c9_decim_coeff[63];
+  }
+  w->decimated[ch][n]=(float)(sum/(32768.0*32768.0));
+ }
+ for(unsigned n=0;n<C9_SEPARATION_FFT;n++){
+  double sn,cs;sincos_small(3.14159265358979323846*n/C9_SEPARATION_FFT,&sn,&cs);w->window[n]=sn;
+  if(n<C9_SEPARATION_FFT/2){sincos_small(6.2831853071795864769*n/C9_SEPARATION_FFT,&sn,&cs);w->twiddle[n]=(c9_complex){cs,-sn};}
+ }
+}
+static void analyze_observations(c9_separation_workspace *w,unsigned decimated_frames){
+ unsigned hops=(decimated_frames-64u-C9_SEPARATION_FFT)/C9_SEPARATION_HOP;
+ unsigned frames=hops+1u;if(frames>C9_ANALYSIS_FRAMES)frames=C9_ANALYSIS_FRAMES;
+ w->analysis_frames=frames;memset(w->covariance,0,sizeof(w->covariance));memset(w->band_energy,0,sizeof(w->band_energy));
+ for(unsigned f=0;f<frames;f++){
+  unsigned start=64u+(frames>1u?(f*hops/(frames-1u)):0u)*C9_SEPARATION_HOP;w->observed_start[f]=start;
+  for(unsigned ch=0;ch<9;ch++){
+   for(unsigned n=0;n<C9_SEPARATION_FFT;n++)w->spectrum[ch][n]=(c9_complex){w->decimated[ch][start+n]*w->window[n],0};
+   fft(w->spectrum[ch],w->twiddle,0);
+   for(unsigned k=8;k<=209;k++){
+    w->observed[f][ch][k-8u]=w->spectrum[ch][k];
+    if(k>=16u)w->band_energy[f][analysis_band(k)]+=zpower(w->spectrum[ch][k]);
+   }
+  }
+  for(unsigned k=0;k<C9_ANALYSIS_BINS;k++)for(unsigned i=0;i<9;i++)for(unsigned j=i;j<9;j++){
+   c9_complex v=zmul(w->observed[f][i][k],zconj(w->observed[f][j][k]));
+   w->covariance[k][i][j]=zadd(w->covariance[k][i][j],v);
+   if(i!=j)w->covariance[k][j][i]=zadd(w->covariance[k][j][i],zconj(v));
+  }
+ }
+ for(unsigned k=0;k<C9_ANALYSIS_BINS;k++)for(unsigned i=0;i<9;i++)for(unsigned j=0;j<9;j++){
+  w->covariance[k][i][j].re/=frames;w->covariance[k][i][j].im/=frames;
+ }
+}
+static unsigned candidate_support(c9_separation_workspace *w,const c9_candidate *c,const uint32_t *lut,
+ unsigned band,const uint8_t used[210],uint32_t *mask,unsigned *run_start,unsigned *run_end){
+ int32_t az,el;c9_candidate_angles(c,&az,&el);double q[9],numerator[8]={0},denominator[8]={0},maximum_energy=0;
+ for(unsigned ch=0;ch<9;ch++)q[ch]=delay_q4(lut,ch,az,el);
+ for(unsigned f=0;f<w->analysis_frames;f++)if(w->band_energy[f][band]>maximum_energy)maximum_energy=w->band_energy[f][band];
+ for(unsigned k=16;k<=209;k++)if(used[k]&&analysis_band(k)==band){
+  c9_complex steer[9];
+  for(unsigned ch=0;ch<9;ch++){
+   double sn,cs;sincos_small(6.2831853071795864769*k*q[ch]/(64.0*C9_SEPARATION_FFT),&sn,&cs);
+   steer[ch]=(c9_complex){cs,-sn};
+  }
+  for(unsigned f=0;f<w->analysis_frames;f++){
+   c9_complex beam={0,0};double energy=0;
+   for(unsigned ch=0;ch<9;ch++){
+    c9_complex x=w->observed[f][ch][k-8];beam=zadd(beam,zmul(x,steer[ch]));energy+=zpower(x);
+   }
+   numerator[f]+=zpower(beam)-energy;denominator[f]+=8*energy;
+  }
+ }
+ *mask=0;*run_start=*run_end=0;
+ for(unsigned f=0;f<w->analysis_frames;f++){
+  int supported=denominator[f]>1e-12&&numerator[f]>.25*denominator[f]&&
+   w->band_energy[f][band]>.25*maximum_energy;
+  if(supported)*mask|=1u<<f;
+ }
+ return c9_support_component(*mask,w->analysis_frames,run_start,run_end);
+}
+/* Secondary directional evidence after removing ONE independently supported
+ * peer. The original SRP/quality gates remain mandatory. This is not used to
+ * synthesize PCM or to declare a physical source. For rank8 residual noise,
+ * (8*projected_target_energy-residual_energy)/(7*residual_energy) has the same
+ * unit-source/zero-noise-coherence convention as the original rank9 statistic. */
+static unsigned candidate_support_residual(c9_separation_workspace *w,const c9_candidate *c,
+ const c9_candidate *peer,const uint32_t *lut,unsigned band,const uint8_t used[210],
+ uint32_t *mask,unsigned *first,unsigned *last){
+ int32_t az,el;c9_candidate_angles(c,&az,&el);double q[9],qp[9];
+ for(unsigned ch=0;ch<9;ch++)q[ch]=delay_q4(lut,ch,az,el);
+ c9_candidate_angles(peer,&az,&el);for(unsigned ch=0;ch<9;ch++)qp[ch]=delay_q4(lut,ch,az,el);
+ double numerator[8]={0},denominator[8]={0},maximum_energy=0;unsigned bins=0;
+ for(unsigned f=0;f<w->analysis_frames;f++)if(w->band_energy[f][band]>maximum_energy)maximum_energy=w->band_energy[f][band];
+ for(unsigned k=16;k<=209;k++)if(used[k]&&analysis_band(k)==band){
+  c9_complex target[9],other[9],cross={0,0};
+  for(unsigned ch=0;ch<9;ch++){
+   double sn,cs;sincos_small(6.2831853071795864769*k*q[ch]/(64.0*C9_SEPARATION_FFT),&sn,&cs);target[ch]=(c9_complex){cs,-sn};
+   sincos_small(6.2831853071795864769*k*qp[ch]/(64.0*C9_SEPARATION_FFT),&sn,&cs);other[ch]=(c9_complex){cs,-sn};
+   cross=zadd(cross,zmul(other[ch],zconj(target[ch])));
+  }
+  double norm=9-zpower(cross)/9;
+  if(norm<.125)continue; /* 1/norm <= existing separation weight-norm limit8. */
+  bins++;
+  for(unsigned f=0;f<w->analysis_frames;f++){
+   c9_complex beam={0,0},interference={0,0};double energy=0;
+   for(unsigned ch=0;ch<9;ch++){c9_complex x=w->observed[f][ch][k-8];beam=zadd(beam,zmul(x,target[ch]));interference=zadd(interference,zmul(x,other[ch]));energy+=zpower(x);}
+   c9_complex removed=zmul(zconj(cross),interference);removed.re/=9;removed.im/=9;beam=zsub(beam,removed);
+   double residual=energy-zpower(interference)/9;if(residual<0)residual=0;
+   numerator[f]+=8*zpower(beam)/norm-residual;denominator[f]+=7*residual;
+  }
+ }
+ *mask=0;*first=*last=0;if(bins<4)return 0;
+ for(unsigned f=0;f<w->analysis_frames;f++)if(denominator[f]>1e-12&&numerator[f]>.25*denominator[f]&&w->band_energy[f][band]>.25*maximum_energy)*mask|=1u<<f;
+ return c9_support_component(*mask,w->analysis_frames,first,last);
+}
+/* Bound all nine per-band peaks before the three-output capacity decision.
+ * Consensus is current-window, spherical and independent of frequency-loop
+ * order. It is not a source-count/physical-truth assertion. */
+typedef struct {
+ c9_candidate candidate;unsigned band,frames,direct_frames;uint32_t quality;
+ int32_t evidence[3],rank_evidence[3];uint32_t bands,mask,first,last;
+} c9_peak_evidence;
+static double c9_peak_dot(const c9_candidate *a,const c9_candidate *b){
+ double u[3],v[3],dot=0;c9_candidate_unit(a,u);c9_candidate_unit(b,v);
+ for(unsigned k=0;k<3;k++)dot+=u[k]*v[k];
+ return dot;
+}
+static int c9_peak_pool_best(const c9_peak_evidence *p,unsigned count,unsigned excluded){
+ int best=-1;int64_t best_sum=-1;unsigned best_frames=0;
+ for(unsigned i=0;i<count;i++)if(!(excluded&(1u<<i))){
+  /* Only independently rechecked evidence at this exact bearing counts.
+   * A nearby peak's band score must not be credited to this representative. */
+  int64_t sum=(int64_t)p[i].rank_evidence[0]+p[i].rank_evidence[1]+p[i].rank_evidence[2];
+  /* Experiment only: bounded 25% consensus bonus; no candidate veto. */
+#ifdef C9_EXPERIMENT_CONSENSUS
+  unsigned nb=0;for(unsigned b=0;b<3;b++)if(p[i].rank_evidence[b]>0)nb++;
+  if(nb>1)sum+=sum*(nb-1)/4;
+#endif
+  unsigned support=p[i].frames;
+  if(best<0||sum>best_sum||(sum==best_sum&&(support>best_frames||
+     (support==best_frames&&(p[i].candidate.score>p[best].candidate.score||
+      (p[i].candidate.score==p[best].candidate.score&&p[i].candidate.grid<p[best].candidate.grid)))))){
+   best=(int)i;best_sum=sum;best_frames=support;
+  }
+ }
+ return best;
+}
+static unsigned c9_peak_quality_details(const int32_t scores[1024],const c9_candidate *c,int32_t *out){
+ if(out)*out=0;
+ int32_t score=scores[c->grid],shoulder=0;if(score<150000)return 0;
+ for(unsigned g=0;g<1024;g++){
+  int32_t dot=c9_direction_dot_q30(g,c->grid);
+  if(dot<=1050277989&&dot>=973140576&&scores[g]>shoulder)shoulder=scores[g];
+ }
+ if(out)*out=shoulder;
+ int64_t quality=(int64_t)(score-shoulder)*1000/score;
+ return quality<3?0u:quality>1000?1000u:(unsigned)quality;
+}
+static unsigned c9_peak_quality(const int32_t scores[1024],const c9_candidate *c){return c9_peak_quality_details(scores,c,NULL);}
+#ifdef C9_CANDIDATES_TEST
+void c9_debug_peak_support(c9_separation_workspace *w,const c9_candidate *c,const uint32_t *lut,unsigned band,unsigned out[3]){
+ uint8_t used[210]={0};double peak=0;
+ for(unsigned k=16;k<=209;k++)if(analysis_band(k)==band){double p=0;for(unsigned ch=0;ch<9;ch++)p+=w->covariance[k-8][ch][ch].re;if(p>peak)peak=p;}
+ for(unsigned k=16;k<=209;k++)if(analysis_band(k)==band){double p=0;for(unsigned ch=0;ch<9;ch++)p+=w->covariance[k-8][ch][ch].re;if(p>peak*.001&&p>1e-12)used[k]=1;}
+ uint32_t mask;unsigned first,last;out[0]=c9_peak_quality(w->search_scores[band],c);out[1]=candidate_support(w,c,lut,band,used,&mask,&first,&last);out[2]=mask;
+}
+#endif
+
+int c9_search_feedback_current(const c9_search_feedback *f,uint32_t now,uint32_t session,
+ uint32_t epoch,uint32_t geometry,uint32_t calibration){
+ if(!f||f->abi!=C9_SEARCH_FEEDBACK_ABI||f->count>3u||f->invalid_input||f->session!=session||f->epoch!=epoch||
+    f->geometry_version!=geometry||f->calibration_version!=calibration||!session||!geometry||
+    f->analysis_frames<3u||f->analysis_frames>C9_ANALYSIS_FRAMES||
+    f->end_sample-f->first_sample>C9_SEARCH_RAW_FRAMES||f->end_sample-f->first_sample<C9_SEARCH_MIN_RAW_FRAMES||
+    ((f->first_sample|f->end_sample)&3u)||f->band_valid_mask>7u||
+    f->valid_until_sample!=f->end_sample+C9_SEARCH_MAX_AGE_SAMPLES||
+    now-f->end_sample>C9_SEARCH_MAX_AGE_SAMPLES)return 0;
+ for(unsigned c=0;c<f->count;c++){
+  uint32_t start=f->support_first_sample[c]-f->first_sample,end=f->support_end_sample[c]-f->first_sample;
+  unsigned n=f->support_frames[c];
+  if(!candidate_valid(&f->candidates[c])||!f->band_mask[c]||(f->band_mask[c]&~f->band_valid_mask)||
+     !f->quality_permille[c]||f->quality_permille[c]>1000u||n<3u||n>f->analysis_frames||
+     start<256u||start>=end||end>f->end_sample-f->first_sample||
+     (start-256u)%(4u*C9_SEPARATION_HOP)||
+     now-f->support_end_sample[c]>C9_SEARCH_MAX_AGE_SAMPLES)return 0;
+  unsigned first,last;
+  unsigned witnesses=c9_support_component(f->support_mask[c],f->analysis_frames,&first,&last);
+  if(witnesses!=n||start!=256u+4u*C9_SEPARATION_HOP*first||
+     end!=256u+4u*(C9_SEPARATION_HOP*last+C9_SEPARATION_FFT))return 0;
+ }
+ return 1;
+}
+#ifndef C9_REFERENCE_SEARCH_INTERPOLATION
+/* Geometry and /4 analysis produce exact multiples of 1/64. Cache the same
+ * cubic interpolation, retaining double precision and all search gates. */
+static uint16_t search_delay_codes[1024][36];
+static double search_cubic_weights[64][4];
+static uint32_t search_delay_lut[9*1024],search_delay_ready;
+static int search_prepare_delays(const uint32_t *lut){
+ if(search_delay_ready&&!memcmp(lut,search_delay_lut,sizeof(search_delay_lut)))return 1;
+ for(unsigned f=0;f<64;f++){
+  double t=f/64.0,t2=t*t,t3=t2*t;
+  search_cubic_weights[f][0]=-.5*t3+t2-.5*t;
+  search_cubic_weights[f][1]=1-2.5*t2+1.5*t3;
+  search_cubic_weights[f][2]=.5*t+2*t2-1.5*t3;
+  search_cubic_weights[f][3]=-.5*t2+.5*t3;
+ }
+ for(unsigned g=0;g<1024;g++){
+  int q[9];for(unsigned ch=0;ch<9;ch++){q[ch]=(int)(lut[ch*1024+g]&16383u);if(q[ch]&8192)q[ch]-=16384;}
+  unsigned pair=0;
+  for(unsigned i=0;i<8;i++)for(unsigned j=i+1;j<9;j++){
+   int numerator=q[j]-q[i],l=numerator/64;if(l*64>numerator)l--;
+   if(l< -31||l>29){search_delay_ready=0;return 0;}
+   search_delay_codes[g][pair++]=(uint16_t)((l+31)*64+numerator-l*64);
+  }
+ }
+ memcpy(search_delay_lut,lut,sizeof(search_delay_lut));search_delay_ready=1;return 1;
+}
+static inline double search_interpolated(const double p[64],uint16_t code){
+ unsigned i=code>>6;const double *w=search_cubic_weights[code&63u];
+ return p[i]*w[0]+p[i+1]*w[1]+p[i+2]*w[2]+p[i+3]*w[3];
+}
+#endif
+int c9_candidates_search(const int16_t (*raw)[9],uint32_t raw_frames,const uint32_t *lut,
+ c9_separation_workspace *w,const c9_search_context *ctx,c9_search_feedback *r){
+ if(!r)return 0;
+ memset(r,0,sizeof(*r));if(w)memset(&w->debug,0,sizeof(w->debug));
+ if(!raw||!lut||!w||!ctx||raw_frames<C9_SEARCH_MIN_RAW_FRAMES||raw_frames>C9_SEARCH_RAW_FRAMES||
+    (raw_frames&3u)||((ctx->first_sample|ctx->end_sample)&3u)||ctx->end_sample-ctx->first_sample!=raw_frames||!ctx->session||!ctx->geometry_version||
+    ctx->geometry_confirmed>1u){r->invalid_input=0x80000000u;return 0;}
+ r->abi=C9_SEARCH_FEEDBACK_ABI;r->session=ctx->session;r->epoch=ctx->epoch;r->first_sample=ctx->first_sample;
+ w->debug.first=ctx->first_sample;w->debug.end=ctx->end_sample;w->debug.session=ctx->session;w->debug.epoch=ctx->epoch;
+ r->end_sample=ctx->end_sample;r->valid_until_sample=ctx->end_sample+C9_SEARCH_MAX_AGE_SAMPLES;
+ r->geometry_version=ctx->geometry_version;r->calibration_version=ctx->calibration_version;r->geometry_confirmed=ctx->geometry_confirmed;
+ uint32_t profile=search_clock();
+ prepare_samples(raw,raw_frames,w,&r->invalid_input,NULL);
+ w->search_ticks[0]=search_clock()-profile;if(r->invalid_input)return 1;
+ profile=search_clock();
+ analyze_observations(w,raw_frames/4u);r->analysis_frames=w->analysis_frames;
+ w->search_ticks[1]=search_clock()-profile;profile=search_clock();
+ double band_energy[3]={0},largest=0;
+ for(unsigned f=0;f<w->analysis_frames;f++)for(unsigned b=0;b<3;b++)band_energy[b]+=w->band_energy[f][b];
+ for(unsigned b=0;b<3;b++)if(band_energy[b]>largest)largest=band_energy[b];
+ c9_candidate proposals[3][3];unsigned counts[3]={0};uint8_t used[3][210]={{0}};
+ for(unsigned b=0;b<3;b++){
+  memset(w->search_scores[b],0,sizeof(w->search_scores[b]));
+  if(largest<1e-10||band_energy[b]<largest*.0005)continue;
+  double peak_power=0;
+  for(unsigned k=16;k<=209;k++)if(analysis_band(k)==b){
+   double p=0;for(unsigned ch=0;ch<9;ch++)p+=w->covariance[k-8][ch][ch].re;
+   if(p>peak_power)peak_power=p;
+  }
+  for(unsigned k=16;k<=209;k++)if(analysis_band(k)==b){
+   double p=0;for(unsigned ch=0;ch<9;ch++)p+=w->covariance[k-8][ch][ch].re;
+   if(p>peak_power*.001&&p>1e-12){used[b][k]=1;r->band_bins[b]++;}
+  }
+  if(r->band_bins[b]<4u)continue;
+#ifdef C9_REFERENCE_SEARCH_IFFT
+  unsigned pair=0;
+  for(unsigned i=0;i<8;i++)for(unsigned j=i+1;j<9;j++){
+   memset(w->transform,0,sizeof(w->transform));
+   for(unsigned k=16;k<=209;k++)if(used[b][k]){
+    c9_complex v=w->covariance[k-8][i][j];
+    double den=square_root(w->covariance[k-8][i][i].re*w->covariance[k-8][j][j].re);
+    if(den>1e-18){v.re/=den;v.im/=den;}else v=(c9_complex){0,0};
+    w->transform[k]=v;w->transform[C9_SEPARATION_FFT-k]=zconj(v);
+   }
+   fft(w->transform,w->twiddle,1);
+   for(int lag=-32;lag<32;lag++)w->search_lags[pair][lag+32]=w->transform[(lag+C9_SEPARATION_FFT)%C9_SEPARATION_FFT].re;
+   pair++;
+  }
+#else
+  /* Two Hermitian spectra X,Y yield two real correlations in one complex
+   * inverse FFT: IFFT(X+iY)=x+i*y. No bins, bands or delays are dropped. */
+  unsigned pi[36],pj[36],pair=0;
+  for(unsigned i=0;i<8;i++)for(unsigned j=i+1;j<9;j++){pi[pair]=i;pj[pair++]=j;}
+  double (*roots)[C9_ANALYSIS_BINS]=w->search_roots;
+  for(unsigned ch=0;ch<9;ch++)for(unsigned k=16;k<=209;k++)if(used[b][k])roots[ch][k-8]=square_root(w->covariance[k-8][ch][ch].re);
+  for(pair=0;pair<36;pair+=2){
+   memset(w->transform,0,sizeof(w->transform));
+   for(unsigned k=16;k<=209;k++)if(used[b][k]){
+    c9_complex v[2];
+    for(unsigned t=0;t<2;t++){
+     unsigned i=pi[pair+t],j=pj[pair+t];v[t]=w->covariance[k-8][i][j];
+     double den=roots[i][k-8]*roots[j][k-8];
+     if(den>1e-18){v[t].re/=den;v[t].im/=den;}else v[t]=(c9_complex){0,0};
+    }
+    w->transform[k]=(c9_complex){v[0].re-v[1].im,v[0].im+v[1].re};
+    w->transform[C9_SEPARATION_FFT-k]=(c9_complex){v[0].re+v[1].im,-v[0].im+v[1].re};
+   }
+   fft(w->transform,w->twiddle,1);
+   for(int lag=-32;lag<32;lag++){
+    c9_complex v=w->transform[(lag+C9_SEPARATION_FFT)%C9_SEPARATION_FFT];
+    w->search_lags[pair][lag+32]=v.re;w->search_lags[pair+1][lag+32]=v.im;
+   }
+  }
+#endif
+#ifndef C9_REFERENCE_SEARCH_INTERPOLATION
+  if(!search_prepare_delays(lut)){r->invalid_input=0x20000000u;return 0;}
+#endif
+  double scale=1000000.0*C9_SEPARATION_FFT/(72.0*r->band_bins[b]);
+  for(unsigned g=0;g<1024;g++){
+#ifdef C9_REFERENCE_SEARCH_INTERPOLATION
+   int q[9];for(unsigned ch=0;ch<9;ch++){q[ch]=(int)(lut[ch*1024+g]&16383u);if(q[ch]&8192)q[ch]-=16384;}
+   double sum=0;pair=0;
+   for(unsigned i=0;i<8;i++)for(unsigned j=i+1;j<9;j++){
+    double lag= -(q[i]-q[j])/64.0;int l=(int)lag;if(l>lag)l--;
+    if(l< -31||l>29){r->invalid_input=0x20000000u;return 0;}
+    /* Cubic correlation interpolation avoids bias toward integer decimated
+     * lags, especially in the high band; the geometric grid remains32x32. */
+    double t=lag-l,p0=w->search_lags[pair][l+31],p1=w->search_lags[pair][l+32];
+    double p2=w->search_lags[pair][l+33],p3=w->search_lags[pair][l+34];
+    sum+=(((-.5*p0+1.5*p1-1.5*p2+.5*p3)*t+(p0-2.5*p1+2*p2-.5*p3))*t+.5*(p2-p0))*t+p1;pair++;
+   }
+#else
+   double sum=0;
+   for(unsigned pair=0;pair<36;pair++)sum+=search_interpolated(w->search_lags[pair],search_delay_codes[g][pair]);
+#endif
+   double score=sum*scale;if(score>2000000000)score=2000000000;if(score< -2000000000)score= -2000000000;
+   w->search_scores[b][g]=(int32_t)score;
+  }
+  counts[b]=c9_candidates_extract(w->search_scores[b],proposals[b]);
+   for(unsigned k=0;k<counts[b];k++){
+    c9_candidate *p=&proposals[b][k];c9_debug_peak *d=&w->debug.peaks[b*3+k];
+    d->grid=p->grid;d->band=b;d->score=p->score;d->peer=UINT32_MAX;
+    c9_candidate_angles(p,&d->az,&d->el);w->debug.count|=1u<<(b*3+k);
+   }
+  if(counts[b]&&proposals[b][0].score>=150000)r->band_valid_mask|=1u<<b;else counts[b]=0;
+ }
+#if C9_JOINT_FORMAL
+ /* Experimental formal PS joint generator; original band candidates are not published. */
+ c9_joint_report joint;c9_joint_shadow_compute(w,lut,r->band_valid_mask,UINT32_MAX,&joint);
+ w->debug.joint_raw_count=joint.raw_peaks;
+ memcpy(w->debug.joint_raw,joint.raw_candidates,sizeof(joint.raw_candidates));
+ memcpy(w->debug.joint_quality,joint.raw_quality,sizeof(joint.raw_quality));
+ memcpy(w->debug.joint_shoulder,joint.raw_shoulder,sizeof(joint.raw_shoulder));
+ memcpy(w->debug.joint_selected_raw,joint.selected_raw_index,sizeof(joint.selected_raw_index));
+ r->count=0;
+ if(joint.status==C9_JOINT_OK)for(unsigned i=0;i<joint.count;i++){
+  unsigned first,last;c9_support_component(joint.support_mask[i],w->analysis_frames,&first,&last);
+  unsigned slot=r->count++;r->candidates[slot]=joint.candidates[i];
+  r->band_mask[slot]=joint.support_band_mask[i];r->quality_permille[slot]=joint.quality[i];
+  r->support_mask[slot]=joint.support_mask[i];
+  r->support_frames[slot]=c9_support_component(joint.support_mask[i],w->analysis_frames,&first,&last);
+  r->support_first_sample[slot]=ctx->first_sample+4u*w->observed_start[first];
+  r->support_end_sample[slot]=ctx->first_sample+4u*(w->observed_start[last]+C9_SEPARATION_FFT);
+  for(unsigned b=0;b<3;b++)r->band_score[slot][b]=w->search_scores[b][joint.candidates[i].grid];
+ }
+ w->search_ticks[2]=search_clock()-profile;return 1;
+#endif
+ /* Rank by independently supported peak prominence (score - shoulder),
+  * not broad unresolved-band coherence alone. Keep raw band scores intact.
+  * First retain every eligible peak (at most3x3), then arbitrate globally.
+  * A low-frequency slot can no longer hide a later independent direction. */
+ c9_peak_evidence pool[9];unsigned pool_ids[9],pool_count=0,excluded=0;
+ for(unsigned b=0;b<3;b++)for(unsigned rank=0;rank<counts[b];rank++){
+  c9_candidate c=proposals[b][rank];unsigned quality=c9_peak_quality_details(w->search_scores[b],&c,&w->debug.peaks[b*3+rank].shoulder);
+  w->debug.peaks[b*3+rank].quality=quality;
+  if(!quality)continue;
+  uint32_t mask;unsigned first,last,n=candidate_support(w,&c,lut,b,used[b],&mask,&first,&last);
+  pool_ids[pool_count]=b*3+rank;
+  w->debug.peaks[b*3+rank].checks|=1u;
+  w->debug.peaks[b*3+rank].direct_mask=mask;
+  w->debug.peaks[b*3+rank].combined_mask=mask;
+  w->debug.peaks[b*3+rank].band_score[b]=c.score;
+  w->debug.peaks[b*3+rank].band_quality[b]=quality;
+  w->debug.peaks[b*3+rank].band_support[b]=mask;
+  pool[pool_count]=(c9_peak_evidence){.candidate=c,.band=b,.frames=n,.direct_frames=n,.quality=quality,
+   .bands=1u<<b,.mask=mask,.first=ctx->first_sample+4u*w->observed_start[first],
+   .last=ctx->first_sample+4u*(w->observed_start[last]+C9_SEPARATION_FFT)};
+  pool[pool_count].evidence[b]=c.score;
+  pool[pool_count].rank_evidence[b]=(int32_t)((int64_t)c.score*quality/1000);pool_count++;
+ }
+ /* A periodic secondary source can fail a total-mixture energy ratio even
+  * when its spatial peak is genuine. Remove only a clearly distinct peer
+  * with at least3 direct witnesses, then require the SAME .25 statistic and
+  * at least3 actual observations. No threshold relaxation or gap filling. */
+ for(unsigned i=0;i<pool_count;i++){
+  unsigned first,last;c9_support_component(pool[i].mask,w->analysis_frames,&first,&last);
+  if(pool[i].frames>=3&&first==0&&last+1==w->analysis_frames)continue;
+  int peer=-1;int64_t best=-1;
+  for(unsigned j=0;j<pool_count;j++)if(i!=j&&pool[j].band==pool[i].band&&pool[j].direct_frames>=3&&
+      c9_peak_dot(&pool[i].candidate,&pool[j].candidate)<.90630778703665){
+   int64_t score=(int64_t)pool[j].candidate.score*pool[j].quality;
+   if(score>best){best=score;peer=(int)j;}
+  }
+  if(peer>=0){
+   uint32_t mask;unsigned b=pool[i].band;
+   candidate_support_residual(w,&pool[i].candidate,&pool[peer].candidate,lut,b,used[b],&mask,&first,&last);
+   w->debug.peaks[pool_ids[i]].checks|=2u;
+   w->debug.peaks[pool_ids[i]].residual_mask=mask;
+   w->debug.peaks[pool_ids[i]].peer=pool_ids[peer];
+   w->debug.peaks[pool_ids[i]].combined_mask=pool[i].mask|mask;
+   uint32_t combined=pool[i].mask|mask;unsigned n=c9_support_component(combined,w->analysis_frames,&first,&last);
+   if(n>=3){pool[i].mask=combined;pool[i].frames=n;pool[i].first=ctx->first_sample+4u*w->observed_start[first];pool[i].last=ctx->first_sample+4u*(w->observed_start[last]+C9_SEPARATION_FFT);}
+  }
+  if(pool[i].frames<3){pool[i].bands=0;pool[i].evidence[pool[i].band]=0;pool[i].rank_evidence[pool[i].band]=0;pool[i].quality=0;}
+ }
+ /* Bound direct/cross work to9x3 checks, plus at most9 peer projections.
+  * No new FFT/covariance computation.
+  * Recheck every contributing band at each proposed representative before
+  * ranking, so a strong single-band shoulder cannot borrow a neighbor's peak. */
+ for(unsigned i=0;i<pool_count;i++){
+  unsigned matched=0;for(unsigned j=0;j<pool_count;j++)
+   if(c9_peak_dot(&pool[i].candidate,&pool[j].candidate)>.9659258262890683)matched|=1u<<pool[j].band;
+  int32_t interval_score=pool[i].candidate.score;
+  for(unsigned b=0;b<3;b++)if((matched&(1u<<b))&&b!=pool[i].band){
+   w->debug.peaks[pool_ids[i]].cross_checked|=1u<<b;
+   unsigned quality=c9_peak_quality(w->search_scores[b],&pool[i].candidate);
+   w->debug.peaks[pool_ids[i]].band_quality[b]=quality;
+   if(!quality)continue;
+   uint32_t mask;unsigned first,last,n=candidate_support(w,&pool[i].candidate,lut,b,used[b],&mask,&first,&last);
+   w->debug.peaks[pool_ids[i]].band_support[b]=mask;
+   if(n<3)continue;
+   int32_t score=w->search_scores[b][pool[i].candidate.grid];
+   w->debug.peaks[pool_ids[i]].band_score[b]=score;
+   w->debug.peaks[pool_ids[i]].band_quality[b]=quality;
+   w->debug.peaks[pool_ids[i]].band_support[b]=mask;
+   pool[i].bands|=1u<<b;pool[i].evidence[b]=score;
+   pool[i].rank_evidence[b]=(int32_t)((int64_t)score*quality/1000);
+   if(quality>pool[i].quality)pool[i].quality=quality;
+   if(n>pool[i].frames||(n==pool[i].frames&&score>interval_score)){
+    interval_score=score;pool[i].frames=n;pool[i].mask=mask;
+    pool[i].first=ctx->first_sample+4u*w->observed_start[first];
+    pool[i].last=ctx->first_sample+4u*(w->observed_start[last]+C9_SEPARATION_FFT);
+   }
+  }
+  if(!pool[i].bands)excluded|=1u<<i;
+ }
+ while(r->count<3u){
+  int winner=c9_peak_pool_best(pool,pool_count,excluded);if(winner<0)break;
+  const c9_peak_evidence *p=&pool[winner];unsigned slot=r->count++;
+  w->debug.peaks[pool_ids[winner]].selected=slot+1u;
+  r->candidates[slot]=p->candidate;r->band_mask[slot]=p->bands;
+  for(unsigned b=0;b<3;b++)r->band_score[slot][b]=p->evidence[b];
+  r->quality_permille[slot]=p->quality;r->support_frames[slot]=p->frames;
+  r->support_mask[slot]=p->mask;r->support_first_sample[slot]=p->first;r->support_end_sample[slot]=p->last;
+  for(unsigned i=0;i<pool_count;i++)if(c9_peak_dot(&p->candidate,&pool[i].candidate)>.9659258262890683)excluded|=1u<<i;
+ }
+ w->search_ticks[2]=search_clock()-profile;return 1;
+}
+static void steering_sector(const c9_candidate *cand,const uint32_t *lut,unsigned bin,
+ c9_complex a[5][9]){
+ int32_t az,el;c9_candidate_angles(cand,&az,&el);
+ uint32_t uncertainty=cand->uncertainty_mdeg;
+ /* Fitting a peak does not establish sub-degree physical accuracy. Keep at
+  * least a three-degree protection sector even on synthetic sharp peaks. */
+ if(uncertainty<3000u)uncertainty=3000u;
+ if(uncertainty>6000u)uncertainty=6000u;
+ const int da[5]={0,1,-1,0,0},de[5]={0,0,0,1,-1};
+ for(unsigned s=0;s<5;s++){
+  int32_t aa=az+da[s]*(int32_t)uncertainty,ee=el+de[s]*(int32_t)uncertainty;
+  if(aa< -90000)aa= -90000;
+  if(aa>90000)aa=90000;
+  if(ee< -90000)ee= -90000;
+  if(ee>90000)ee=90000;
+  for(unsigned ch=0;ch<9;ch++){
+   double q=delay_q4(lut,ch,aa,ee),sn,cs;
+   sincos_small(6.2831853071795864769*bin*q/(64.0*C9_SEPARATION_FFT),&sn,&cs);
+   a[s][ch]=(c9_complex){cs,sn};
+  }
+ }
+}
+static int protected_covariance(const c9_separation_workspace *w,unsigned bin,
+ const c9_complex target[5][9],c9_complex result[9][9],unsigned *rank_out){
+ c9_complex basis[5][9],projection[9][9],temp[9][9];unsigned rank=0;
+ for(unsigned vector=0;vector<5;vector++){
+  c9_complex v[9];
+  for(unsigned ch=0;ch<9;ch++){
+   if(!vector)v[ch]=target[0][ch];
+   else if(vector==1)v[ch]=zsub(target[1][ch],target[2][ch]);
+   else if(vector==2)v[ch]=zsub(target[3][ch],target[4][ch]);
+   else{
+    unsigned a=vector==3?1u:3u,b=vector==3?2u:4u;
+    v[ch]=zsub(zadd(target[a][ch],target[b][ch]),zadd(target[0][ch],target[0][ch]));
+   }
+  }
+  for(unsigned pass=0;pass<2;pass++)for(unsigned j=0;j<rank;j++){
+   c9_complex dot={0,0};for(unsigned ch=0;ch<9;ch++)dot=zadd(dot,zmul(zconj(basis[j][ch]),v[ch]));
+   for(unsigned ch=0;ch<9;ch++)v[ch]=zsub(v[ch],zmul(basis[j][ch],dot));
+  }
+  double norm=0;for(unsigned ch=0;ch<9;ch++)norm+=zpower(v[ch]);
+  if(norm<1e-10||!finite_number(norm))continue;
+  norm=square_root(norm);for(unsigned ch=0;ch<9;ch++)basis[rank][ch]=(c9_complex){v[ch].re/norm,v[ch].im/norm};rank++;
+ }
+ *rank_out=rank;
+ for(unsigned i=0;i<9;i++)for(unsigned j=0;j<9;j++){
+  c9_complex p={(double)(i==j),0};for(unsigned k=0;k<rank;k++)p=zsub(p,zmul(basis[k][i],zconj(basis[k][j])));
+  projection[i][j]=p;
+ }
+ for(unsigned i=0;i<9;i++)for(unsigned j=0;j<9;j++){
+  c9_complex sum={0,0};for(unsigned k=0;k<9;k++)sum=zadd(sum,zmul(projection[i][k],w->covariance[bin-8][k][j]));temp[i][j]=sum;
+ }
+ double total=0,residual=0;
+ for(unsigned i=0;i<9;i++)for(unsigned j=0;j<9;j++){
+  c9_complex sum={0,0};for(unsigned k=0;k<9;k++)sum=zadd(sum,zmul(temp[i][k],projection[k][j]));result[i][j]=sum;
+  if(i==j){total+=w->covariance[bin-8][i][i].re;residual+=sum.re;}
+ }
+ /* Never normalize an almost-pure target's tiny steering/quantization error
+  * into a high-power noise covariance. At least-30dB residual evidence is
+  * required; otherwise retain the deterministic guarded sector solution. */
+ if(!w->analysis_frames||total<1e-16||residual<.001*total||!finite_number(residual))return 0;
+ double scale=9.0/residual;
+ for(unsigned i=0;i<9;i++)for(unsigned j=i;j<9;j++){
+  c9_complex v=zadd(result[i][j],zconj(result[j][i]));v.re*=.375*scale;v.im*=.375*scale;
+  if(i==j){v.re+=.25;v.im=0;}
+  result[i][j]=v;result[j][i]=zconj(v);
+ }
+ return 1;
+}
+static int prepare_bin(c9_separation_workspace *w,const c9_candidate *cand,
+ unsigned count,const uint32_t *lut,unsigned bin,c9_separation_report *r,int empirical){
+ c9_complex (*a)[5][9]=w->bin_steering;
+ c9_complex (*cov)[9]=w->bin_covariance,(*iv)[9]=w->bin_inverse,(*observed_cov)[9]=w->bin_observed_covariance;
+ for(unsigned c=0;c<count;c++)steering_sector(&cand[c],lut,bin,a[c]);
+ int usable=1,used_covariance=0;unsigned protected_min=9,protected_max=0;
+ double report_norm=0,report_null=0,report_error=0,sector_min=1,sector_max=1,sector_leak=0;
+ for(unsigned c=0;c<count&&usable;c++){
+  int accepted=0;unsigned protected_rank=0;
+  int have_covariance=empirical&&count>1&&protected_covariance(w,bin,a[c],observed_cov,&protected_rank);
+  /* Soft-null loading is deliberately bounded. An infinitely deep point null
+   * is brittle to angle/calibration errors. Five sector samples broaden the
+   * suppression while target-sector deviations are penalized separately.
+   * Retry weaker suppression only when all explicit quality guards still pass. */
+  static const double loading[3]={10000,300,30};
+  for(unsigned attempt=0;attempt<3&&!accepted;attempt++){
+   if(count==1){
+    /* One known candidate has no spatial competitor to null. Ordinary DAS
+     * is the exact minimum-white-noise solution and needs no matrix solve. */
+    memset(iv,0,sizeof(w->bin_inverse));for(unsigned ch=0;ch<9;ch++)iv[ch][ch].re=1;
+   }else{
+    memset(cov,0,sizeof(w->bin_covariance));for(unsigned ch=0;ch<9;ch++)cov[ch][ch].re=1;
+    for(unsigned other=0;other<count;other++)for(unsigned s=0;s<5;s++){
+     double scale=(other==c?1000:loading[attempt])/5;
+     for(unsigned i=0;i<9;i++)for(unsigned j=0;j<9;j++){
+      c9_complex ai=a[other][s][i],aj=a[other][s][j];
+      if(other==c){ai=zsub(ai,a[c][0][i]);aj=zsub(aj,a[c][0][j]);}
+      c9_complex value=zmul(ai,zconj(aj));value.re*=scale;value.im*=scale;
+      cov[i][j]=zadd(cov[i][j],value);
+     }
+    }
+    if(have_covariance){
+     const double mix[3]={8,2,0};
+     for(unsigned i=0;i<9;i++)for(unsigned j=0;j<9;j++){
+      c9_complex value=observed_cov[i][j];value.re*=mix[attempt];value.im*=mix[attempt];cov[i][j]=zadd(cov[i][j],value);
+     }
+    }
+    if(!inverse(cov,iv))continue;
+   }
+   c9_complex response={0,0};double norm=0;
+   for(unsigned ch=0;ch<9;ch++){
+    c9_complex b={0,0};for(unsigned j=0;j<9;j++)b=zadd(b,zmul(zconj(a[c][0][j]),iv[j][ch]));
+    w->weights[c][bin][ch]=b;response=zadd(response,zmul(b,a[c][0][ch]));
+   }
+   if(zpower(response)<1e-12)continue;
+   for(unsigned ch=0;ch<9;ch++){
+    w->weights[c][bin][ch]=zdiv(w->weights[c][bin][ch],response);
+    norm+=zpower(w->weights[c][bin][ch]);
+   }
+   if(!finite_number(norm)||norm>8.0)continue;
+   double null=0,error=0,min_gain=1,max_gain=1,max_leak=0;
+   for(unsigned other=0;other<count;other++)for(unsigned s=0;s<5;s++){
+    c9_complex v={0,0};for(unsigned ch=0;ch<9;ch++)v=zadd(v,zmul(w->weights[c][bin][ch],a[other][s][ch]));
+    double gain=zpower(v);
+    if(!finite_number(gain)){max_leak=1e100;continue;}
+    if(other==c){
+     if(gain<min_gain)min_gain=gain;
+     if(gain>max_gain)max_gain=gain;
+     if(!s)error=absolute(v.re-1)+absolute(v.im);
+    }else{
+     if(!s&&gain>null)null=gain;
+     if(gain>max_leak)max_leak=gain;
+    }
+   }
+   /* Power thresholds: preserve sector amplitude within +/-15 percent, at
+    * least20dB suppression at each competing center and15.2dB over samples.
+    * These are steering-model checks, never proof of real acoustic isolation. */
+   if(min_gain<.85*.85||max_gain>1.15*1.15||null>.01||max_leak>.03)continue;
+   accepted=1;
+   if(have_covariance&&attempt<2u){
+    used_covariance=1;if(protected_rank<protected_min)protected_min=protected_rank;if(protected_rank>protected_max)protected_max=protected_rank;
+   }
+   if(norm>report_norm)report_norm=norm;
+   if(null>report_null)report_null=null;
+   if(error>report_error)report_error=error;
+   if(min_gain<sector_min)sector_min=min_gain;
+   if(max_gain>sector_max)sector_max=max_gain;
+   if(max_leak>sector_leak)sector_leak=max_leak;
+  }
+  if(!accepted)usable=0;
+ }
+ if(usable){
+  if(used_covariance){
+   r->covariance_used_bins++;if(protected_min<r->covariance_protected_rank_min)r->covariance_protected_rank_min=protected_min;
+   if(protected_max>r->covariance_protected_rank_max)r->covariance_protected_rank_max=protected_max;
+  }
+  if(report_norm>r->max_weight_norm)r->max_weight_norm=report_norm;
+  if(report_null>r->max_null_leakage)r->max_null_leakage=report_null;
+  if(report_error>r->target_error)r->target_error=report_error;
+  if(sector_min<r->min_sector_gain)r->min_sector_gain=sector_min;
+  if(sector_max>r->max_sector_gain)r->max_sector_gain=sector_max;
+  if(sector_leak>r->max_sector_leakage)r->max_sector_leakage=sector_leak;
+ }else for(unsigned c=0;c<count;c++)for(unsigned ch=0;ch<9;ch++){
+  w->weights[c][bin][ch]=zconj(a[c][0][ch]);
+  w->weights[c][bin][ch].re/=9;w->weights[c][bin][ch].im/=9;
+ }
+ return usable;
+}
+
+static int separate_internal(const int16_t (*raw)[9],const c9_candidate *cand,
+ unsigned count,const uint32_t *lut,c9_separation_workspace *w,
+ double out[C9_CANDIDATES][C9_AUDIO_FRAMES],c9_separation_report *r,int empirical,const c9_separation_report *frozen){
+ if(!r)return 0;
+ if(frozen){*r=*frozen;r->frames=0;r->ready_mask=0;memset(r->energy,0,sizeof(r->energy));memset(r->usable_energy,0,sizeof(r->usable_energy));memset(r->clipped_output,0,sizeof(r->clipped_output));}
+ else memset(r,0,sizeof(*r));
+ if(!raw||!cand||!lut||!w||!out||!count||count>C9_CANDIDATES){r->invalid_input=0x80000000u;return 0;}
+ memset(out,0,C9_CANDIDATES*C9_AUDIO_FRAMES*sizeof(double));r->count=count;
+ for(unsigned c=0;c<count;c++){
+  uint32_t delays[9];if(!c9_candidate_delays_q16(&cand[c],lut,delays)){r->invalid_input=0x80000000u;return 0;}
+ }
+ for(unsigned i=0;i<count;i++)for(unsigned j=0;j<i;j++){
+  double u[3],v[3];c9_candidate_unit(&cand[i],u);c9_candidate_unit(&cand[j],v);
+  if(u[0]*v[0]+u[1]*v[1]+u[2]*v[2]>.90630778703664996){r->invalid_input=0x40000000u;return 0;}
+ }
+ if(!frozen){r->min_sector_gain=1;r->max_sector_gain=1;r->covariance_protected_rank_min=9;}
+ prepare_samples(raw,C9_SNAPSHOT_FRAMES,w,&r->invalid_input,r->clipped_input);
+ if(!frozen&&empirical){
+  analyze_observations(w,C9_DECIMATED_FRAMES);r->covariance_frames=w->analysis_frames;
+  r->covariance_bins=C9_ANALYSIS_BINS;r->covariance_shrinkage_permille=250;
+ }
+ uint8_t usable[C9_SEPARATION_FFT/2+1]={0};
+ const unsigned firstbin=8,lastbin=209; /* 305.1758..7972.7173 Hz. */
+ for(unsigned k=firstbin;k<=lastbin;k++){
+  if(frozen)usable[k]=(uint8_t)((frozen->usable_mask[(k-firstbin)/32]>>((k-firstbin)%32))&1u);
+  else{
+   usable[k]=(uint8_t)prepare_bin(w,cand,count,lut,k,r,empirical);r->usable_bins+=usable[k];r->total_bins++;
+   if(usable[k])r->usable_mask[(k-firstbin)/32]|=1u<<((k-firstbin)%32);
+  }
+ }
+ /* The chosen fixed carrier is2200..4600Hz (feature contract C9F2).
+  * Coverage is a geometry/calibration condition, independent of spectral
+  * energy. Otherwise a signal with its fault sideband in an unsafe hole
+  * could be handed to diagnosis as apparently clean normal machine audio. */
+ if(!r->covariance_used_bins)r->covariance_protected_rank_min=0;
+ r->carrier_bins=r->carrier_usable_bins=r->carrier_max_gap=0;unsigned gap=0;
+ for(unsigned k=firstbin;k<=lastbin;k++){
+  double hz=k*(39062.5/C9_SEPARATION_FFT);
+  if(hz<C9_DIAG_CARRIER_LOW_HZ||hz>C9_DIAG_CARRIER_HIGH_HZ)continue;
+  r->carrier_bins++;r->carrier_usable_bins+=usable[k];
+  if(!usable[k]){gap++;if(gap>r->carrier_max_gap)r->carrier_max_gap=gap;}else gap=0;
+ }
+ memset(w->normalization,0,sizeof(w->normalization));
+ /* Start one half-frame before the capture. Zero padding plus exact overlap
+  * normalization avoid startup/end amplitude dips without borrowing samples
+  * from another snapshot. Trim the first 64 decimated warmup samples. */
+ for(int start=-(int)C9_SEPARATION_HOP;start<(int)C9_DECIMATED_FRAMES;start+=C9_SEPARATION_HOP){
+  r->frames++;
+  for(unsigned ch=0;ch<9;ch++){
+   for(unsigned j=0;j<C9_SEPARATION_FFT;j++){
+    int index=start+(int)j;
+    w->spectrum[ch][j]=(c9_complex){index>=0&&index<(int)C9_DECIMATED_FRAMES?w->decimated[ch][index]*w->window[j]:0,0};
+   }
+   fft(w->spectrum[ch],w->twiddle,0);
+  }
+  for(unsigned c=0;c<count;c++){
+   memset(w->transform,0,sizeof(w->transform));
+   for(unsigned k=firstbin;k<=lastbin;k++){
+    c9_complex y={0,0};for(unsigned ch=0;ch<9;ch++)y=zadd(y,zmul(w->weights[c][k][ch],w->spectrum[ch][k]));
+    double hz=k*(39062.5/C9_SEPARATION_FFT),gain=1;
+    if(hz<600)gain=(hz-300)/300;else if(hz>7500)gain=(8000-hz)/500;
+    if(gain<0)gain=0;
+    y.re*=gain;y.im*=gain;
+    double energy=zpower(y);r->energy[c]+=energy;if(usable[k])r->usable_energy[c]+=energy;
+    /* An unsafe DAS bin is only a conservative quality proxy. Do not hand
+     * its spatially mixed signal to a fault classifier as separated audio. */
+    if(!usable[k])y=(c9_complex){0,0};
+    w->transform[k]=y;w->transform[C9_SEPARATION_FFT-k]=zconj(y);
+   }
+   fft(w->transform,w->twiddle,1);
+   for(unsigned j=0;j<C9_SEPARATION_FFT;j++){
+    int n=start+(int)j-64;
+    if(n>=0&&n<(int)C9_AUDIO_FRAMES)out[c][n]+=w->transform[j].re*w->window[j];
+   }
+  }
+  for(unsigned j=0;j<C9_SEPARATION_FFT;j++){
+   int n=start+(int)j-64;if(n>=0&&n<(int)C9_AUDIO_FRAMES)w->normalization[n]+=w->window[j]*w->window[j];
+  }
+ }
+ for(unsigned c=0;c<count;c++){
+  int ready=!r->invalid_input&&r->energy[c]>1e-6&&r->usable_energy[c]>=.85*r->energy[c]&&
+   r->carrier_bins&&r->carrier_usable_bins*20u>=r->carrier_bins*19u&&r->carrier_max_gap<=3u;
+  for(unsigned n=0;n<C9_AUDIO_FRAMES;n++){
+   double norm=w->normalization[n];if(norm<.01){ready=0;out[c][n]=0;continue;}
+   out[c][n]/=norm;
+   if(!finite_number(out[c][n])){ready=0;out[c][n]=0;}
+   if(out[c][n]>1||out[c][n]< -1){r->clipped_output[c]++;ready=0;}
+  }
+  if(ready)r->ready_mask|=1u<<c;
+ }
+ return 1;
+}
+
+int c9_candidates_separate(const int16_t (*raw)[9],const c9_candidate *cand,unsigned count,
+ const uint32_t *lut,c9_separation_workspace *w,double out[C9_CANDIDATES][C9_AUDIO_FRAMES],c9_separation_report *r){
+ return separate_internal(raw,cand,count,lut,w,out,r,1,NULL);
+}
+#ifdef C9_CANDIDATES_TEST
+int c9_candidates_test_separate(const int16_t (*raw)[9],const c9_candidate *cand,unsigned count,
+ const uint32_t *lut,c9_separation_workspace *w,double out[C9_CANDIDATES][C9_AUDIO_FRAMES],c9_separation_report *r,int empirical){
+ return separate_internal(raw,cand,count,lut,w,out,r,empirical,NULL);
+}
+int c9_candidates_test_render(const int16_t (*raw)[9],const c9_candidate *cand,unsigned count,
+ const uint32_t *lut,c9_separation_workspace *w,double out[C9_CANDIDATES][C9_AUDIO_FRAMES],c9_separation_report *r,const c9_separation_report *frozen){
+ return separate_internal(raw,cand,count,lut,w,out,r,0,frozen);
+}
+#endif
+
+/* Optional read-only shadow pass; original search above remains unchanged. */
+#include "circular9_joint_shadow_impl.h"

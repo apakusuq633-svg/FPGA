@@ -1,0 +1,129 @@
+
+Discarded input sections
+
+ .text          0x00000000        0x0 C:\Users\lenovo\Desktop\FPGA_PDM\performance_comparison\pl_rtl\micro_fw\start.o
+ .data          0x00000000        0x0 C:\Users\lenovo\Desktop\FPGA_PDM\performance_comparison\pl_rtl\micro_fw\start.o
+ .bss           0x00000000        0x0 C:\Users\lenovo\Desktop\FPGA_PDM\performance_comparison\pl_rtl\micro_fw\start.o
+ .text          0x00000000        0x0 C:\Users\lenovo\Desktop\FPGA_PDM\performance_comparison\pl_rtl\micro_fw\microbench.o
+ .data          0x00000000        0x0 C:\Users\lenovo\Desktop\FPGA_PDM\performance_comparison\pl_rtl\micro_fw\microbench.o
+ .bss           0x00000000        0x0 C:\Users\lenovo\Desktop\FPGA_PDM\performance_comparison\pl_rtl\micro_fw\microbench.o
+ .comment       0x00000000       0x13 C:\Users\lenovo\Desktop\FPGA_PDM\performance_comparison\pl_rtl\micro_fw\microbench.o
+ .text          0x00000000        0x0 C:\Users\lenovo\Desktop\FPGA_PDM\performance_comparison\pl_rtl\micro_fw\fw_fft.o
+ .data          0x00000000        0x0 C:\Users\lenovo\Desktop\FPGA_PDM\performance_comparison\pl_rtl\micro_fw\fw_fft.o
+ .bss           0x00000000        0x0 C:\Users\lenovo\Desktop\FPGA_PDM\performance_comparison\pl_rtl\micro_fw\fw_fft.o
+ .text.ifft512_real_hw
+                0x00000000       0x40 C:\Users\lenovo\Desktop\FPGA_PDM\performance_comparison\pl_rtl\micro_fw\fw_fft.o
+ .text.ifft512_real_ring_hw
+                0x00000000       0x94 C:\Users\lenovo\Desktop\FPGA_PDM\performance_comparison\pl_rtl\micro_fw\fw_fft.o
+ .text.ifft512_real
+                0x00000000      0x144 C:\Users\lenovo\Desktop\FPGA_PDM\performance_comparison\pl_rtl\micro_fw\fw_fft.o
+ .bss.fw_ifft_profile
+                0x00000000        0xc C:\Users\lenovo\Desktop\FPGA_PDM\performance_comparison\pl_rtl\micro_fw\fw_fft.o
+ .comment       0x00000000       0x13 C:\Users\lenovo\Desktop\FPGA_PDM\performance_comparison\pl_rtl\micro_fw\fw_fft.o
+ .text          0x00000000        0x0 C:\Users\lenovo\Desktop\FPGA_PDM\performance_comparison\pl_rtl\micro_fw\fw_tables.o
+ .data          0x00000000        0x0 C:\Users\lenovo\Desktop\FPGA_PDM\performance_comparison\pl_rtl\micro_fw\fw_tables.o
+ .bss           0x00000000        0x0 C:\Users\lenovo\Desktop\FPGA_PDM\performance_comparison\pl_rtl\micro_fw\fw_tables.o
+ .comment       0x00000000       0x13 C:\Users\lenovo\Desktop\FPGA_PDM\performance_comparison\pl_rtl\micro_fw\fw_tables.o
+ .text          0x00000000        0x0 C:\Users\lenovo\Desktop\FPGA_PDM\performance_comparison\pl_rtl\micro_fw\fw_fir.o
+ .data          0x00000000        0x0 C:\Users\lenovo\Desktop\FPGA_PDM\performance_comparison\pl_rtl\micro_fw\fw_fir.o
+ .bss           0x00000000        0x0 C:\Users\lenovo\Desktop\FPGA_PDM\performance_comparison\pl_rtl\micro_fw\fw_fir.o
+ .comment       0x00000000       0x13 C:\Users\lenovo\Desktop\FPGA_PDM\performance_comparison\pl_rtl\micro_fw\fw_fir.o
+
+Memory Configuration
+
+Name             Origin             Length             Attributes
+ITCM             0x00000000         0x00004000         xr
+DTCM             0x00000000         0x00004000         rw
+DLMA             0x10000000         0x00004000         rw
+*default*        0x00000000         0xffffffff
+
+Linker script and memory map
+
+LOAD C:\Users\lenovo\Desktop\FPGA_PDM\performance_comparison\pl_rtl\micro_fw\start.o
+LOAD C:\Users\lenovo\Desktop\FPGA_PDM\performance_comparison\pl_rtl\micro_fw\microbench.o
+LOAD C:\Users\lenovo\Desktop\FPGA_PDM\performance_comparison\pl_rtl\micro_fw\fw_fft.o
+LOAD C:\Users\lenovo\Desktop\FPGA_PDM\performance_comparison\pl_rtl\micro_fw\fw_tables.o
+LOAD C:\Users\lenovo\Desktop\FPGA_PDM\performance_comparison\pl_rtl\micro_fw\fw_fir.o
+
+.text           0x00000000      0x764
+ *(.text.start)
+ .text.start    0x00000000       0x30 C:\Users\lenovo\Desktop\FPGA_PDM\performance_comparison\pl_rtl\micro_fw\start.o
+                0x00000000                _start
+ *(.text*)
+ .text.startup.main
+                0x00000030      0x1c4 C:\Users\lenovo\Desktop\FPGA_PDM\performance_comparison\pl_rtl\micro_fw\microbench.o
+                0x00000030                main
+ .text.butterflies512.constprop.0
+                0x000001f4      0x194 C:\Users\lenovo\Desktop\FPGA_PDM\performance_comparison\pl_rtl\micro_fw\fw_fft.o
+ .text.bitrev_swap.constprop.0
+                0x00000388       0x80 C:\Users\lenovo\Desktop\FPGA_PDM\performance_comparison\pl_rtl\micro_fw\fw_fft.o
+ .text.fft_init
+                0x00000408        0x4 C:\Users\lenovo\Desktop\FPGA_PDM\performance_comparison\pl_rtl\micro_fw\fw_fft.o
+                0x00000408                fft_init
+ .text.fft1024  0x0000040c      0x190 C:\Users\lenovo\Desktop\FPGA_PDM\performance_comparison\pl_rtl\micro_fw\fw_fft.o
+                0x0000040c                fft1024
+ .text.fft1024_hw
+                0x0000059c       0x70 C:\Users\lenovo\Desktop\FPGA_PDM\performance_comparison\pl_rtl\micro_fw\fw_fft.o
+                0x0000059c                fft1024_hw
+ .text.fw_fir_run
+                0x0000060c      0x158 C:\Users\lenovo\Desktop\FPGA_PDM\performance_comparison\pl_rtl\micro_fw\fw_fir.o
+                0x0000060c                fw_fir_run
+                0x00000764                        . = ALIGN (0x4)
+
+.data           0x00000000      0x848 load address 0x10000000
+ *(.rodata*)
+ .rodata.g_tw_im
+                0x00000000      0x402 C:\Users\lenovo\Desktop\FPGA_PDM\performance_comparison\pl_rtl\micro_fw\fw_tables.o
+                0x00000000                g_tw_im
+ *fill*         0x00000402        0x2 
+ .rodata.g_tw_re
+                0x00000404      0x402 C:\Users\lenovo\Desktop\FPGA_PDM\performance_comparison\pl_rtl\micro_fw\fw_tables.o
+                0x00000404                g_tw_re
+ *fill*         0x00000806        0x2 
+ .rodata.fw_fir_coeff
+                0x00000808       0x40 C:\Users\lenovo\Desktop\FPGA_PDM\performance_comparison\pl_rtl\micro_fw\fw_fir.o
+ *(.srodata*)
+ *(.data*)
+ *(.sdata*)
+                0x00000848                        . = ALIGN (0x4)
+
+.rela.dyn       0x00000848        0x0 load address 0x10000848
+ .rela.text.start
+                0x00000848        0x0 C:\Users\lenovo\Desktop\FPGA_PDM\performance_comparison\pl_rtl\micro_fw\start.o
+
+.bss            0x00000848      0x80c load address 0x10000848
+                0x00000848                        _bss_start = .
+ *(.bss*)
+ .bss.g_zi      0x00000848      0x400 C:\Users\lenovo\Desktop\FPGA_PDM\performance_comparison\pl_rtl\micro_fw\fw_fft.o
+ .bss.g_zr      0x00000c48      0x400 C:\Users\lenovo\Desktop\FPGA_PDM\performance_comparison\pl_rtl\micro_fw\fw_fft.o
+ .bss.fw_fft_profile
+                0x00001048        0xc C:\Users\lenovo\Desktop\FPGA_PDM\performance_comparison\pl_rtl\micro_fw\fw_fft.o
+                0x00001048                fw_fft_profile
+ *(.sbss*)
+ *(COMMON)
+                0x00001054                        . = ALIGN (0x4)
+                0x00001054                        _bss_end = .
+                0x00000001                        ASSERT ((_bss_end <= 0x2800), live16 data overlaps results)
+
+.results        0x00002800      0x400
+                0x00002c00                        . = (. + 0x400)
+ *fill*         0x00002800      0x400 
+                0x00003ff0                        _stack_top = 0x3ff0
+
+/DISCARD/
+ *(.comment*)
+ *(.eh_frame*)
+OUTPUT(C:\Users\lenovo\Desktop\FPGA_PDM\performance_comparison\pl_rtl\micro_fw\microbench.elf elf32-littleriscv)
+
+.riscv.attributes
+                0x00000000       0x33
+ .riscv.attributes
+                0x00000000       0x31 C:\Users\lenovo\Desktop\FPGA_PDM\performance_comparison\pl_rtl\micro_fw\start.o
+ .riscv.attributes
+                0x00000031       0x33 C:\Users\lenovo\Desktop\FPGA_PDM\performance_comparison\pl_rtl\micro_fw\microbench.o
+ .riscv.attributes
+                0x00000064       0x33 C:\Users\lenovo\Desktop\FPGA_PDM\performance_comparison\pl_rtl\micro_fw\fw_fft.o
+ .riscv.attributes
+                0x00000097       0x33 C:\Users\lenovo\Desktop\FPGA_PDM\performance_comparison\pl_rtl\micro_fw\fw_tables.o
+ .riscv.attributes
+                0x000000ca       0x33 C:\Users\lenovo\Desktop\FPGA_PDM\performance_comparison\pl_rtl\micro_fw\fw_fir.o

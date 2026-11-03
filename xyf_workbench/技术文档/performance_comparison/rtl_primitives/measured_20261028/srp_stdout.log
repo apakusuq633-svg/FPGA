@@ -1,0 +1,45 @@
+SCAN_CYCLES rlen=32 idx=5 fast=1 pass=0 cycles=37153
+SCAN_CYCLES rlen=32 idx=5 fast=1 pass=1 cycles=37153
+SRP_LAG_RING_PASS rlen=32 idx=5 fast=1 scores=2048
+C:\Users\lenovo\Desktop\FPGA_PDM\FPGA\xyf_workbench\zynq_-pl_-simd_-verilog\tb\tb_srp_lag_ring.v:104: $finish called at 1544600000 (1ps)
+SCAN_CYCLES rlen=32 idx=5 fast=0 pass=0 cycles=147458
+SCAN_CYCLES rlen=32 idx=5 fast=0 pass=1 cycles=147458
+SRP_LAG_RING_PASS rlen=32 idx=5 fast=0 scores=2048
+C:\Users\lenovo\Desktop\FPGA_PDM\FPGA\xyf_workbench\zynq_-pl_-simd_-verilog\tb\tb_srp_lag_ring.v:104: $finish called at 3750700000 (1ps)
+SCAN_CYCLES rlen=64 idx=6 fast=1 pass=0 cycles=37153
+SCAN_CYCLES rlen=64 idx=6 fast=1 pass=1 cycles=37153
+SRP_LAG_RING_PASS rlen=64 idx=6 fast=1 scores=2048
+C:\Users\lenovo\Desktop\FPGA_PDM\FPGA\xyf_workbench\zynq_-pl_-simd_-verilog\tb\tb_srp_lag_ring.v:104: $finish called at 1567640000 (1ps)
+SCAN_CYCLES rlen=64 idx=6 fast=0 pass=0 cycles=147458
+SCAN_CYCLES rlen=64 idx=6 fast=0 pass=1 cycles=147458
+SRP_LAG_RING_PASS rlen=64 idx=6 fast=0 scores=2048
+C:\Users\lenovo\Desktop\FPGA_PDM\FPGA\xyf_workbench\zynq_-pl_-simd_-verilog\tb\tb_srp_lag_ring.v:104: $finish called at 3773740000 (1ps)
+SCAN_CYCLES rlen=64 idx=10 fast=1 pass=0 cycles=37153
+SCAN_CYCLES rlen=64 idx=10 fast=1 pass=1 cycles=37153
+SRP_LAG_RING_PASS rlen=64 idx=10 fast=1 scores=2048
+C:\Users\lenovo\Desktop\FPGA_PDM\FPGA\xyf_workbench\zynq_-pl_-simd_-verilog\tb\tb_srp_lag_ring.v:104: $finish called at 1567640000 (1ps)
+SCAN_CYCLES rlen=64 idx=10 fast=0 pass=0 cycles=147458
+SCAN_CYCLES rlen=64 idx=10 fast=0 pass=1 cycles=147458
+SRP_LAG_RING_PASS rlen=64 idx=10 fast=0 scores=2048
+C:\Users\lenovo\Desktop\FPGA_PDM\FPGA\xyf_workbench\zynq_-pl_-simd_-verilog\tb\tb_srp_lag_ring.v:104: $finish called at 3773740000 (1ps)
+SCAN_CYCLES rlen=32 idx=5 fast=4 pass=0 cycles=9307
+SCAN_CYCLES rlen=32 idx=5 fast=4 pass=1 cycles=9307
+SRP_LAG_RING_PASS rlen=32 idx=5 fast=4 scores=2048
+C:\Users\lenovo\Desktop\FPGA_PDM\FPGA\xyf_workbench\zynq_-pl_-simd_-verilog\tb\tb_srp_lag_ring.v:104: $finish called at 987680000 (1ps)
+SCAN_CYCLES rlen=64 idx=6 fast=4 pass=0 cycles=9307
+SCAN_CYCLES rlen=64 idx=6 fast=4 pass=1 cycles=9307
+SRP_LAG_RING_PASS rlen=64 idx=6 fast=4 scores=2048
+C:\Users\lenovo\Desktop\FPGA_PDM\FPGA\xyf_workbench\zynq_-pl_-simd_-verilog\tb\tb_srp_lag_ring.v:104: $finish called at 1010720000 (1ps)
+SCAN_CYCLES rlen=64 idx=10 fast=4 pass=0 cycles=9307
+SCAN_CYCLES rlen=64 idx=10 fast=4 pass=1 cycles=9307
+SRP_LAG_RING_PASS rlen=64 idx=10 fast=4 scores=2048
+C:\Users\lenovo\Desktop\FPGA_PDM\FPGA\xyf_workbench\zynq_-pl_-simd_-verilog\tb\tb_srp_lag_ring.v:104: $finish called at 1010720000 (1ps)
+SRP_THROUGHPUT pairs=5 grids=1 fast=4 round=0 cycles=22
+SRP_THROUGHPUT pairs=5 grids=1 fast=4 round=1 cycles=22
+SRP_THROUGHPUT pairs=5 grids=1 fast=4 round=2 cycles=22
+SRP_THROUGHPUT pairs=7 grids=17 fast=4 round=0 cycles=54
+SRP_THROUGHPUT pairs=7 grids=17 fast=4 round=1 cycles=54
+SRP_THROUGHPUT pairs=7 grids=17 fast=4 round=2 cycles=54
+SRP_PARALLEL4_EDGES_PASS partial_group_single_grid_restart_abort=1
+C:\Users\lenovo\Desktop\FPGA_PDM\FPGA\xyf_workbench\zynq_-pl_-simd_-verilog\tb\tb_srp_throughput.v:68: $finish called at 8560000 (1ps)
+SRP_LAG_RING_ALL_PASS scores=18432

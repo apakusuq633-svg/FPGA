@@ -1,0 +1,19 @@
+{
+  "scope": "Simulation and native-host only; no board programming or A9 measurement",
+  "started_utc": "2026-10-28T05:19:55.495248+00:00",
+  "runs": [
+    {
+      "suite": "primitives",
+      "command": [
+        "C:\\msys64\\ucrt64\\bin\\python.exe",
+        "-X",
+        "utf8",
+        "C:\\Users\\lenovo\\Desktop\\FPGA_PDM\\performance_comparison\\run_primitive_checks.py"
+      ],
+      "started_utc": "2026-10-28T05:19:55.495290+00:00",
+      "finished_utc": "2026-10-28T05:20:11.349596+00:00",
+      "returncode": 0
+    }
+  ],
+  "passed": true
+}
