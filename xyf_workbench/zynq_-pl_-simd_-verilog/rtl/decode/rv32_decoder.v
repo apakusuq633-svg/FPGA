@@ -132,6 +132,8 @@ module rv32_decoder (
   assign rs2_o  = instr_i[24:20];
   assign rd_o   = instr_i[11:7];
 
+  wire [31:0] imm_gen_out;
+
   rv32_imm_gen u_imm_gen (
     .instr_i (instr_i),
     .imm_o   (imm_gen_out)
@@ -198,7 +200,6 @@ module rv32_decoder (
   // 两半边都合法，**不能再用 ~funct3[2] 把后四条挡掉**。
   assign valid_op_v = is_op_v;
 
-  wire [31:0] imm_gen_out;
   // ⚠ 这个拼接是 **32 位**，不是 31 位：{21'b0, instr[30], instr[29:20]} 正好 21+1+10。
   //   少一位会零扩展成「整体下移一格」，通道号静默丢掉（上面那段注释记的就是这个坑）。
   //   imm[10] = instr[30] 是给 x′ 延迟线的第 4 条通道用的 —— LEN 6 位 + ch 2 位刚好占满。

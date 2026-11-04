@@ -1,12 +1,15 @@
 # Offline competition regression using configured sound-hole geometry; no board.
 from pathlib import Path
-import json,subprocess,hashlib
-R=Path(__file__).resolve().parents[1];O=R/'build/peak_competition_20261027';O.mkdir(exist_ok=True);CC=r'D:\winlibs\mingw64\bin\gcc.exe'
+import json,subprocess,hashlib,os,shutil
+R=Path(__file__).resolve().parents[1];O=R/'build/peak_competition_20261027';O.mkdir(exist_ok=True)
+CC=os.environ.get('CC') or shutil.which('gcc')
+if not CC:raise SystemExit('gcc not found: install GCC or set CC')
+EXE=O/('peak_pool.exe' if os.name=='nt' else 'peak_pool')
 def run(name,args):
  p=subprocess.run([str(x) for x in args],cwd=R,text=True,capture_output=True);(O/(name+'.log')).write_text(p.stdout+p.stderr);print(p.stdout,end='',flush=True)
  if p.returncode:raise RuntimeError(name+': '+p.stderr)
  return p.stdout
-run('pool_compile',[CC,'-std=c11','-O2','-Wall','-Wextra','-Werror','-Wno-unused-const-variable','-Isw','sw/circular9_peak_competition_test.c','-lm','-o',O/'peak_pool.exe']);run('pool',[O/'peak_pool.exe'])
+run('pool_compile',[CC,'-std=c11','-O2','-Wall','-Wextra','-Werror','-Wno-unused-const-variable','-Isw','sw/circular9_peak_competition_test.c','-lm','-o',EXE]);run('pool',[EXE])
 c=json.loads((R/'configs/circular9_array.json').read_text());xyz=c['channel_positions_m'];x=','.join(format(v[0],'.17g') for v in xyz);y=','.join(format(v[1],'.17g') for v in xyz)
 s=(R/'sw/circular9_candidates_test.c').read_text();s=s.replace('double x=ch<8?.030*cos(a):0,y=ch<8?.030*sin(a):0;','double x=physical_x[ch],y=physical_y[ch];').replace('double x=ch<8?.030*cos(ring_angle):0,y=ch<8?.030*sin(ring_angle):0;','double x=physical_x[ch],y=physical_y[ch];').replace('x-.030','x-physical_x[0]')
 pre='#define main archived_fixture_main\nstatic const double physical_x[9]={'+x+'};\nstatic const double physical_y[9]={'+y+'};\n'

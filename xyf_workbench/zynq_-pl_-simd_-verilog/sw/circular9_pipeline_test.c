@@ -72,6 +72,7 @@ static void device_write(void *ctx,uint32_t offset,uint32_t value){
  if(offset==0x3c){device.command=value;device.commands++;}
 }
 static das_bus das_axi_bus(uintptr_t base){(void)base;return(das_bus){NULL,device_read,device_write};}
+static unsigned c9_gsc_manual_ready;
 static c9_candidate applied_candidate;static uint32_t applied_epoch;
 static unsigned release_calls,apply_target_accept=1;
 static int c9_apply_target(const das_bus *b,const c9_candidate *candidate,uint32_t epoch){

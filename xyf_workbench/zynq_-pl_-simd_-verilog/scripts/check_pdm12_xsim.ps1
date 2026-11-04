@@ -4,7 +4,7 @@ $root=Split-Path -Parent $PSScriptRoot
 $out=Join-Path $root ('build\'+$Tag)
 if(Test-Path -LiteralPath $out){throw 'Use a new output tag'}
 New-Item -ItemType Directory -Path $out | Out-Null
-$tool='D:\Vivado\Vivado\2020.2\bin'
+$tool=$(if($env:VIVADO_BIN_DIR){$env:VIVADO_BIN_DIR}else{'D:\Vivado\Vivado\2020.2\bin'})
 $original=[IO.File]::ReadAllText((Join-Path $root 'tb\tb_pdm_array_rx.v'))
 $reference=[regex]::Match($original,'(?s)module pdm_ref_cic.*?endmodule').Value
 if(-not $reference){throw 'Reference module absent'}

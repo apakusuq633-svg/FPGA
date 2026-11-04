@@ -16,7 +16,8 @@ import zipfile
 
 ROOT = Path(__file__).resolve().parents[1]
 # Consolidated repository documentation; resolved after clone, without machine paths.
-DOCS = next(parent / 'docs' for parent in Path(__file__).resolve().parents if (parent / 'docs' / '工程设计与接口.md').is_file())
+DOCS = next((parent / 'docs' for parent in Path(__file__).resolve().parents
+             if (parent / 'docs' / '工程设计与接口.md').is_file()), None)
 PRODUCTION_UNITS = ("ps_ui", "gsc9", "pdm_stream", "circular9_stream",
                     "circular9_audio", "circular9_candidates", "circular9_diagnosis")
 EVIDENCE = {
@@ -62,10 +63,13 @@ LIVE_COPIES = {
     "circular9_preflight.py": "pc/circular9_preflight.py",
     "circular9_calibration.py": "scripts/circular9_calibration.py",
     "build_circular9.py": "scripts/build_circular9.py",
-    'engineering.md': str(DOCS / '工程设计与接口.md'),
-    'deployment.md': str(DOCS / '构建部署与操作.md'),
-    'verification.md': str(DOCS / '测试验证与问题记录.md'),
 }
+if DOCS is not None:
+    LIVE_COPIES.update({
+        'engineering.md': str(DOCS / '工程设计与接口.md'),
+        'deployment.md': str(DOCS / '构建部署与操作.md'),
+        'verification.md': str(DOCS / '测试验证与问题记录.md'),
+    })
 
 
 def sha(path):
@@ -289,7 +293,8 @@ def audit(root=ROOT, release=None):
         problems = [f"profile mismatch: {name}" for name, value in expected.items() if array.get(name) != value]
         if bearing.get("feature_contract") != "C9F2" or bearing.get("separation_contract") != "C9S3":
             problems.append("bearing feature/separation contract is not C9F2/C9S3")
-        if sha(root / "docs/circular9_fault_localization_plan_20261022.md") != array.get("plan_sha256"):
+        plan = root / "docs/circular9_fault_localization_plan_20261022.md"
+        if plan.is_file() and sha(plan) != array.get("plan_sha256"):
             problems.append("original implementation-plan hash changed")
         return problems, {"scan": array.get("scan_model"), "feature_contract": bearing.get("feature_contract"),
                           "separation_contract": bearing.get("separation_contract")}

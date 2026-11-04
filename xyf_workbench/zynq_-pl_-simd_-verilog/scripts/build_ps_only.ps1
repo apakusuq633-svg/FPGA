@@ -19,9 +19,9 @@
 #
 # Keep this file ASCII-only -- see the note at the top of scripts/verify.ps1.
 param(
-    [string]$ToolDir = 'D:\Vivado\Vitis\2020.2\gnu\aarch32\nt\gcc-arm-none-eabi\bin',
-    [string]$BspDir = 'D:\Vitis\PS-PL\export\PS-PL\sw\PS-PL\standalone_domain',
-    [string]$Spec = 'D:\Vitis\rv32_app\src\Xilinx.spec'
+    [string]$ToolDir = $(if($env:ARM_TOOL_DIR){$env:ARM_TOOL_DIR}else{'D:\Vivado\Vitis\2020.2\gnu\aarch32\nt\gcc-arm-none-eabi\bin'}),
+    [string]$BspDir = $(if($env:ARM_BSP_DIR){$env:ARM_BSP_DIR}else{'D:\Vitis\PS-PL\export\PS-PL\sw\PS-PL\standalone_domain'}),
+    [string]$Spec = $(if($env:ARM_SPEC){$env:ARM_SPEC}else{'D:\Vitis\rv32_app\src\Xilinx.spec'})
 )
 $ErrorActionPreference = 'Stop'
 $project = Split-Path -Parent $PSScriptRoot

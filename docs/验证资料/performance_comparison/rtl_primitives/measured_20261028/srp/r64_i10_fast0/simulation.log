@@ -1,4 +1,0 @@
-SCAN_CYCLES rlen=64 idx=10 fast=0 pass=0 cycles=147458
-SCAN_CYCLES rlen=64 idx=10 fast=0 pass=1 cycles=147458
-SRP_LAG_RING_PASS rlen=64 idx=10 fast=0 scores=2048
-C:\Users\lenovo\Desktop\FPGA_PDM\FPGA\xyf_workbench\zynq_-pl_-simd_-verilog\tb\tb_srp_lag_ring.v:104: $finish called at 3773740000 (1ps)

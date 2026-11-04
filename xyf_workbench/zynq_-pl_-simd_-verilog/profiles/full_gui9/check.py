@@ -1,11 +1,15 @@
 """Focused GUI/monitor verification. No hardware and no RTL simulation."""
 from pathlib import Path
-import hashlib,json,os,subprocess,sys
+import hashlib,json,os,shutil,subprocess,sys
 P=Path(__file__).resolve().parent
 R=P.parents[1]
 O=R/'build/gui9_checks';O.mkdir(parents=True,exist_ok=True)
-GCC=Path(r'D:\winlibs\mingw64\bin\gcc.exe')
-NODE=Path(r'C:\Users\21914\.cache\codex-runtimes\codex-primary-runtime\dependencies\node\bin\node.exe')
+GCC=os.environ.get('CC') or shutil.which('gcc')
+NODE=os.environ.get('NODE') or shutil.which('node')
+if not GCC:raise SystemExit('gcc not found: install GCC or set CC to its path')
+if not NODE:raise SystemExit('node not found: install Node.js or set NODE to its path')
+GCC=Path(GCC)
+NODE=Path(NODE)
 results=[]
 def run(name,args,env=None):
  p=subprocess.run([str(x) for x in args],cwd=R,capture_output=True,text=True,encoding='utf-8',errors='replace',env=env)

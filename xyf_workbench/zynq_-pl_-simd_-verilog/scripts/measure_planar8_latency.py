@@ -14,7 +14,13 @@ import argparse
 
 ROOT=Path(__file__).resolve().parents[1]
 OUT=ROOT/'build/planar8_optimized'
-PREFIX='D:/AMDDesignTools/2025.2/gnu/riscv/nt/bin/riscv64-unknown-elf-'
+def _toolchain_prefix():
+    env=os.environ.get('RISCV_PREFIX')
+    if env:return env
+    for prefix in ('riscv-none-elf-','riscv64-unknown-elf-','riscv32-unknown-elf-'):
+        if shutil.which(prefix+'gcc'):return prefix
+    raise SystemExit('RISC-V toolchain not found: set RISCV_PREFIX or add riscv-none-elf-gcc to PATH')
+PREFIX=_toolchain_prefix()
 
 
 def main():

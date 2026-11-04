@@ -1,5 +1,6 @@
 set root [file normalize [file join [file dirname [info script]] ..]]
-set original C:/Users/lenovo/Desktop/FPGA/PDM/pdm_mic_8ch.runs/impl_1
+if {![info exists ::env(PDM_ORIGINAL)]} { error "PDM_ORIGINAL is not set: point it at the original PDM implementation directory" }
+set original $::env(PDM_ORIGINAL)
 set out [file join $root build pdm_ila_20261021 original_pdm_stock]
 file mkdir $out
 open_checkpoint [file join $original pdm_top_routed.dcp]

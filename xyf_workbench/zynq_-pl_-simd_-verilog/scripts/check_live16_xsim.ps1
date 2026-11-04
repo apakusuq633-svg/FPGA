@@ -1,5 +1,5 @@
 # Vivado Simulator alternative to the Icarus SoC test; no hardware download.
-param([string]$ToolDir='D:\Vivado\Vivado\2020.2\bin',[switch]$Natural,[switch]$Debug4,[switch]$SpectraOnly,[switch]$Twelve,[switch]$CycleProfile,[switch]$RawCapture,[switch]$Numeric66,[switch]$TestSrp,[switch]$Transfer,[int]$SnapshotFrames=2,[string]$RunTag='',[string]$TransferBuild='build\localizer12')
+param([string]$ToolDir=$(if($env:VIVADO_BIN_DIR){$env:VIVADO_BIN_DIR}else{'D:\Vivado\Vivado\2020.2\bin'}),[switch]$Natural,[switch]$Debug4,[switch]$SpectraOnly,[switch]$Twelve,[switch]$CycleProfile,[switch]$RawCapture,[switch]$Numeric66,[switch]$TestSrp,[switch]$Transfer,[int]$SnapshotFrames=2,[string]$RunTag='',[string]$TransferBuild='build\localizer12')
 $ErrorActionPreference='Stop'
 $project=Split-Path -Parent $PSScriptRoot
 if($CycleProfile -and (-not $Twelve -or $RawCapture -or $Natural -or $Debug4 -or $SpectraOnly)){throw 'CycleProfile requires Twelve and a built profiling firmware'}

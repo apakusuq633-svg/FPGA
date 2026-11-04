@@ -1,7 +1,11 @@
 # Fresh local nine-microphone build; no programming commands.
 set root [file normalize [file join [file dirname [info script]] ../..]]
-set py C:/Users/21914/.cache/codex-runtimes/codex-primary-runtime/dependencies/python/python.exe
-if {[info exists ::env(GUI9_PYTHON)]} {set py $::env(GUI9_PYTHON)}
+if {[info exists ::env(GUI9_PYTHON)]} {
+    set py $::env(GUI9_PYTHON)
+} else {
+    set py [auto_execok python]
+}
+if {$py eq ""} { error "Python not found: set GUI9_PYTHON or add python to PATH" }
 set ::env(DAS_ACTIVE_CHANNELS) 9
 set ::env(PDM_STREAM_DMA) 1
 set ::env(ZYNQ_PROJ_DIR) [file join $root build gui9_impl]

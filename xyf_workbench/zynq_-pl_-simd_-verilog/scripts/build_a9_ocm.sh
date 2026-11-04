@@ -46,10 +46,10 @@ case "$app" in
 esac
 # 共享头文件都放在 sw/，靠 -I 找到，不往 Vitis 里拷（D:\Vitis 是两个项目共用的）
 
-TOOLBIN="/d/Vivado/Vitis/2020.2/gnu/aarch32/nt/gcc-arm-none-eabi/bin"
-BSPINC="D:/Vitis/PS-PL/export/PS-PL/sw/PS-PL/standalone_domain/bspinclude/include"
-BSPLIB="D:/Vitis/PS-PL/export/PS-PL/sw/PS-PL/standalone_domain/bsplib/lib"
-SPEC="D:/Vitis/rv32_app/src/Xilinx.spec"
+TOOLBIN="${A9_TOOLBIN:-/d/Vivado/Vitis/2020.2/gnu/aarch32/nt/gcc-arm-none-eabi/bin}"
+BSPINC="${A9_BSPINC:-D:/Vitis/PS-PL/export/PS-PL/sw/PS-PL/standalone_domain/bspinclude/include}"
+BSPLIB="${A9_BSPLIB:-D:/Vitis/PS-PL/export/PS-PL/sw/PS-PL/standalone_domain/bsplib/lib}"
+SPEC="${A9_SPEC:-D:/Vitis/rv32_app/src/Xilinx.spec}"
 
 for p in "$TOOLBIN/arm-none-eabi-gcc.exe" "$BSPINC/xil_io.h" "$BSPLIB/libxil.a" "$SPEC" \
          "$src" "$root/sw/lscript_ocm.ld"; do

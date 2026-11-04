@@ -2,6 +2,7 @@
 import hashlib
 import json
 import os
+import shutil
 from pathlib import Path
 import subprocess
 
@@ -11,9 +12,14 @@ OUT = ROOT / 'build/circular9_loader_checks'
 def main():
     OUT.mkdir(parents=True, exist_ok=True)
     env = os.environ.copy()
-    env['PATH'] = 'C:/msys64/ucrt64/bin;C:/msys64/usr/bin;' + env['PATH']
+    for p in ('C:/msys64/ucrt64/bin', 'C:/msys64/usr/bin'):
+        if Path(p).is_dir():
+            env['PATH'] = p + os.pathsep + env['PATH']
+    cc = os.environ.get('CC') or shutil.which('gcc')
+    if not cc:
+        raise SystemExit('gcc not found: install GCC or set CC')
     exe = OUT / ('loader.exe' if os.name == 'nt' else 'loader')
-    for name, command in [('compile', ['gcc', '-std=c11', '-O2', '-Wall', '-Wextra', '-Werror',
+    for name, command in [('compile', [cc, '-std=c11', '-O2', '-Wall', '-Wextra', '-Werror',
                                       '-Isw', 'sw/circular9_loader_test.c', '-o', str(exe)]),
                           ('native', [str(exe)])]:
         p = subprocess.run(command, cwd=ROOT, env=env, text=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)

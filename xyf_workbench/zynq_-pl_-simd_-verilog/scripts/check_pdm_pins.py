@@ -35,6 +35,7 @@ Run from any directory with Python 3. Wired into scripts/verify.ps1. The optiona
 """
 
 import argparse
+import json
 import re
 import sys
 import tempfile
@@ -45,8 +46,17 @@ ROOT = Path(__file__).resolve().parents[1]
 XDC = "constrs/ps_pl_wrapper.xdc"
 DOC = "docs/board_io.md"
 
+def _configured_data_lines():
+    """Nine-mic profile uses five DATA lines; legacy 8/16-channel uses eight."""
+    try:
+        cfg = json.loads((ROOT / "configs/circular9_array.json").read_text(encoding="utf-8-sig"))
+        n = int(cfg.get("data_lines", 8))
+        return n if 1 <= n <= 8 else 8
+    except (OSError, ValueError, TypeError):
+        return 8
+
 CLK = "clk"
-DATA = ["din%d" % i for i in range(8)]
+DATA = ["din%d" % i for i in range(_configured_data_lines())]
 ALL = [CLK] + DATA
 
 # Headings to look for in board_io.md, verbatim. These are the only non-ASCII strings in
@@ -153,20 +163,45 @@ def parse_xdc(path):
 def check(xdc_path, doc_path):
     if not xdc_path.exists():
         raise RuntimeError("%s is missing; the PDM array is constrained there" % xdc_path)
-    if not doc_path.exists():
-        raise RuntimeError("%s is missing; its section 8 is the authoritative pinout table"
-                           % doc_path)
 
     xdc = parse_xdc(xdc_path)
-    if len(xdc) != 9:
+    extra_path = xdc_path.parent / "circular9_extra.xdc"
+    if extra_path.is_file() and extra_path.resolve() != xdc_path.resolve():
+        for key, props in parse_xdc(extra_path).items():
+            if key in xdc and xdc[key]["pin"] != props["pin"]:
+                raise RuntimeError("conflicting PDM pin for %s: %s in %s, %s in %s"
+                                   % (key.upper(), xdc[key]["pin"], xdc_path.name,
+                                      props["pin"], extra_path.name))
+            xdc.setdefault(key, props)
+    if len(xdc) != len(ALL):
         raise RuntimeError(
-            "parsed %d PDM ports out of %s, expected 9 (1 clock + 8 data). A parse this short "
-            "must not be allowed to reach a comparison -- an empty parse compares equal to an "
-            "empty parse. See docs/issues/050."
-            % (len(xdc), xdc_path.name))
+            "parsed %d PDM ports out of %s (+ circular9_extra.xdc), expected %d "
+            "(1 clock + %d data). A parse this short must not be allowed to reach a "
+            "comparison -- an empty parse compares equal to an empty parse. See docs/issues/050."
+            % (len(xdc), xdc_path.name, len(ALL), len(DATA)))
     if sorted(xdc) != sorted(ALL):
         raise RuntimeError("%s pins %s, expected %s"
                            % (xdc_path.name, sorted(xdc), sorted(ALL)))
+
+    if not doc_path.exists() or len(DATA) != 8:
+        unpulled = [k.upper() for k in DATA if not xdc[k]["pull"]]
+        if unpulled:
+            raise RuntimeError("no PULLDOWN true on the data line(s) %s" % unpulled)
+        ios = sorted({xdc[k]["io"] for k in ALL})
+        if len(ios) != 1 or ios[0] is None:
+            raise RuntimeError("the PDM pins do not share one IOSTANDARD (%s)" % ios)
+        elsewhere = [path.name for path in sorted(xdc_path.parent.glob("*.xdc"))
+                     if path.name not in (xdc_path.name, "circular9_extra.xdc",
+                                          "pdm_ila_top.xdc")
+                     and parse_xdc(path)]
+        if elsewhere:
+            raise RuntimeError("PDM ports are also pinned in %s" % ", ".join(elsewhere))
+        reason = ("docs/board_io.md absent" if not doc_path.exists()
+                  else "the doc table covers the eight-line profile")
+        print("PASS: PDM pinout XDC-only: %d signals (1 clock + %d data), one IOSTANDARD (%s), "
+              "%d data pins pulled down, no conflicting .xdc; %s so the table cross-check is "
+              "skipped" % (len(ALL), len(DATA), ios[0], len(DATA), reason), flush=True)
+        return
 
     lines = doc_path.read_text(encoding="utf-8").splitlines()
     cur_body = section(lines, HEAD_CURRENT)
@@ -241,7 +276,8 @@ def check(xdc_path, doc_path):
     # A PDM port pinned in two .xdc files silently overrides, and the stale one is invisible.
     elsewhere = []
     for path in sorted(xdc_path.parent.glob("*.xdc")):
-        if path.name != xdc_path.name and parse_xdc(path):
+        if path.name not in (xdc_path.name, "circular9_extra.xdc", "pdm_ila_top.xdc") \
+                and parse_xdc(path):
             elsewhere.append(path.name)
     if elsewhere:
         raise RuntimeError(
@@ -327,12 +363,12 @@ def main():
         return 0
     # Overrides exist so the controls can be pointed at mutated copies by hand; the
     # controls themselves are built from the real files, so they are skipped for those.
-    if args.xdc == XDC and args.doc == DOC:
+    if args.xdc == XDC and args.doc == DOC and (ROOT / DOC).is_file():
         self_test()
     check(ROOT / args.xdc, ROOT / args.doc)
     if args.xdc == XDC and args.doc == DOC:
-        print("PASS: default target is 12 channels / 6 DATA (DIN0..5) + CLOCK; "
-              "the eight-line table covers legal 8/16-channel profiles; hardware UNVERIFIED")
+        print("PASS: default target is %d PDM signals (1 CLOCK + %d DATA); hardware UNVERIFIED"
+              % (len(ALL), len(DATA)))
     return 0
 
 

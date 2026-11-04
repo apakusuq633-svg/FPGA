@@ -1,5 +1,5 @@
 # Nine-microphone full GUI. Default: local integrity check, no board access.
-param([switch]$Program,[switch]$OpenPage,[string]$XsctPath='E:\Vivado2020.2\Vitis\2020.2\bin\xsct.bat')
+param([switch]$Program,[switch]$OpenPage,[string]$XsctPath=$(if($env:XSCT_PATH){$env:XSCT_PATH}else{'E:\Vivado2020.2\Vitis\2020.2\bin\xsct.bat'}))
 $ErrorActionPreference='Stop'
 $project=Split-Path -Parent (Split-Path -Parent $PSScriptRoot)
 $bundle=Join-Path $project 'build\full_gui9_release'

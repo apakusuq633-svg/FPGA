@@ -1,19 +1,23 @@
 # Simulation only: real FSTF recordings propagated as far-field plane waves.
 from pathlib import Path
-import numpy as np,json,wave,hashlib,subprocess,itertools,math,time,argparse
+import numpy as np,json,wave,hashlib,subprocess,itertools,math,time,argparse,os,shutil
 from c9_scene_evaluation import angle,match,direction
 R=Path(__file__).resolve().parents[1]
 ap=argparse.ArgumentParser();ap.add_argument('--scenes',type=Path);ap.add_argument('--output',type=Path);ap.add_argument('--duration-s',type=float,default=2.56);ap.add_argument('--seed',type=int,default=20261027);ap.add_argument('--candidate-source',type=Path,default=R/'sw/circular9_candidates.c');args=ap.parse_args()
 assert 1.1<=args.duration_s<=60
 O=args.output.resolve() if args.output else R/'build/fstf_integration_20261027';O.mkdir(parents=True,exist_ok=True)
 # Build the actual adapter/task harness on every run; never reuse a stale executable.
-cc=r'D:\winlibs\mingw64\bin\gcc.exe'
+cc=os.environ.get('CC') or shutil.which('gcc')
+if not cc:raise SystemExit('gcc not found: install GCC or set CC')
+exe=O/('fstf_e2e.exe' if os.name=='nt' else 'fstf_e2e')
 inc=R/'build/circular9_pipeline_checks/include'
 if not (inc/'xtime_l.h').exists():
  import sys
  subprocess.run([sys.executable,str(R/'scripts/check_circular9_pipeline.py')],cwd=R,check=True)
-subprocess.run([cc,'-std=c11','-O2','-DC9_CANDIDATES_TEST','-DC9_FSTF_EXPERIMENTAL=1','-I'+str(inc),'-Isw',str(args.candidate_source),'sw/circular9_diagnosis.c','sw/circular9_fstf_e2e_test.c','-pthread','-lm','-o',str(O/'fstf_e2e.exe')],cwd=R,check=True)
-DATA=Path(r'F:\RISC-V\26fpga创新设计赛道\测试音频\FSTF_1800rpm_6_fault_types_WAV');labels=['inner','outer','ball','healthy','looseness','combined'];waves={};wave_manifest={}
+subprocess.run([cc,'-std=c11','-O2','-DC9_CANDIDATES_TEST','-DC9_FSTF_EXPERIMENTAL=1','-I'+str(inc),'-Isw',str(args.candidate_source),'sw/circular9_diagnosis.c','sw/circular9_fstf_e2e_test.c','-pthread','-lm','-o',str(exe)],cwd=R,check=True)
+DATA=Path(os.environ.get('FSTF_DATA_DIR',''))
+if not DATA.is_dir():raise SystemExit('FSTF dataset not found: set FSTF_DATA_DIR to the directory containing 6 WAV files')
+labels=['inner','outer','ball','healthy','looseness','combined'];waves={};wave_manifest={}
 assert len(list(DATA.glob('*.wav')))==6
 for label,p in zip(labels,sorted(DATA.glob('*.wav'))):
  with wave.open(str(p)) as f:assert f.getframerate()==48000 and f.getnchannels()==1 and f.getsampwidth()==2;waves[label]=np.frombuffer(f.readframes(f.getnframes()),'<i2').astype(float)/32768

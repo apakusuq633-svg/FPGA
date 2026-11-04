@@ -1,7 +1,0 @@
-set_property -dict {PACKAGE_PIN T14 IOSTANDARD LVCMOS33 PULLDOWN true} [get_ports {pdm_din_i[0]}]
-set_property -dict {PACKAGE_PIN Y17 IOSTANDARD LVCMOS33 PULLDOWN true} [get_ports {pdm_din_i[1]}]
-set_property -dict {PACKAGE_PIN W16 IOSTANDARD LVCMOS33 PULLDOWN true} [get_ports {pdm_din_i[2]}]
-set_property -dict {PACKAGE_PIN T15 IOSTANDARD LVCMOS33 PULLDOWN true} [get_ports {pdm_din_i[3]}]
-set_property -dict {PACKAGE_PIN Y16 IOSTANDARD LVCMOS33 PULLDOWN true} [get_ports {pdm_din_i[4]}]
-set_property -dict {PACKAGE_PIN V16 IOSTANDARD LVCMOS33 SLEW SLOW DRIVE 4} [get_ports pdm_clk_o]
-set_false_path -from [get_ports {pdm_din_i[*]}]

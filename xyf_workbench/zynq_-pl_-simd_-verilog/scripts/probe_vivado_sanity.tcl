@@ -15,7 +15,8 @@
 # ⚠ 探测先于判断：本脚本会打印每一步的标记，**先看 S1/S2/S3 有没有走到**，
 #   再看判决。崩在第几步本身就是信息。
 
-set outdir "C:/vivado_sanity"
+set outdir [file join [file dirname [info script]] .. build vivado_sanity]
+if {[info exists ::env(VIVADO_SANITY_OUT)]} { set outdir $::env(VIVADO_SANITY_OUT) }
 set part   "xc7z020clg400-1"
 
 puts "== 环境体检开始（part = $part）=="

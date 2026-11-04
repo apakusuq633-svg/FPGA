@@ -61,7 +61,7 @@ SECTIONS {
 }
 '@
 [IO.File]::WriteAllText((Join-Path $out 'selftest.ld'),$linker)
-$tool='D:\Vivado\Vitis\2020.2\gnu\aarch32\nt\gcc-arm-none-eabi\bin'
+$tool=$(if($env:ARM_TOOL_DIR){$env:ARM_TOOL_DIR}else{'D:\Vivado\Vitis\2020.2\gnu\aarch32\nt\gcc-arm-none-eabi\bin'})
 & "$tool\arm-none-eabi-gcc.exe" -mcpu=cortex-a9 -mfpu=vfpv3 -mfloat-abi=hard -O2 -ffreestanding -fno-builtin -fno-stack-protector -nostdlib -Wall -Wextra -Werror -I (Join-Path $root 'sw') (Join-Path $root 'sw\gsc12.c') (Join-Path $out 'selftest.c') (Join-Path $out 'start.S') "-Wl,-T,$out\selftest.ld" '-Wl,--build-id=none' -lgcc -o (Join-Path $out 'gsc12_selftest.elf') *> (Join-Path $out 'compile.log')
 if($LASTEXITCODE -ne 0){throw 'ARM ELF link failed'}
 & "$tool\arm-none-eabi-size.exe" (Join-Path $out 'gsc12_selftest.elf') | Set-Content -Encoding UTF8 (Join-Path $out 'size.txt')

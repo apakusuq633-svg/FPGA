@@ -1,9 +1,12 @@
 # Mechanism and safety regressions, not application acceptance or board tests.
 from pathlib import Path
-import subprocess,json,os,sys,hashlib
-R=Path(__file__).resolve().parents[1];O=R/'build/fstf_integration_20261027';O.mkdir(exist_ok=True);cc=r'D:\winlibs\mingw64\bin\gcc.exe'
+import subprocess,json,os,sys,hashlib,shutil
+R=Path(__file__).resolve().parents[1];O=R/'build/fstf_integration_20261027';O.mkdir(exist_ok=True)
+cc=os.environ.get('CC') or shutil.which('gcc')
+if not cc:raise SystemExit('gcc not found: install GCC or set CC')
+ext='.exe' if os.name=='nt' else ''
 for enabled in [False,True]:
- exe=O/('adapter_on.exe' if enabled else 'adapter_off.exe');flags=['-DC9_FSTF_EXPERIMENTAL=1'] if enabled else []
+ exe=O/(('adapter_on' if enabled else 'adapter_off')+ext);flags=['-DC9_FSTF_EXPERIMENTAL=1'] if enabled else []
  subprocess.run([cc,'-std=c11','-O2','-Isw',*flags,'sw/circular9_fstf_adapter_test.c','-lm','-o',str(exe)],cwd=R,check=True);subprocess.run([str(exe)],cwd=R,check=True)
 subprocess.run([sys.executable,str(R/'scripts/run_fstf_c9_e2e.py')],cwd=R,check=True)
 d=json.loads((O/'e2e_results.json').read_text());assert len(d['cases'])==9

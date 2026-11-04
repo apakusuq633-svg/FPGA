@@ -36,7 +36,7 @@ $tcl  = Join-Path $root 'scripts\run_zynq_flow.tcl'
 $log  = Join-Path $root 'build\das8\zynq_flow.log'
 $jou  = Join-Path $root 'build\das8\zynq_flow.jou'
 New-Item -ItemType Directory -Force -Path (Join-Path $root 'build\das8') | Out-Null
-$viv  = 'D:\Vivado\Vivado\2020.2\bin\vivado.bat'
+$viv  = $(if($env:VIVADO_BAT){$env:VIVADO_BAT}else{'D:\Vivado\Vivado\2020.2\bin\vivado.bat'})
 
 # build/ is gitignored, so build/vfft_timing.tcl does not survive a clean checkout --
 # and nothing regenerates it. It used to be the only accepted path, so a fresh clone

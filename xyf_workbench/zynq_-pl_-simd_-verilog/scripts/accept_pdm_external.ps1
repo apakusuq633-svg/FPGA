@@ -4,7 +4,7 @@ param(
   [Parameter(Mandatory=$true)][string]$Manifest,
   [Parameter(Mandatory=$true)][string]$Output,
   [string]$Config='configs/pdm_external_assumptions.json',
-  [string]$Vivado='D:\Vivado\Vivado\2020.2\bin\vivado.bat'
+  [string]$Vivado=$(if($env:VIVADO_BAT){$env:VIVADO_BAT}else{'D:\Vivado\Vivado\2020.2\bin\vivado.bat'})
 )
 $ErrorActionPreference='Stop'
 function WslPath([string]$p) {

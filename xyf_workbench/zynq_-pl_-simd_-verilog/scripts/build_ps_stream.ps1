@@ -17,7 +17,7 @@ if($EnableGsc -and -not $GscProfile){throw 'Enabling GSC requires an explicitly 
 $bsp=Join-Path $platform 'sw/pdm9/standalone_domain'
 $lib=Join-Path $bsp 'bsplib/lib'
 $include=Join-Path $bsp 'bspinclude/include'
-$tool='D:\Vivado\Vitis\2020.2\gnu\aarch32\nt\gcc-arm-none-eabi\bin'
+$tool=$(if($env:ARM_TOOL_DIR){$env:ARM_TOOL_DIR}else{'D:\Vivado\Vitis\2020.2\gnu\aarch32\nt\gcc-arm-none-eabi\bin'})
 $out=Join-Path $root $Output
 if(Test-Path -LiteralPath $out){throw 'Use a new output directory'}
 foreach($path in @("$lib/libxil.a","$lib/liblwip4.a","$include/xparameters.h")){if(-not(Test-Path -LiteralPath $path)){throw "Missing $path"}}

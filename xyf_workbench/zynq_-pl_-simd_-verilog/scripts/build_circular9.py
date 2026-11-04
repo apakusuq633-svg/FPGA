@@ -4,6 +4,7 @@ import hashlib
 import itertools
 import json
 import math
+import os
 from pathlib import Path
 import re
 import shutil
@@ -318,7 +319,7 @@ def geometry(c):
 
 def main():
     p = argparse.ArgumentParser()
-    p.add_argument('--compiler-prefix', default='D:/AMDDesignTools/2025.2/gnu/riscv/nt/bin/riscv64-unknown-elf-')
+    p.add_argument('--compiler-prefix', default=os.environ.get('RISCV_PREFIX') or None)
     p.add_argument('--geometry-only', action='store_true')
     p.add_argument('--validate-only', action='store_true', help='validate explicit configuration without writing generated products')
     p.add_argument('--config', type=Path, default=ROOT/'configs/circular9_array.json',
@@ -359,9 +360,17 @@ def main():
     if a.geometry_only:
         print('CIRCULAR9_GEOMETRY_PASS channels=9 slots=10 pairs=36 grid=1024')
         return
+    if a.compiler_prefix is None:
+        for prefix in ('riscv-none-elf-', 'riscv64-unknown-elf-', 'riscv32-unknown-elf-'):
+            if shutil.which(prefix + 'gcc'):
+                a.compiler_prefix = prefix
+                break
+        else:
+            raise SystemExit('RISC-V toolchain missing: set --compiler-prefix or RISCV_PREFIX, '
+                             'or add riscv-none-elf-gcc / riscv64-unknown-elf-gcc to PATH')
     compiler = {n: shutil.which(a.compiler_prefix+n) for n in ('gcc', 'objcopy', 'size')}
     if not all(compiler.values()):
-        raise RuntimeError('RISC-V toolchain missing')
+        raise RuntimeError('RISC-V toolchain missing: ' + a.compiler_prefix)
     from build_live16 import fft_rom
     fft_rom()
     if a.reference_post and a.test_geometry:raise ValueError('Choose one comparison fixture')

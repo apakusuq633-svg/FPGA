@@ -1,6 +1,6 @@
 """Deterministic acoustic stress cases; numerical simulation, never a board claim."""
 from pathlib import Path
-import argparse,ctypes,json,math,os,subprocess
+import argparse,ctypes,json,math,os,shutil,subprocess
 import numpy as np
 from build_live16 import ROOT,geometry
 
@@ -26,9 +26,11 @@ def profile(channels):
 def main():
     parser=argparse.ArgumentParser();parser.add_argument('--baseline-only',action='store_true')
     args=parser.parse_args();OUT.mkdir(parents=True,exist_ok=True)
-    compiler=Path('D:/winlibs/mingw64/bin/gcc.exe')
+    cc=os.environ.get('CC') or shutil.which('gcc')
+    if not cc:raise SystemExit('gcc not found: install GCC or set CC')
+    compiler=Path(cc)
     os.environ['PATH']=str(compiler.parent)+os.pathsep+os.environ['PATH']
-    dll=OUT/'location.dll'
+    dll=OUT/('location.dll' if os.name=='nt' else 'location.so')
     files=['sw/fw/fw_fft.c','sw/fw/fw_gcc.c','sw/fw/fw_tables.c']
     if not args.baseline_only:files+=['scripts/golden/location_quality_host.c']
     subprocess.run([str(compiler),'-std=c11','-O2','-shared','-Wall','-Wextra','-Werror','-Isw/fw',*files,'-o',str(dll)],cwd=ROOT,check=True)

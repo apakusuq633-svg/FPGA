@@ -8,7 +8,7 @@ if(Test-Path -LiteralPath $out){throw 'Fresh output required'}
 New-Item -ItemType Directory -Path $out | Out-Null
 $bspPath=(Resolve-Path -LiteralPath $Bsp).Path
 $ld=(Resolve-Path -LiteralPath $LinkerScript).Path
-$tool='D:\Vivado\Vitis\2020.2\gnu\aarch32\nt\gcc-arm-none-eabi\bin'
+$tool=$(if($env:ARM_TOOL_DIR){$env:ARM_TOOL_DIR}else{'D:\Vivado\Vitis\2020.2\gnu\aarch32\nt\gcc-arm-none-eabi\bin'})
 $cc=Join-Path $tool 'arm-none-eabi-gcc.exe'
 foreach($p in @($cc,"$bspPath/include/xil_io.h","$bspPath/lib/libxil.a")){if(-not(Test-Path -LiteralPath $p)){throw "Missing $p"}}
 $spec=Join-Path $out 'Xilinx.spec'

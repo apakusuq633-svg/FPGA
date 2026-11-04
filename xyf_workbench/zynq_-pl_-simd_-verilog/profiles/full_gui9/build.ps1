@@ -1,8 +1,14 @@
 # Reproducible local PS/GUI build using matched hardware; no JTAG access.
-param([string]$Python='C:\Users\21914\.cache\codex-runtimes\codex-primary-runtime\dependencies\python\python.exe',
- [string]$BspWorkspace='F:\RISC-V\pipeline_latest2\build\c9bsp_gui25',
- [string]$ToolDir='E:\Vivado2020.2\Vitis\2020.2\gnu\aarch32\nt\gcc-arm-none-eabi\bin')
+param([string]$Python=$env:C9_PYTHON,
+ [string]$BspWorkspace=$env:C9_BSP_WORKSPACE,
+ [string]$ToolDir=$env:C9_TOOL_DIR)
 $ErrorActionPreference='Stop'
+if([string]::IsNullOrWhiteSpace($Python)){
+  $cmd=Get-Command python -ErrorAction SilentlyContinue
+  if($cmd){$Python=$cmd.Source}else{throw 'Python not found: install Python 3 or pass -Python <path>'}
+}
+if([string]::IsNullOrWhiteSpace($BspWorkspace)){throw 'BspWorkspace not set: pass -BspWorkspace <Vitis BSP workspace> or set C9_BSP_WORKSPACE'}
+if([string]::IsNullOrWhiteSpace($ToolDir)){throw 'ToolDir not set: pass -ToolDir <arm-none-eabi bin> or set C9_TOOL_DIR'}
 $project=Split-Path -Parent (Split-Path -Parent $PSScriptRoot)
 & $Python (Join-Path $PSScriptRoot 'make_ui.py')
 if($LASTEXITCODE -ne 0){throw 'Page generation failed'}

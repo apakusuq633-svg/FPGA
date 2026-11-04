@@ -1,8 +1,8 @@
-﻿# Local build only: no deployment or changes to the shared Vitis workspace.
+# Local build only: no deployment or changes to the shared Vitis workspace.
 param(
-    [string]$ToolDir = 'D:\Vivado\Vitis\2020.2\gnu\aarch32\nt\gcc-arm-none-eabi\bin',
-    [string]$BspDir = 'D:\Vitis\PS-PL\export\PS-PL\sw\PS-PL\standalone_domain',
-    [string]$AppDir = 'D:\Vitis\ui_app\src',
+    [string]$ToolDir = $(if($env:ARM_TOOL_DIR){$env:ARM_TOOL_DIR}else{'D:\Vivado\Vitis\2020.2\gnu\aarch32\nt\gcc-arm-none-eabi\bin'}),
+    [string]$BspDir = $(if($env:ARM_BSP_DIR){$env:ARM_BSP_DIR}else{'D:\Vitis\PS-PL\export\PS-PL\sw\PS-PL\standalone_domain'}),
+    [string]$AppDir = $(if($env:ARM_APP_DIR){$env:ARM_APP_DIR}else{'D:\Vitis\ui_app\src'}),
     [switch]$Live,
     [switch]$MatchingPlWindow,
     [switch]$DynamicReplay,

@@ -1,9 +1,18 @@
 """Build localization profile and LUTs; fixed DAS uses build_live16_fixed.py."""
 from pathlib import Path
-import hashlib,itertools,json,math,re,struct,subprocess
+import hashlib,itertools,json,math,os,re,shutil,struct,subprocess
 ROOT=Path(__file__).resolve().parents[1]
 OUT=ROOT/'build/das16_loc/fw'
-TOOL=Path('D:/riscv/riscv-none-elf-gcc/bin')
+def tool(name):
+    exe=name+('.exe' if os.name=='nt' else '')
+    env=os.environ.get('RISCV_TOOL_DIR')
+    if env:
+        path=Path(env)/exe
+        if path.exists():return str(path)
+    for prefix in ('riscv-none-elf-','riscv64-unknown-elf-','riscv32-unknown-elf-'):
+        path=shutil.which(prefix+name)
+        if path:return path
+    raise SystemExit('RISC-V toolchain not found: '+name+'. Set RISCV_TOOL_DIR or add riscv-none-elf-gcc to PATH')
 def run(*args):subprocess.run([str(x) for x in args],cwd=ROOT,check=True)
 def fft_rom():
     tables=(ROOT/'sw/fw/fw_tables.c').read_text()
@@ -37,16 +46,16 @@ def main():
     OUT.mkdir(parents=True,exist_ok=True);objects=[]
     for source in ('start.S','fw_live16.c','fw_fft.c','fw_gcc.c','fw_tables.c'):
         obj=OUT/(Path(source).stem+'.o');objects.append(obj)
-        run(TOOL/'riscv-none-elf-gcc.exe','-DFW_ARRAY_CHANNELS=16','-DFW_GEOMETRY_CONFIRMED=1','-march=rv32im_zicsr','-mabi=ilp32','-Os',
+        run(tool('gcc'),'-DFW_ARRAY_CHANNELS=16','-DFW_GEOMETRY_CONFIRMED=1','-march=rv32im_zicsr','-mabi=ilp32','-Os',
             '-ffreestanding','-fno-builtin','-nostdlib','-Wall','-Wextra','-Werror',
             '-ffunction-sections','-fdata-sections','-fstack-usage','-c',ROOT/'sw/fw'/source,'-o',obj)
     elf=OUT/'fw_live16.elf'
-    run(TOOL/'riscv-none-elf-gcc.exe','-march=rv32im_zicsr','-mabi=ilp32','-nostdlib',
+    run(tool('gcc'),'-march=rv32im_zicsr','-mabi=ilp32','-nostdlib',
         '-T',ROOT/'sw/fw/link_live16.ld','-Wl,--gc-sections,-Map='+str(OUT/'fw_live16.map'),*objects,'-o',elf)
     header=['#ifndef ACOUSTIC_LIVE16_IMAGE_H','#define ACOUSTIC_LIVE16_IMAGE_H','#include <stdint.h>']
     arrays={}
     for memory,section in (('itcm','.text'),('dtcm','.data')):
-        binary=OUT/(memory+'.bin');run(TOOL/'riscv-none-elf-objcopy.exe','-O','binary','--only-section='+section,elf,binary)
+        binary=OUT/(memory+'.bin');run(tool('objcopy'),'-O','binary','--only-section='+section,elf,binary)
         data=binary.read_bytes();data+=b'\0'*((-len(data))%4)
         if not data:data=b'\0'*4
         assert len(data)<=16384
@@ -73,6 +82,6 @@ def main():
       'max_lut_abs_delay_samples':maxlag,'mapping':'CH2k DINk GND, CH2k+1 DINk VDD; slots in increasing angle from +X',
       'physical_slot_mapping_confirmed':False,'board_tested':False}
     (ROOT/'configs/live16_geometry.json').write_text(json.dumps(config,indent=2)+'\n')
-    run(TOOL/'riscv-none-elf-size.exe',elf)
+    run(tool('size'),elf)
     print(f'LIVE16_BUILD_PASS pairs={len(pairs)} grid={len(grids)} max_abs_lag={maxlag:.6f} r_len=32')
 if __name__=='__main__':main()

@@ -18,7 +18,7 @@ def main():
     env = os.environ.copy()
     env['PATH'] = 'C:/msys64/ucrt64/bin;C:/msys64/usr/bin;' + env['PATH']
     commands = [
-        ['gcc','-std=c11','-O2','-Wall','-Wextra','-Werror','-DC9_CANDIDATES_TEST','-Wno-unused-const-variable','-Wno-unused-function',
+        ['gcc','-std=c11','-O2','-Wall','-Wextra','-Werror','-DC9_CANDIDATES_TEST','-Wno-unused-const-variable','-Wno-unused-function','-Wno-unused-variable',
          '-I'+str(include),'-Isw','sw/circular9_candidates.c','sw/circular9_diagnosis.c',
          'sw/circular9_pipeline_test.c','-pthread','-lm','-o',str(OUT/'pipeline.exe')],
         [str(OUT/'pipeline.exe'),str(OUT/'candidates.json')],
